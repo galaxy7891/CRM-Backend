@@ -45,6 +45,8 @@ class Deal extends Model
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'open_date', 'close_date', 'expected_close_date'];
 
+
+    
     /**
      * Get the customer that owns the deal.
      * Get the user that owns the deal.

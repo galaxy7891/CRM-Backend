@@ -37,6 +37,16 @@ class Company extends Model
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
+
+
+    /**
+     * Get the users associated with the company.
+     * Get the customers associated with the company.
+     * 
+     * This defines a one-to-many relationship where the user can have multiple customers.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function users()
     {
         return $this->hasMany(User::class, 'company_id');

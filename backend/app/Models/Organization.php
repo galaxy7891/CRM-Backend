@@ -46,7 +46,13 @@ class Organization extends Model
 
 
 
-    
+    /**
+     * Get the customers associated with the organization.
+     * 
+     * This defines a one-to-many relationship where the user can have multiple customers.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function customers()
     {
         return $this->hasMany(Customer::class, 'organization_id');
