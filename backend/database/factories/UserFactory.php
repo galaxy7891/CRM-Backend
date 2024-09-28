@@ -20,11 +20,11 @@ class UserFactory extends Factory
     {
         return [
             'user_id' => Str::uuid(),
-            'company_id' => 'c1330543-70d8-4397-86e7-1ad11494d608',
+            'company_id' => null,
             'email' => $this->faker->unique()->safeEmail(),
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
-            'password' => bcrypt('password'),
+            'password' => bcrypt('password123'),
             'phone' => $this->faker->phoneNumber(),
             'role' => $this->faker->randomElement(['super_admin', 'admin', 'employee']),
             'gender' => $this->faker->randomElement(['male', 'female', 'other']),
@@ -35,13 +35,4 @@ class UserFactory extends Factory
         ];
     }
     
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    // public function unverified(): static
-    // {
-    //     return $this->state(fn (array $attributes) => [
-    //         'email_verified_at' => null,
-    //     ]);
-    // }
 }

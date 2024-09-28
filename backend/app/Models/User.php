@@ -2,17 +2,22 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
+
 use Illuminate\Support\Str;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
+use Tymon\JWTAuth\Contracts\JWTSubject;
+
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, SoftDeletes, Notifiable;
+    use HasFactory, SoftDeletes, Notifiable, HasUuid;
 
+    protected $primaryKey = 'user_id';
     /**
      * The attributes that are mass assignable.
      * 
@@ -128,10 +133,12 @@ class User extends Authenticatable implements JWTSubject
             [
                 'first_name' => $nameParts['first_name'],
                 'last_name' => $nameParts['last_name'],
+                'role' => 'super_admin',
                 'photo' => $googleUser->avatar,
                 'google_id' => $googleUser->id,
             ]
         );
+
     }
 }
 

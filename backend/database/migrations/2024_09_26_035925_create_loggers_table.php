@@ -20,7 +20,7 @@ class CreateLoggersTable extends Migration
             $table->string('action'); 
             $table->text('description')->nullable(); 
             $table->timestamps();
-            $table->dateTime('deleted_at');
+            $table->timestamps('deleted_at');
 
 
             // Menambahkan foreign key
