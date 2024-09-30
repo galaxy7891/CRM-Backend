@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Traits\HasUuid;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -147,11 +146,13 @@ class User extends Authenticatable implements JWTSubject
      * Create a new user instance after a valid registration.
      *
      * @param array $dataUser
+     * @param string $company_id 
      * @return User
      */
-    public static function registerUser(array $dataUser): self
+    public static function registerUser(array $dataUser, string $company_id): self
     {
         return self::create([
+            'company_id' => $company_id,
             'email' => $dataUser['email'],
             'first_name' => $dataUser['first_name'],
             'last_name' => $dataUser['last_name'],

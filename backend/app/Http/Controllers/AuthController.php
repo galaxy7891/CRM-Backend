@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Company;
 use App\Http\Controllers\Controller;
-use App\Services\OtpService;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -67,11 +66,11 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-       
+    
         try {
 
-            $user = User::createUser($request->all());
-            Company::createCompany($request->all(), $user->id);
+            $company = Company::registerCompany($request->all());
+            User::registerUser($request->all(), $company->company_id);
 
             $credentials = [
                 'email' => $request->input('email'),
@@ -226,95 +225,6 @@ class AuthController extends Controller
 
 
 
-
-
-
-
-
-
-
-    /**
-     * Step A: User submits email to receive OTP
-     */
-    public function sendOTP(Request $request, OtpService $otpService)
-    {
-    
-        $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email',
-        ]);
-
-        if ($validator->fails()){
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try{
-    
-            $otpService->generateAndSendOtp($request->email);
-    
-            return response()->json([
-                'status' => 'success',
-                'message' => 'OTP sent to your email.'
-            ], 200);
-
-        } catch (\Exception $e){
-            
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
-
-        }
-    }
-
-
-    
-    /**
-     * Step A: Verify OTP
-     */
-    public function verifyOtp(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'otp' => 'required|digits:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Ambil OTP dan waktu kadaluarsa dari session
-        $sessionOtp = session('otp');
-        $otpExpiresAt = session('otp_expires_at');
-
-        // Validasi OTP
-        if ($sessionOtp !== $request->otp) {
-            return response()->json([
-                'otp' => $sessionOtp,
-                'error' => 'Invalid OTP.'
-            ], 400);
-        }
-
-        // Validasi waktu kadaluarsa OTP
-        if (now()->greaterThan($otpExpiresAt)) {
-            return response()->json([
-                'error' => 'OTP has expired.'
-            ], 400);
-        }
-
-        // Clear OTP dari session
-        session()->forget(['otp', 'otp_expires_at']);
-
-        // Simpan data ke database (akan dilakukan di langkah berikutnya)
-        // Di sini Anda bisa melanjutkan ke langkah berikutnya, misalnya ke Step B
-
-        return response()->json(['message' => 'OTP verified. Proceed to the next step.'], 200);
-    }
 
 
     /**

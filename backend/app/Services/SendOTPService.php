@@ -5,7 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TemplateOTPEmail;
 
-class OtpService
+class SendOTPService
 {
     /**
      * Generate OTP and send email.
