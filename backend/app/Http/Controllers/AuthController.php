@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Company;
 use App\Http\Controllers\Controller;
 use App\Services\OtpService;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -22,40 +20,85 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-               
-        try {
-
-            $credentials= $request->validate([
+        
+        $credentials = Validator::make($request->all(), [
                 'email' => 'required|email',
                 'password' => 'required',
-            ]);
+        ]);
+
+        if ($credentials->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $credentials->errors()
+            ], 422);
+        }
+
+        try {
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json(
-                    ['error' => 'Email and password do not match'],
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized',
+                    'errors' => 'Email and password do not match'],
                     401
                 );
             }
 
             return $this->respondWithToken($token);
 
-        } catch (ValidationException $e) {
-            
-            return response()->json([
-                'message' => 'Validation Error',
-                'errors' => $e->errors(),
-            ], 422);
-        
         } catch (\Exception $e) {
 
             return response()->json([
-                'error' => 'Internal Server Error',
-                'message' => $e->getMessage()
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'errors' => $e->getMessage()
             ], 500);
 
         }
     }
 
+
+
+    /**
+     * Register a User and Get a JWT via given credentials.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register(Request $request)
+    {
+       
+        try {
+
+            $user = User::createUser($request->all());
+            Company::createCompany($request->all(), $user->id);
+
+            $credentials = [
+                'email' => $request->input('email'),
+                'password' => $request->input('password'),
+            ];
+    
+            if (!$token = auth()->attempt($credentials)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized',
+                    'errors' => 'Email and password do not match'],
+                    401
+                );
+            }
+    
+            return $this->respondWithToken($token);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'errors' => $e->getMessage()
+            ], 500);
+
+        }
+    }
 
 
 
@@ -68,7 +111,6 @@ class AuthController extends Controller
     {
         return Socialite::driver('google')->stateless()->redirect();
     }
-
 
 
 
@@ -97,13 +139,13 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             
             return response()->json([
-                'error' => 'Internal Server Error',
-                'message' => $e->getMessage()
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'errors' => $e->getMessage()
             ], 500);
 
         }
     }
-  
 
 
 
@@ -134,8 +176,6 @@ class AuthController extends Controller
 
 
 
-
-
     /**
      * Refresh a token.
      *
@@ -148,7 +188,6 @@ class AuthController extends Controller
   
 
 
-
     /**
      * Get the JWT array structure.
      *
@@ -159,10 +198,14 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
+            'status' => 'success',
+            'message' => 'Token generated successfully',
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60
+            ]
+        ], 200);
     }
 
 
@@ -195,32 +238,34 @@ class AuthController extends Controller
      */
     public function sendOTP(Request $request, OtpService $otpService)
     {
-        try{
-
-            $request->validate([
-                'email' => 'required|email|unique:users,email',
-            ]);
     
-            session(['email' => $request->email]);
+        $validator = Validator::make($request->only('email'), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try{
     
             $otpService->generateAndSendOtp($request->email);
     
             return response()->json([
-                'message' => 'OTP sent to your email.',
+                'status' => 'success',
+                'message' => 'OTP sent to your email.'
             ], 200);
-
-        } catch (ValidationException $e){
-            
-            return response()->json([
-                'error' => 'Validation error',
-                'message' => $e->getMessage()
-            ], 422);
 
         } catch (\Exception $e){
             
             return response()->json([
-                'error' => 'Internal Server Error',
-                'message' => $e->getMessage()
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'errors' => $e->getMessage()
             ], 500);
 
         }

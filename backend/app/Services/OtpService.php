@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
+use App\Mail\TemplateOTPEmail;
 
 class OtpService
 {
@@ -20,6 +20,6 @@ class OtpService
         session(['otp' => $otp]);
         session(['otp_expires_at' => now()->addMinutes(5)]);
 
-        Mail::to($email)->send(new OtpMail($otp));
+        Mail::to($email)->send(new TemplateOTPEmail($otp));
     }
 }

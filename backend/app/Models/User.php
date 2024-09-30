@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
@@ -71,7 +71,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the deals associated with the user.
      * Get the loggers associated with the user.
      * 
-     * This defines a one-to-many relationship where the user can have multiple customers.
+     * This defines aone-to-many relationship where the user can have multiple customers.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -139,6 +139,26 @@ class User extends Authenticatable implements JWTSubject
             ]
         );
 
+    }
+
+
+
+    /**
+     * Create a new user instance after a valid registration.
+     *
+     * @param array $dataUser
+     * @return User
+     */
+    public static function registerUser(array $dataUser): self
+    {
+        return self::create([
+            'email' => $dataUser['email'],
+            'first_name' => $dataUser['first_name'],
+            'last_name' => $dataUser['last_name'],
+            'password' => Hash::make($dataUser['password']),
+            'phone' => $dataUser['phone'],
+            'job_position' => $dataUser['job_position'],
+        ]);
     }
 }
 

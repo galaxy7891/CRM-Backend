@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLoggersTable extends Migration
+class CreateOtpsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,16 @@ class CreateLoggersTable extends Migration
      */
     public function up()
     {
-        Schema::create('loggers', function (Blueprint $table) {
-            $table->uuid('logger_id')->primary();
-            $table->uuid('user_id');
-            $table->string('table_name'); 
-            $table->string('action'); 
-            $table->text('description')->nullable(); 
-            $table->timestamps();
+        Schema::create('otps', function (Blueprint $table) {
+            $table->uuid('otp_id')->primary();
+            $table->uuid('user_id'); 
+            $table->string('code');
+            $table->dateTime('expire_at');
+            $table->boolean('is_used')->default(false);
+            $table->timestamps(); 
             $table->softDeletes();
 
-
-            // Menambahkan foreign key
+            // Foreign key constraint linking to the users table
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
@@ -35,6 +34,6 @@ class CreateLoggersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('loggers');
+        Schema::dropIfExists('otps');
     }
 }

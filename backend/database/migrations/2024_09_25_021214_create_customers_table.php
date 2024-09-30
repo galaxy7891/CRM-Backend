@@ -29,11 +29,11 @@ class CreateCustomersTable extends Migration
             $table->string('village')->nullable();
             $table->string('zip_code')->nullable();
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('user_id')->references('user_id')->on('users');
-            $table->foreign('organization_id')->references('organization_id')->on('organizations');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('organization_id')->references('organization_id')->on('organizations')->onDelete('cascade');
         });
     }
 

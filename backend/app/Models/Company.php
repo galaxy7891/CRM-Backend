@@ -56,4 +56,22 @@ class Company extends Model
     {
         return $this->hasMany(Customer::class, 'organization_id');
     }
+
+
+
+    /**
+     * Create a new company instance associated with a user.
+     *
+     * @param array $dataCompany
+     * @param string $user_id 
+     * @return Company
+     */
+    public static function registerCompany(array $dataCompany, string $user_id): self
+    {
+        return self::create([
+            'name' => $dataCompany['name'],
+            'industry' => $dataCompany['industry'],
+            'user_id' => $user_id,
+        ]);
+    }
 }

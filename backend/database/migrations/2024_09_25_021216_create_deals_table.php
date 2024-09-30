@@ -25,11 +25,11 @@ class CreateDealsTable extends Migration
             $table->integer('payment_duration')->nullable();
             $table->string('owner');
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('customer_id')->references('customer_id')->on('customers');
-            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('customer_id')->references('customer_id')->on('customers')->onDelete('cascade');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         });
     }
 

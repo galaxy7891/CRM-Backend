@@ -22,10 +22,10 @@ class CreateUsersTable extends Migration
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->string('photo')->nullable();
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('company_id')->references('company_id')->on('companies');
+            $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
         });
     }
 
