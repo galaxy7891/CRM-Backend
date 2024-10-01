@@ -27,8 +27,8 @@ class OtpController extends Controller
 
         if ($validator->fails()){
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
+                'success' => false,
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -40,8 +40,8 @@ class OtpController extends Controller
             $SendOTPService->generateAndSendOtp($email);
     
             return response()->json([
-                'status' => 'success',
-                'message' => 'OTP sent to your email.',
+                'success' => true,
+                'message' => 'OTP berhasil dikirimkan ke email anda.',
                 'data' => [
                     'email' => $email
                 ]
@@ -50,7 +50,7 @@ class OtpController extends Controller
         } catch (\Exception $e){
             
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
@@ -76,8 +76,8 @@ class OtpController extends Controller
 
         if($validator->fails()){
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
+                'success' => false,
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -90,8 +90,9 @@ class OtpController extends Controller
             $otp = Otp::findOTP($email);
             if (!$otp) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid OTP or OTP has already been used or expired.',
+                    'success' => false,
+                    'message' => 'Kode OTP invalid atau OTP telah digunakan atau hangus.',
+                    'data' => null
                 ], 404);
             }
 
@@ -100,20 +101,22 @@ class OtpController extends Controller
                 $otp->save();
 
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'OTP verified successfully.',
+                    'success' => true,
+                    'message' => 'OTP berhasil diverifikasi.',
+                    'data' => null
                 ], 200); 
             }
 
             return response()->json([
-                'status' => 'error',
-                'message' => 'OTP does not match.',
+                'success' => false,
+                'message' => 'OTP tidak sesuai.',
+                'data' => null
             ], 400);
 
         } catch (\Exception $e) {
             
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);

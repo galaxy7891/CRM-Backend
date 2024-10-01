@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -27,10 +27,18 @@ class CreateUsersTable extends Migration
             // Foreign Key Constraints
             $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
         });
+
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
     }
 
     public function down()
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
     }
-}
+};

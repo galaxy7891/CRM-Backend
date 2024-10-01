@@ -3,6 +3,26 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OTPController;
+use App\Http\Controllers\UserController;
+
+
+Route::group([
+
+    'middleware' => 'api'
+
+], function ($router) {
+    /*
+     * forgot password
+     */
+    Route::post('/password/forgot', [UserController::class, 'sendResetLink']);
+
+    /*
+     * reset password
+     */
+    Route::post('/password/reset', [UserController::class, 'reset'])->name('password.reset');
+});
+
+
 
 Route::group([
 

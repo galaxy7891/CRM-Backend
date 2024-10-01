@@ -27,8 +27,8 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
+                'success' => false,
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -39,11 +39,10 @@ class AuthController extends Controller
 
             if (!$token = auth()->attempt($credentials)) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized',
-                    'errors' => 'Email and password do not match'],
-                    401
-                );
+                    'success' => false,
+                    'message' => 'Email dan password tidak sesuai',
+                    'data' => null
+                ], 401);
             }
 
             return $this->respondWithToken($token);
@@ -51,7 +50,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
@@ -81,11 +80,10 @@ class AuthController extends Controller
     
             if (!$token = auth()->attempt($credentials)) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized',
-                    'errors' => 'Email and password do not match'],
-                    401
-                );
+                    'success' => false,
+                    'message' => 'Email dan password tidak sesuai',
+                    'data' => null
+                ], 401);
             }
     
             return $this->respondWithToken($token);
@@ -93,7 +91,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
@@ -140,7 +138,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
@@ -162,14 +160,17 @@ class AuthController extends Controller
             auth()->logout();
 
             return response()->json([
-                'message' => 'Successfully logged out'
+                'status' => true,
+                'message' => 'Logout berhasil',
+                'data' => null
             ]);
 
         } catch (\Exception $e) {
             
             return response()->json([
-                'error' => 'Failed to log out',
-                'message' => $e->getMessage()
+                'success' => false,
+                'message' => 'Logout gagal',
+                'errors' => $e->getMessage()
             ], 500);
         
         }
@@ -199,8 +200,8 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'status' => 'success',
-            'message' => 'Token generated successfully',
+            'success' => true,
+            'message' => 'Token berhasil dibuat',
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'bearer',
