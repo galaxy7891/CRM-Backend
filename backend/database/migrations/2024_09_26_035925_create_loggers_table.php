@@ -20,8 +20,7 @@ class CreateLoggersTable extends Migration
             $table->string('action');
             $table->text('description')->nullable();
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
-
+            $table->softDeletes();
 
             // Menambahkan foreign key
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');

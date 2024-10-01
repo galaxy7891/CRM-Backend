@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
+use App\Mail\TemplateOTPEmail;
+use App\Models\Otp;
 
-class OtpService
+class SendOTPService
 {
     /**
      * Generate OTP and send email.
@@ -15,11 +16,10 @@ class OtpService
      */
     public function generateAndSendOtp(string $email): void
     {
-        $otp = rand(100000, 999999);
+        $code = rand(100000, 999999);
 
-        session(['otp' => $otp]);
-        session(['otp_expires_at' => now()->addMinutes(5)]);
+        Otp::createOTP($email, $code);
 
-        Mail::to($email)->send(new OtpMail($otp));
+        Mail::to($email)->send(new TemplateOTPEmail($code));
     }
 }

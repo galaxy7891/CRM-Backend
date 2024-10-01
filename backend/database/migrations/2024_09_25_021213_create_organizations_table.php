@@ -24,7 +24,7 @@ class CreateOrganizationsTable extends Migration
             $table->string('village')->nullable();
             $table->string('zip_code')->nullable();
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
         });
     }
 

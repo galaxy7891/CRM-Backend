@@ -17,7 +17,7 @@ class CreateCompaniesTable extends Migration
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
         });
     }
 

@@ -14,12 +14,12 @@ class CreateProductsTable extends Migration
             $table->string('category');
             $table->string('code')->nullable();
             $table->integer('quantity');
-            $table->string('unit');  // String karena Laravel tidak mendukung tipe ENUM buatan
+            $table->string('unit');
             $table->decimal('price', 8, 2);
             $table->text('description')->nullable();
             $table->string('photo_product');
             $table->timestamps();
-            $table->dateTime('deleted_at')->nullable();
+            $table->softDeletes();
         });
     }
 

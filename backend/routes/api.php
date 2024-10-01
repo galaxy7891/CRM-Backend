@@ -2,21 +2,18 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
-use Illuminate\Auth\Middleware\Authenticate;
 use App\Http\Controllers\CustomerController;
+use Illuminate\Auth\Middleware\Authenticate;
 
 
 // customer
-Route::get('/customers', function (Request $request) {
-    return $request->user();
-})->middleware(Authenticate::using('sanctum'));
 
 
 Route::apiResource('/customers', CustomerController::class);
 
 
-Route::apiResource('/organizations', CustomerController::class);
 
 Route::group([
 
@@ -28,8 +25,17 @@ Route::group([
     /* 
      * register
      */
-    Route::post('/otp', [AuthController::class, 'sendOTP'])->name('otp');
-    Route::post('/verifyotp', [AuthController::class, 'verifyOtp'])->name('verifyotp');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+    /* 
+     * otp
+     */
+    Route::post('/sendOTP', [OTPController::class, 'sendOTP'])->name('sendOTP');
+    Route::post('/verifyOTP', [OTPController::class, 'verifyOTP'])->name('verifyOTP');
+
+    /* 
+     * oauth google
+     */
     Route::get('/google', [AuthController::class, 'redirectToGoogle']);
     Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
 

@@ -4,12 +4,11 @@ namespace App\Models;
 
 use App\Traits\HasUuid;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
@@ -71,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the deals associated with the user.
      * Get the loggers associated with the user.
      * 
-     * This defines a one-to-many relationship where the user can have multiple customers.
+     * This defines a one-to-many relationship where the user can have multiple customers, deals, loggers.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -138,5 +137,27 @@ class User extends Authenticatable implements JWTSubject
                 'google_id' => $googleUser->id,
             ]
         );
+    }
+
+
+
+    /**
+     * Create a new user instance after a valid registration.
+     *
+     * @param array $dataUser
+     * @param string $company_id 
+     * @return User
+     */
+    public static function registerUser(array $dataUser, string $company_id): self
+    {
+        return self::create([
+            'company_id' => $company_id,
+            'email' => $dataUser['email'],
+            'first_name' => $dataUser['first_name'],
+            'last_name' => $dataUser['last_name'],
+            'password' => Hash::make($dataUser['password']),
+            'phone' => $dataUser['phone'],
+            'job_position' => $dataUser['job_position'],
+        ]);
     }
 }

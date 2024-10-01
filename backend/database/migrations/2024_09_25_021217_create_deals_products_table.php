@@ -14,8 +14,8 @@ class CreateDealsProductsTable extends Migration
             $table->uuid('deals_id');
 
             // Foreign Key Constraints
-            $table->foreign('product_id')->references('product_id')->on('products');
-            $table->foreign('deals_id')->references('deals_id')->on('deals');
+            $table->foreign('product_id')->references('product_id')->on('products')->onDelete('cascade');
+            $table->foreign('deals_id')->references('deals_id')->on('deals')->onDelete('cascade');
         });
     }
 

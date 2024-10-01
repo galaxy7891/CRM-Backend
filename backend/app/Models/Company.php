@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUuid;
 
+    protected $primaryKey = 'company_id';
     /**
      * The attributes that are mass assignable.
      * 
@@ -55,5 +57,21 @@ class Company extends Model
     public function customers()
     {
         return $this->hasMany(Customer::class, 'organization_id');
+    }
+
+
+
+    /**
+     * Create a new company instance associated with a user.
+     *
+     * @param array $dataCompany
+     * @return Company
+     */
+    public static function registerCompany(array $dataCompany): self
+    {
+        return self::create([
+            'name' => $dataCompany['name'],
+            'industry' => $dataCompany['industry']
+        ]);
     }
 }
