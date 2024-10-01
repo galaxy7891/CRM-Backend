@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Http\Controllers\Controller;
 use App\Services\OtpService;
-
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
+use App\Helpers\StringHelper;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
 class AuthController extends Controller
-{  
+{
     /**
      * Login a User and Get a JWT via given credentials.
      *
@@ -22,10 +23,10 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-               
+
         try {
 
-            $credentials= $request->validate([
+            $credentials = $request->validate([
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
@@ -38,21 +39,18 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
-
         } catch (ValidationException $e) {
-            
+
             return response()->json([
                 'message' => 'Validation Error',
                 'errors' => $e->errors(),
             ], 422);
-        
         } catch (\Exception $e) {
 
             return response()->json([
                 'error' => 'Internal Server Error',
                 'message' => $e->getMessage()
             ], 500);
-
         }
     }
 
@@ -93,17 +91,15 @@ class AuthController extends Controller
             $token = auth()->login($user);
 
             return $this->respondWithToken($token);
-            
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'error' => 'Internal Server Error',
                 'message' => $e->getMessage()
             ], 500);
-
         }
     }
-  
+
 
 
 
@@ -121,17 +117,14 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Successfully logged out'
             ]);
-
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'error' => 'Failed to log out',
                 'message' => $e->getMessage()
             ], 500);
-        
         }
     }
-
 
 
 
@@ -145,7 +138,7 @@ class AuthController extends Controller
     {
         return $this->respondWithToken(auth()->refresh());
     }
-  
+
 
 
 
@@ -179,7 +172,7 @@ class AuthController extends Controller
 
 
 
-    
+
 
 
 
@@ -195,39 +188,36 @@ class AuthController extends Controller
      */
     public function sendOTP(Request $request, OtpService $otpService)
     {
-        try{
+        try {
 
             $request->validate([
                 'email' => 'required|email|unique:users,email',
             ]);
-    
+
             session(['email' => $request->email]);
-    
+
             $otpService->generateAndSendOtp($request->email);
-    
+
             return response()->json([
                 'message' => 'OTP sent to your email.',
             ], 200);
+        } catch (ValidationException $e) {
 
-        } catch (ValidationException $e){
-            
             return response()->json([
                 'error' => 'Validation error',
                 'message' => $e->getMessage()
             ], 422);
+        } catch (\Exception $e) {
 
-        } catch (\Exception $e){
-            
             return response()->json([
                 'error' => 'Internal Server Error',
                 'message' => $e->getMessage()
             ], 500);
-
         }
     }
 
 
-    
+
     /**
      * Step A: Verify OTP
      */
@@ -343,5 +333,4 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Registration completed.'], 200);
     }
-
 }

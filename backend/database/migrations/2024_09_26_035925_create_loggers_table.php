@@ -16,11 +16,11 @@ class CreateLoggersTable extends Migration
         Schema::create('loggers', function (Blueprint $table) {
             $table->uuid('logger_id')->primary();
             $table->uuid('user_id');
-            $table->string('table_name'); 
-            $table->string('action'); 
-            $table->text('description')->nullable(); 
+            $table->string('table_name');
+            $table->string('action');
+            $table->text('description')->nullable();
             $table->timestamps();
-            $table->timestamps('deleted_at');
+            $table->dateTime('deleted_at')->nullable();
 
 
             // Menambahkan foreign key

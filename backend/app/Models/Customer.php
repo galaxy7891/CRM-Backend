@@ -10,13 +10,14 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
 
+
     /**
      * The attributes that are mass assignable.
      * 
      * @var array
      */
     protected $fillable = [
-        'customer_id',
+        'id',
         'organization_id',
         'user_id',
         'first_name',

@@ -46,7 +46,7 @@ class Deal extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'open_date', 'close_date', 'expected_close_date'];
 
 
-    
+
     /**
      * Get the customer that owns the deal.
      * Get the user that owns the deal.
@@ -58,7 +58,7 @@ class Deal extends Model
      */
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'id');
     }
 
     public function user()
@@ -71,4 +71,3 @@ class Deal extends Model
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
     }
 }
-
