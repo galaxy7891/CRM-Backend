@@ -20,20 +20,22 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         
-        $credentials = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
                 'password' => 'required',
         ]);
 
-        if ($credentials->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validation error',
-                'errors' => $credentials->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 
         try {
+
+            $credentials = $request->only(['email', 'password']);
 
             if (!$token = auth()->attempt($credentials)) {
                 return response()->json([
@@ -149,7 +151,7 @@ class AuthController extends Controller
 
 
     /**
-     * Log the user out (Invalidate the token).
+     * Logout (Invalidate the token).
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -207,96 +209,5 @@ class AuthController extends Controller
         ], 200);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-    /**
-     * Step B: Submit personal data
-     */
-    public function registerStepB(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'password' => 'required|string|min:8',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Simpan data diri di session
-        session([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'phone' => $request->phone,
-            'password' => bcrypt($request->password), // Encrypt password
-        ]);
-
-        return response()->json(['message' => 'Personal data saved.'], 200);
-    }
-
-
-    /**
-     * Step C: Submit company data
-     */
-    public function registerStepC(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'job_position' => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
-            'industry' => 'required|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Simpan data perusahaan di session
-        session([
-            'job_position' => $request->job_position,
-            'company_name' => $request->company_name,
-            'industry' => $request->industry,
-        ]);
-
-        // Ketika semua data terkumpul, simpan ke database
-        $user = User::create([
-            'email' => session('email'),
-            'first_name' => session('first_name'),
-            'last_name' => session('last_name'),
-            'password' => session('password'),
-            'phone' => session('phone'),
-        ]);
-
-        // Simpan data perusahaan ke tabel terkait
-        $user->company()->create([
-            'name' => session('company_name'),
-            'job_position' => session('job_position'),
-            'industry' => session('industry'),
-        ]);
-
-        // Hapus data session setelah selesai
-        session()->forget(['email', 'first_name', 'last_name', 'password', 'phone', 'job_position', 'company_name', 'industry']);
-
-        return response()->json(['message' => 'Registration completed.'], 200);
-    }
 
 }

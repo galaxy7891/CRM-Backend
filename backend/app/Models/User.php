@@ -70,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the deals associated with the user.
      * Get the loggers associated with the user.
      * 
-     * This defines aone-to-many relationship where the user can have multiple customers.
+     * This defines a one-to-many relationship where the user can have multiple customers, deals, loggers.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

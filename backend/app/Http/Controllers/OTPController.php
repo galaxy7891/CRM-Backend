@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Otp;
 use App\Services\SendOTPService;
-use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
-class OTPController extends Controller
+class OtpController extends Controller
 {
+    
     /**
-     * Step A: User submits email to receive OTP
+     * Send OTP to the user's email.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Services\SendOTPService $SendOTPService
+     *
+     * @return \Illuminate\Http\JsonResponse 
      */
     public function sendOTP(Request $request, SendOTPService $SendOTPService)
     {
@@ -28,11 +35,16 @@ class OTPController extends Controller
 
         try{
     
-            $SendOTPService->generateAndSendOtp($request->email);
+            $email = $request->email;
+
+            $SendOTPService->generateAndSendOtp($email);
     
             return response()->json([
                 'status' => 'success',
-                'message' => 'OTP sent to your email.'
+                'message' => 'OTP sent to your email.',
+                'data' => [
+                    'email' => $email
+                ]
             ], 200);
 
         } catch (\Exception $e){
@@ -49,45 +61,64 @@ class OTPController extends Controller
 
     
     /**
-     * Step A: Verify OTP
+     * Verify the OTP sent to the user's email.
+     *
+     * @param \Illuminate\Http\Request $request
+     * 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function verifyOTP(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'otp' => 'required|digits:6',
+
+        $validator = Validator::make($request->only('code'), [
+            'code' => 'required|digits:6',
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()){
             return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        // Ambil OTP dan waktu kadaluarsa dari session
-        $sessionOtp = session('otp');
-        $otpExpiresAt = session('otp_expires_at');
+        try {
 
-        // Validasi OTP
-        if ($sessionOtp !== $request->otp) {
+            $email = $request->email;
+            $code = $request->code;
+
+            $otp = Otp::findOTP($email);
+            if (!$otp) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid OTP or OTP has already been used or expired.',
+                ], 404);
+            }
+
+            if ($otp->code === $code) {
+                $otp->is_used = true;
+                $otp->save();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'OTP verified successfully.',
+                ], 200); 
+            }
+
             return response()->json([
-                'otp' => $sessionOtp,
-                'error' => 'Invalid OTP.'
+                'status' => 'error',
+                'message' => 'OTP does not match.',
             ], 400);
-        }
 
-        // Validasi waktu kadaluarsa OTP
-        if (now()->greaterThan($otpExpiresAt)) {
+        } catch (\Exception $e) {
+            
             return response()->json([
-                'error' => 'OTP has expired.'
-            ], 400);
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+                'errors' => $e->getMessage()
+            ], 500);
+        
         }
-
-        // Clear OTP dari session
-        session()->forget(['otp', 'otp_expires_at']);
-
-        // Simpan data ke database (akan dilakukan di langkah berikutnya)
-        // Di sini Anda bisa melanjutkan ke langkah berikutnya, misalnya ke Step B
-
-        return response()->json(['message' => 'OTP verified. Proceed to the next step.'], 200);
     }
+
 }

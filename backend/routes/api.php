@@ -11,7 +11,7 @@ Route::group([
 
 ], function ($router) {
     
-    /* 
+    /*
      * register
      */
     Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -24,7 +24,7 @@ Route::group([
 
     /* 
      * oauth google
-     */    
+     */
     Route::get('/google', [AuthController::class, 'redirectToGoogle']);
     Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('handleGoogleCallback');
     
