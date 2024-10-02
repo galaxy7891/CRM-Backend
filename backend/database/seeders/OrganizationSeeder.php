@@ -14,7 +14,7 @@ class OrganizationSeeder extends Seeder
     public function run(): void
     {
         Organization::create([
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'id' => '123e4567-e89b-12d3-a456-426614174004',
             'name' => 'PT Sumber Kencana',
             'industry' => 'Perdagangan',
             'email' => 'info@sumberkencana.com',
@@ -31,7 +31,7 @@ class OrganizationSeeder extends Seeder
         ]);
 
         Organization::create([
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174005',
+            'id' => '123e4567-e89b-12d3-a456-426614174005',
             'name' => 'CV Maju Jaya',
             'industry' => 'Konstruksi',
             'email' => 'contact@majujaya.com',
@@ -48,7 +48,7 @@ class OrganizationSeeder extends Seeder
         ]);
 
         Organization::create([
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174006',
+            'id' => '123e4567-e89b-12d3-a456-426614174006',
             'name' => 'PT Bumi Resources',
             'industry' => 'Pertambangan',
             'email' => 'info@bumiresources.com',

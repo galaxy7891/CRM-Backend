@@ -69,7 +69,7 @@ class Customer extends Model
 
     public function organization()
     {
-        return $this->belongsTo(Organization::class, 'organization_id');
+        return $this->belongsTo(Organization::class, 'id');
     }
 
 
