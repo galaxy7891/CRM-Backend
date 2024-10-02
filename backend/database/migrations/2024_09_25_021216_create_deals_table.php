@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDealsTable extends Migration
 {
+
     public function up()
     {
         Schema::create('deals', function (Blueprint $table) {
@@ -28,8 +29,8 @@ class CreateDealsTable extends Migration
             $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('customer_id')->references('customer_id')->on('customers')->onDelete('cascade');
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('customer_id')->references('id')->on('customers');
+            $table->foreign('user_id')->references('user_id')->on('users');
         });
     }
 

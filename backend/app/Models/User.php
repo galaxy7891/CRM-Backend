@@ -137,7 +137,6 @@ class User extends Authenticatable implements JWTSubject
                 'google_id' => $googleUser->id,
             ]
         );
-
     }
 
 
@@ -162,4 +161,3 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 }
-

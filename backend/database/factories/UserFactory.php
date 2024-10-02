@@ -34,5 +34,4 @@ class UserFactory extends Factory
             'deleted_at' => null,
         ];
     }
-    
 }
