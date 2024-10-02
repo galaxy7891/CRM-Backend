@@ -5,28 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomerResource;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
-     */
-
-    /*************  ✨ Codeium Command ⭐  *************/
-    /**
-     * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    /******  c153a343-a1bf-4ce5-bd4b-47395dc02e4e  *******/
+
     public function index()
     {
         $customers = Customer::latest()->paginate(10);
 
-        return new CustomerResource(true, 'List Customer', $customers);
+        return new CustomerResource(true, 'Daftar Customer', $customers);
     }
 
     /**

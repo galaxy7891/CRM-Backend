@@ -33,7 +33,7 @@ class CreateCustomersTable extends Migration
 
             // Foreign Key Constraints
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
-            $table->foreign('organization_id')->references('organization_id')->on('organizations')->onDelete('cascade');
+            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
         });
     }
 

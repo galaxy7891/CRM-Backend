@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OrganizationController;
 use Illuminate\Auth\Middleware\Authenticate;
 
 
@@ -12,6 +13,7 @@ use Illuminate\Auth\Middleware\Authenticate;
 
 
 Route::apiResource('/customers', CustomerController::class);
+Route::apiResource('/organizations', OrganizationController::class);
 
 
 

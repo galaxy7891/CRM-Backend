@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Traits\HasUuid;
+
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Organization extends Model
 {
-
     use HasFactory, SoftDeletes;
-    protected $primaryKey = 'organization_id';
+
+    protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
+    public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
+
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +21,7 @@ class Organization extends Model
      * @var array
      */
     protected $fillable = [
-        'organization_id',
+        'id',
         'name',
         'industry',
         'email',
