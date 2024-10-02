@@ -21,7 +21,8 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    /******  c153a343-a1bf-4ce5-bd4b-47395dc02e4e  *******/    public function index()
+    /******  c153a343-a1bf-4ce5-bd4b-47395dc02e4e  *******/
+    public function index()
     {
         $customers = Customer::latest()->paginate(10);
 
@@ -52,16 +53,38 @@ class CustomerController extends Controller
             'subdistrict' => 'nullable|string|max:255',
             'village' => 'nullable|string|max:255',
             'zip_code' => 'nullable|string|max:10',
+        ], [
+            'organization_id.required' => 'Organisasi wajib diisi.',
+            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'user_id.required' => 'Pengguna wajib diisi.',
+            'user_id.uuid' => 'ID pengguna harus berupa UUID yang valid.',
+            'first_name.required' => 'Nama depan wajib diisi.',
+            'last_name.required' => 'Nama belakang wajib diisi.',
+            'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',
+            'customerCategory.in' => 'Kategori pelanggan harus berupa salah satu: leads atau contact.',
+            'job.string' => 'Pekerjaan harus berupa teks.',
+            'status.required' => 'Status pelanggan wajib diisi.',
+            'status.in' => 'Status harus berupa salah satu: hot, warm, atau cold.',
+            'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.string' => 'Nomor telepon harus berupa teks.',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'owner.required' => 'Pemilik kontak wajib diisi.',
+            'address.string' => 'Alamat harus berupa teks.',
+            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
         ]);
 
         //check if validation fails
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
         }
 
         //create customer
 
-        $customers = Customer::create([
+        $customer = Customer::create([
             'id' => Str::uuid(),
             'organization_id' => $request->organization_id,
             'user_id' => $request->user_id,
@@ -83,7 +106,7 @@ class CustomerController extends Controller
             'zip_code' => $request->zip_code,
         ]);
 
-        return new CustomerResource(true, 'Data Customer Berhasil Ditambahkan!', $customers);
+        return new CustomerResource(true, "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!", $customer);
     }
 
     /**
@@ -113,8 +136,8 @@ class CustomerController extends Controller
             'description' => 'nullable|string',
             'status' => 'required|in:hot,warm,cold',
             'birthdate' => 'nullable|date',
-            'email' => 'required|email|unique:customers,email',
-            'phone' => 'required|string|max:15|unique:customers,phone',
+            'email' => 'required|email',
+            'phone' => 'required|string|max:15',
             'owner' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
@@ -122,18 +145,38 @@ class CustomerController extends Controller
             'subdistrict' => 'nullable|string|max:255',
             'village' => 'nullable|string|max:255',
             'zip_code' => 'nullable|string|max:10',
+        ], [
+            'organization_id.required' => 'Organisasi wajib diisi.',
+            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'user_id.required' => 'Pengguna wajib diisi.',
+            'user_id.uuid' => 'ID pengguna harus berupa UUID yang valid.',
+            'first_name.required' => 'Nama depan wajib diisi.',
+            'last_name.required' => 'Nama belakang wajib diisi.',
+            'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',
+            'customerCategory.in' => 'Kategori pelanggan harus berupa salah satu: leads atau contact.',
+            'job.string' => 'Pekerjaan harus berupa teks.',
+            'status.required' => 'Status pelanggan wajib diisi.',
+            'status.in' => 'Status harus berupa salah satu: hot, warm, atau cold.',
+            'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.string' => 'Nomor telepon harus berupa teks.',
+            'owner.required' => 'Pemilik customer wajib diisi.',
+            'address.string' => 'Alamat harus berupa teks.',
+            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
         ]);
 
         // Check if validation fails
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
         }
 
         // Check if customer exists
         $customer = Customer::find($id);
 
         if (!$customer) {
-            return response()->json(['message' => 'Customer tidak ditemukan'], 404);
+            return response()->json(['success' => false, 'message' => 'Customer tidak ditemukan', 'data' => null], 404);
         }
 
         $customer->update([
