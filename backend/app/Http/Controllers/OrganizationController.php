@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization;
-use App\Http\Resources\OrganizationResource;
-
 use Illuminate\Support\Str;
+use App\Models\Organization;
+
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\OrganizationResource;
 
 class OrganizationController extends Controller
 {
@@ -34,7 +35,7 @@ class OrganizationController extends Controller
             'industry' => 'nullable|string|max:255',
             'status' => 'required|in:hot,warm,cold',
             'email' => 'nullable|email|unique:organizations,email',
-            'phone' => 'string|max:15|unique:organizations,phone',
+            'phone' => 'nullable|string|max:15|unique:organizations,phone',
             'owner' => 'required|string|max:255',
             'website' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
@@ -103,12 +104,38 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Check if customer exists
+        $organization = Organization::find($id);
+
+        if (!$organization) {
+            return response()->json(['success' => false, 'message' => 'Organization tidak ditemukan', 'data' => null], 404);
+        }
+
         $validator = Validator::make($request->all(), [
-            'name' => 'unique:organizations,name|required|string|max:255',
+            'name' => [
+
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('organizations', 'name')->ignore($id) // ignore validation for this id
+            ],
             'industry' => 'nullable|string|max:255',
             'status' => 'required|in:hot,warm,cold',
-            'email' => 'nullable|email|unique:organizations,email',
-            'phone' => 'string|max:15|unique:organizations,phone',
+            'email' => [
+                'sometimes', // only update if email is provided
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('organizations', 'email')->ignore($id) // ignore validation for this id
+            ],
+            'phone' =>
+            [
+                'sometimes', // only update if phone is provided
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('organizations', 'phone')->ignore($id) // ignore validation for this id
+            ],
             'owner' => 'required|string|max:255',
             'website' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
@@ -140,12 +167,6 @@ class OrganizationController extends Controller
             return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
         }
 
-        // Check if customer exists
-        $organization = Organization::find($id);
-
-        if (!$organization) {
-            return response()->json(['success' => false, 'message' => 'Organization tidak ditemukan', 'data' => null], 404);
-        }
         $organization->update([
             'name' => $request->name,
             'industry' => $request->industry,

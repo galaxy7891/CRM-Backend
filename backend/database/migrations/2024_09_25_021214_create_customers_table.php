@@ -10,7 +10,7 @@ class CreateCustomersTable extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('organization_id');
+            $table->uuid('organization_id')->nullable();
             $table->uuid('user_id');
             $table->string('first_name');
             $table->string('last_name');
@@ -19,8 +19,8 @@ class CreateCustomersTable extends Migration
             $table->text('description')->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->date('birthdate')->nullable();
-            $table->string('email');
-            $table->string('phone');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
             $table->string('owner');
             $table->string('address')->nullable();
             $table->string('country')->nullable();
