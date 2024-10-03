@@ -8,7 +8,7 @@ use App\Http\Controllers\UserController;
 
 Route::group([
 
-    'middleware' => 'api'
+    'middleware' => 'auth:'
 
 ], function ($router) {
     /*

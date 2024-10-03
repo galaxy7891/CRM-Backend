@@ -79,7 +79,6 @@ class UserController extends Controller
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8',
-            'password_confirmation' => 'required|min:8|same:password'
         ]);
 
         if($validator->fails()){
@@ -93,7 +92,7 @@ class UserController extends Controller
         try {
 
             $status = Password::reset(
-                $request->only('email', 'password', 'password_confirmation', 'token'),
+                $request->only('email', 'password', 'token'),
                 function ($user, $password) {
                     $user->forceFill([
                         'password' => Hash::make($password),

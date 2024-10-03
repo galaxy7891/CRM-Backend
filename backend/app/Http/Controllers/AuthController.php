@@ -99,7 +99,7 @@ class AuthController extends Controller
         }
     }
 
-
+    
 
     /**
      * Redirect the user to the Google login page.
@@ -209,6 +209,5 @@ class AuthController extends Controller
             ]
         ], 200);
     }
-
 
 }
