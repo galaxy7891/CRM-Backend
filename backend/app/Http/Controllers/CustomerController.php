@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-
-use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomerResource;
+
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -21,9 +21,22 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::latest()->paginate(10);
+        try {
+            $customers = Customer::latest()->paginate(10);
 
-        return new CustomerResource(true, 'Daftar Customer', $customers);
+            return new CustomerResource(
+                true, // success
+                'Daftar Customer', // message
+                $customers // data
+            );
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
     /**
@@ -73,34 +86,29 @@ class CustomerController extends Controller
 
         //check if validation fails
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => null
+            ], 422);
         }
 
         //create customer
+        try {
+            $customer = Customer::createCustomer($request->all());
+            return new CustomerResource(
+                true, // success
+                "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!", // message
+                $customer // data
+            );
+        } catch (\Exception $e) {
 
-        $customer = Customer::create([
-            'id' => Str::uuid(),
-            'organization_id' => $request->organization_id,
-            'user_id' => $request->user_id,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'customerCategory' => $request->customerCategory,
-            'job' => $request->job,
-            'description' => $request->description,
-            'status' => $request->status,
-            'birthdate' => $request->birthdate,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'owner' => $request->owner,
-            'address' => $request->address,
-            'country' => $request->country,
-            'city' => $request->city,
-            'subdistrict' => $request->subdistrict,
-            'village' => $request->village,
-            'zip_code' => $request->zip_code,
-        ]);
-
-        return new CustomerResource(true, "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!", $customer);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
     /**
@@ -108,11 +116,27 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $customers = Customer::find($id);
-        if (is_null($customers)) {
-            return new CustomerResource(false, 'Data Customer Tidak Ditemukan!', null);
+        try {
+            $customers = Customer::find($id);
+            if (is_null($customers)) {
+                return new CustomerResource(
+                    false, // success
+                    'Data Customer Tidak Ditemukan!', // message
+                    null // data
+                );
+            }
+            return new CustomerResource(
+                true, // success
+                'Data Customer Ditemukan!', // message
+                $customers // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
         }
-        return new CustomerResource(true, 'Data Customer Ditemukan!', $customers);
     }
 
     /**
@@ -124,7 +148,11 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
 
         if (!$customer) {
-            return response()->json(['success' => false, 'message' => 'Customer tidak ditemukan', 'data' => null], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan',
+                'data' => null
+            ], 404);
         }
 
         $validator = Validator::make($request->all(), [
@@ -181,32 +209,28 @@ class CustomerController extends Controller
 
         // Check if validation fails
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => null
+            ], 422);
         }
 
+        try {
+            $customer = Customer::updateCustomer($request->all(), $id);
+            return new CustomerResource(
+                true, // successs
+                'Data Customer Berhasil Diubah!', // message
+                $customer // data
+            );
+        } catch (\Exception $e) {
 
-        $customer->update([
-            'organization_id' => $request->organization_id,
-            'user_id' => $request->user_id,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'customerCategory' => $request->customerCategory,
-            'job' => $request->job,
-            'description' => $request->description,
-            'status' => $request->status,
-            'birthdate' => $request->birthdate,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'owner' => $request->owner,
-            'address' => $request->address,
-            'country' => $request->country,
-            'city' => $request->city,
-            'subdistrict' => $request->subdistrict,
-            'village' => $request->village,
-            'zip_code' => $request->zip_code,
-        ]);
-
-        return new CustomerResource(true, 'Data Customer Berhasil Diubah!', $customer);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
 
@@ -215,16 +239,32 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $customer = Customer::find($id);
+        try {
+            $customer = Customer::find($id);
 
-        if (!$customer) {
-            return response()->json(['success' => false, 'message' => 'Customer tidak ditemukan', 'data' => null], 404);
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer tidak ditemukan',
+                    'data' => null
+                ], 404);
+            }
+
+            // Delete the customer
+            $customer->delete();
+
+            // Return response with first and last name
+            return new CustomerResource(
+                true, // success
+                "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!", // message
+                null // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ]);
         }
-
-        // Delete the customer
-        $customer->delete();
-
-        // Return response with first and last name
-        return new CustomerResource(true, "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!", null);
     }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends Model
 {
@@ -84,5 +85,57 @@ class Customer extends Model
     public function deals()
     {
         return $this->hasMany(Deal::class, 'customer_id');
+    }
+
+    public static function createCustomer(array $data): self
+    {
+        return self::create([
+            'id' => Str::uuid(),
+            'organization_id' => $data['organization_id'] ?? null,
+            'user_id' => $data['user_id'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'customerCategory' => $data['customerCategory'],
+            'job' => $data['job'] ?? null,
+            'description' => $data['description'] ?? null,
+            'status' => $data['status'],
+            'birthdate' => $data['birthdate'] ?? null,
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'owner' => $data['owner'],
+            'address' => $data['address'] ?? null,
+            'country' => $data['country'] ?? null,
+            'city' => $data['city'] ?? null,
+            'subdistrict' => $data['subdistrict'] ?? null,
+            'village' => $data['village'] ?? null,
+            'zip_code' => $data['zip_code'] ?? null,
+        ]);
+    }
+    public static function updateCustomer(array $data, $id): self
+    {
+        $customer = self::findOrFail($id);
+        $customer->fill([
+            'organization_id' => $data['organization_id'] ?? null,
+            'user_id' => $data['user_id'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'customerCategory' => $data['customerCategory'],
+            'job' => $data['job'] ?? null,
+            'description' => $data['description'] ?? null,
+            'status' => $data['status'],
+            'birthdate' => $data['birthdate'] ?? null,
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'owner' => $data['owner'] ?? null,
+            'address' => $data['address'] ?? null,
+            'country' => $data['country'] ?? null,
+            'city' => $data['city'] ?? null,
+            'subdistrict' => $data['subdistrict'] ?? null,
+            'village' => $data['village'] ?? null,
+            'zip_code' => $data['zip_code'] ?? null,
+        ]);
+
+        $customer->save();
+        return $customer;
     }
 }
