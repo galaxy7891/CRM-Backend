@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
-{  
+{
     /**
      * Login a User and Get a JWT via given credentials.
      *
@@ -19,10 +19,10 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        
+
         $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
-                'password' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -46,7 +46,6 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -54,7 +53,6 @@ class AuthController extends Controller
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
-
         }
     }
 
@@ -67,7 +65,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-    
+
         try {
 
             $company = Company::registerCompany($request->all());
@@ -77,7 +75,7 @@ class AuthController extends Controller
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ];
-    
+
             if (!$token = auth()->attempt($credentials)) {
                 return response()->json([
                     'success' => false,
@@ -85,9 +83,8 @@ class AuthController extends Controller
                     'data' => null
                 ], 401);
             }
-    
-            return $this->respondWithToken($token);
 
+            return $this->respondWithToken($token);
         } catch (\Exception $e) {
 
             return response()->json([
@@ -95,7 +92,6 @@ class AuthController extends Controller
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
-
         }
     }
 
@@ -134,15 +130,13 @@ class AuthController extends Controller
             $token = auth()->login($user);
 
             return $this->respondWithToken($token);
-            
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
-
         }
     }
 
@@ -164,15 +158,13 @@ class AuthController extends Controller
                 'message' => 'Logout berhasil',
                 'data' => null
             ]);
-
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Logout gagal',
                 'errors' => $e->getMessage()
             ], 500);
-        
         }
     }
 
@@ -187,7 +179,7 @@ class AuthController extends Controller
     {
         return $this->respondWithToken(auth()->refresh());
     }
-  
+
 
 
     /**
@@ -209,6 +201,4 @@ class AuthController extends Controller
             ]
         ], 200);
     }
-
-
 }

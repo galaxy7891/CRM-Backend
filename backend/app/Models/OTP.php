@@ -74,5 +74,4 @@ class Otp extends Model
             ->latest('created_at')
             ->first();
     }
-
 }

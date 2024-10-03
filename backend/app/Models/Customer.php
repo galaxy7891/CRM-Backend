@@ -10,13 +10,16 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
+    public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
+
     /**
      * The attributes that are mass assignable.
      * 
      * @var array
      */
     protected $fillable = [
-        'customer_id',
+        'id',
         'organization_id',
         'user_id',
         'first_name',
@@ -66,7 +69,7 @@ class Customer extends Model
 
     public function organization()
     {
-        return $this->belongsTo(Organization::class, 'organization_id');
+        return $this->belongsTo(Organization::class, 'id');
     }
 
 
