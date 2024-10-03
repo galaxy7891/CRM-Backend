@@ -9,7 +9,7 @@ class CreateOrganizationsTable extends Migration
     public function up()
     {
         Schema::create('organizations', function (Blueprint $table) {
-            $table->uuid('organization_id')->primary();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('industry')->nullable();
             $table->string('email')->nullable();

@@ -22,7 +22,7 @@ class OrganizationController extends Controller
     {
         $organizations = Organization::latest()->paginate(10);
 
-        return new OrganizationResoure(true, 'Daftar Organization', $organizations);
+        return new OrganizationResource(true, 'Daftar Organization', $organizations);
     }
 
     /**

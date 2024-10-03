@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class OtpController extends Controller
 {
-    
+
     /**
      * Send OTP to the user's email.
      *
@@ -20,12 +20,12 @@ class OtpController extends Controller
      */
     public function sendOTP(Request $request, SendOTPService $SendOTPService)
     {
-    
+
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email',
         ]);
 
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
@@ -33,12 +33,12 @@ class OtpController extends Controller
             ], 422);
         }
 
-        try{
-    
+        try {
+
             $email = $request->email;
 
             $SendOTPService->generateAndSendOtp($email);
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'OTP berhasil dikirimkan ke email anda.',
@@ -46,20 +46,18 @@ class OtpController extends Controller
                     'email' => $email
                 ]
             ], 200);
+        } catch (\Exception $e) {
 
-        } catch (\Exception $e){
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
-
         }
     }
 
 
-    
+
     /**
      * Verify the OTP sent to the user's email.
      *
@@ -74,7 +72,7 @@ class OtpController extends Controller
             'code' => 'required|digits:6',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
@@ -112,16 +110,13 @@ class OtpController extends Controller
                 'message' => 'OTP tidak sesuai.',
                 'data' => null
             ], 400);
-
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
-        
         }
     }
-
 }
