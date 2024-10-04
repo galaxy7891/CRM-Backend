@@ -10,7 +10,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('category');
             $table->string('code')->nullable();
             $table->integer('quantity');

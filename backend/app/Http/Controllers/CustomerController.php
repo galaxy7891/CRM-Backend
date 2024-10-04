@@ -241,7 +241,6 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::find($id);
-
             if (!$customer) {
                 return response()->json([
                     'success' => false,
@@ -264,7 +263,7 @@ class CustomerController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'data' => null
-            ]);
+            ], 500);
         }
     }
 }

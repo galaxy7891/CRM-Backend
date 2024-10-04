@@ -15,7 +15,6 @@ class Organization extends Model
     protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
     public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
 
-
     /**
      * The attributes that are mass assignable.
      * 
