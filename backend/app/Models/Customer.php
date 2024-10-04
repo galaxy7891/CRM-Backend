@@ -65,7 +65,7 @@ class Customer extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function organization()
@@ -84,7 +84,7 @@ class Customer extends Model
      */
     public function deals()
     {
-        return $this->hasMany(Deal::class, 'customer_id');
+        return $this->hasMany(Deal::class, 'id');
     }
 
     public static function createCustomer(array $data): self

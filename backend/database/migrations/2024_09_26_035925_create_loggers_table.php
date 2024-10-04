@@ -14,7 +14,7 @@ class CreateLoggersTable extends Migration
     public function up()
     {
         Schema::create('loggers', function (Blueprint $table) {
-            $table->uuid('logger_id')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->string('table_name');
             $table->string('action');
@@ -23,7 +23,7 @@ class CreateLoggersTable extends Migration
             $table->softDeletes();
 
             // Menambahkan foreign key
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -9,18 +9,20 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TemplateOTPEmail extends Mailable
+class TemplateInviteUser extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otp;
+    public $email;
+    public $url;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($otp)
+    public function __construct($email, $url)
     {
-        $this->otp = $otp;
+        $this->email = $email;
+        $this->url = $url;
     }
 
     /**
@@ -29,7 +31,7 @@ class TemplateOTPEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'OTP Mail',
+            subject: 'Jalin: Invitation Account',
         );
     }
 
@@ -39,9 +41,10 @@ class TemplateOTPEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'otp',
+            view: 'invitation',
             with: [
-                'otp' => $this->otp,
+                'email' => $this->email,
+                'url' => $this->url
             ],
         );
     }

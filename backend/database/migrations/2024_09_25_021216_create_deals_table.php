@@ -10,7 +10,7 @@ class CreateDealsTable extends Migration
     public function up()
     {
         Schema::create('deals', function (Blueprint $table) {
-            $table->uuid('deals_id')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('customer_id');
             $table->uuid('user_id');
             $table->string('name');
@@ -30,7 +30,7 @@ class CreateDealsTable extends Migration
 
             // Foreign Key Constraints
             $table->foreign('customer_id')->references('id')->on('customers');
-            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

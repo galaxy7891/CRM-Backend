@@ -22,7 +22,7 @@ class CustomerController extends Controller
     public function index()
     {
         try {
-            $customers = Customer::latest()->paginate(10);
+            $customers = Customer::latest()->paginate(25);
 
             return new CustomerResource(
                 true, // success

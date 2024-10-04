@@ -27,8 +27,8 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
+                'success' => false,
+                'message' => 'Validasi gagal',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -38,28 +38,23 @@ class AuthController extends Controller
             $credentials = $request->only(['email', 'password']);
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json(
-                    [
-                        'status' => 'error',
-                        'message' => 'Unauthorized',
-                        'errors' => 'Email and password do not match'
-                    ],
-                    401
-                );
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email dan password tidak sesuai',
+                    'data' => null
+                ], 401);
             }
 
             return $this->respondWithToken($token);
         } catch (\Exception $e) {
 
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
         }
     }
-
-
 
     /**
      * Register a User and Get a JWT via given credentials.
@@ -68,40 +63,55 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|unique:users,email',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'password' => 'required',
+            'phone' => 'required',
+            'job_position' => 'required',
+            'name' => 'required',
+            'industry' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         try {
 
             $company = Company::registerCompany($request->all());
-            User::registerUser($request->all(), $company->company_id);
+            User::createUser($request->all(), $company->id);
 
             $credentials = [
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
+                'email' => $request->email,
+                'password' => $request->password,
             ];
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json(
-                    [
-                        'status' => 'error',
-                        'message' => 'Unauthorized',
-                        'errors' => 'Email and password do not match'
-                    ],
-                    401
-                );
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email dan password tidak sesuai',
+                    'data' => null
+                ], 401);
             }
 
             return $this->respondWithToken($token);
+            
         } catch (\Exception $e) {
 
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
+
         }
     }
-
-
 
     /**
      * Redirect the user to the Google login page.
@@ -112,8 +122,6 @@ class AuthController extends Controller
     {
         return Socialite::driver('google')->stateless()->redirect();
     }
-
-
 
     /**
      * Handle the callback from Google after authentication.
@@ -139,14 +147,12 @@ class AuthController extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
         }
     }
-
-
 
     /**
      * Logout (Invalidate the token).
@@ -160,18 +166,20 @@ class AuthController extends Controller
             auth()->logout();
 
             return response()->json([
-                'message' => 'Successfully logged out'
+                'status' => true,
+                'message' => 'Logout berhasil',
+                'data' => null
             ]);
+
         } catch (\Exception $e) {
 
             return response()->json([
-                'error' => 'Failed to log out',
-                'message' => $e->getMessage()
+                'success' => false,
+                'message' => 'Logout gagal',
+                'errors' => $e->getMessage()
             ], 500);
         }
     }
-
-
 
     /**
      * Refresh a token.
@@ -183,8 +191,6 @@ class AuthController extends Controller
         return $this->respondWithToken(auth()->refresh());
     }
 
-
-
     /**
      * Get the JWT array structure.
      *
@@ -195,8 +201,8 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'status' => 'success',
-            'message' => 'Token generated successfully',
+            'success' => true,
+            'message' => 'Token berhasil dibuat',
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'bearer',

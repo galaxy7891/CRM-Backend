@@ -8,51 +8,41 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Auth\Middleware\Authenticate;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserInvitationController;
+use App\Http\Middleware\JwtMiddleware;
 
+// Route::apiResource('/customers', CustomerController::class);
 
-// customer
+Route::group(['middleware' => 'api'], function () {
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/login', [AuthController::class, 'login'])->name('login');
+        Route::post('/register', [AuthController::class, 'register'])->name('register');
 
+        Route::group(['prefix' => 'otp'], function () {
+            Route::post('/send', [OTPController::class, 'sendOTP']);
+            Route::post('/verify', [OTPController::class, 'verifyOTP']);
+        });
 
-Route::apiResource('/customers', CustomerController::class);
-Route::apiResource('/organizations', OrganizationController::class);
-Route::apiResource('/products', ProductController::class);
+        Route::group(['prefix' => 'password'], function () {
+            Route::post('/forgot', [UserController::class, 'sendResetLink']);
+            Route::post('/reset', [UserController::class, 'reset'])->name('password.reset');
+        });
+    });
 
+    Route::group(['prefix' => 'oauth'], function () {
+        Route::get('/google', [AuthController::class, 'redirectToGoogle']);
+        Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
+    });
 
+    Route::post('/invitation/accept', [UserInvitationController::class, 'createUser']);
 
-Route::group([
-
-    'middleware' => 'api',
-    'prefix' => 'auth'
-
-], function ($router) {
-
-    /* 
-     * register
-     */
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
-
-    /* 
-     * otp
-     */
-    Route::post('/sendOTP', [OTPController::class, 'sendOTP'])->name('sendOTP');
-    Route::post('/verifyOTP', [OTPController::class, 'verifyOTP'])->name('verifyOTP');
-
-    /* 
-     * oauth google
-     */
-    Route::get('/google', [AuthController::class, 'redirectToGoogle']);
-    Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
-
-    /* 
-     * login
-     */
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
-
-    /* 
-     * logout
-     */
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    //refresh jwt
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
+    Route::group(['middleware' => JwtMiddleware::class], function () { //authentikasi terlebih dahulu
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
+        Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
+        Route::apiResource('/customers', CustomerController::class);
+        Route::apiResource('/organizations', OrganizationController::class);
+        Route::apiResource('/products', ProductController::class);
+    });
 });

@@ -35,8 +35,6 @@ class Product extends Model
         'deleted_at',
     ];
 
-
-
     /**
      * The attributes that should be cast to date instances.
      * 

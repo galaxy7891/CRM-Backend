@@ -9,7 +9,7 @@ class CreateUsersTable extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->uuid('user_id')->primary();
+            $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable();
             $table->string('google_id')->nullable();
             $table->string('email')->unique();
@@ -25,12 +25,13 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('company_id')->references('company_id')->on('companies')->onDelete('cascade');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
+
     }
 
     public function down()
     {
         Schema::dropIfExists('users');
     }
-}
+};

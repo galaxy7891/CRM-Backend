@@ -16,10 +16,13 @@ class SendOTPService
      */
     public function generateAndSendOtp(string $email): void
     {
-        $code = rand(100000, 999999);
+        $dataOtp = [
+            'email' => $email,
+            'code' => rand(100000, 999999)
+        ];
 
-        Otp::createOTP($email, $code);
+        Otp::createOTP($dataOtp);
 
-        Mail::to($email)->send(new TemplateOTPEmail($code));
+        Mail::to($email)->send(new TemplateOTPEmail($dataOtp['code']));
     }
 }

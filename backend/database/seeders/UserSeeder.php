@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     {
         User::create([
 
-            'user_id' => '123e4567-e89b-12d3-a456-426614174003',
+            'id' => '123e4567-e89b-12d3-a456-426614174003',
             'company_id' => '123e4567-e89b-12d3-a456-426614174000',
             'google_id' => null,
             'email' => 'user_satu@gmail.com',

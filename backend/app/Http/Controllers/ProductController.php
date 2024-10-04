@@ -166,11 +166,11 @@ class ProductController extends Controller
         }
         try {
             $product = Product::updateProduct($request->all(), $id);
-                return new ProductResource(
-                    true, // success
-                    'Data Product Berhasil Diubah', // message
-                    $product // data
-                );
+            return new ProductResource(
+                true, // success
+                'Data Product Berhasil Diubah', // message
+                $product // data
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

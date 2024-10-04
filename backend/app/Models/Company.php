@@ -11,14 +11,13 @@ class Company extends Model
 {
     use HasFactory, SoftDeletes, HasUuid;
 
-    protected $primaryKey = 'company_id';
     /**
      * The attributes that are mass assignable.
      * 
      * @var array
      */
     protected $fillable = [
-        'company_id',
+        'id',
         'name',
         'industry',
         'logo',
@@ -51,15 +50,13 @@ class Company extends Model
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'company_id');
+        return $this->hasMany(User::class, 'id');
     }
 
     public function customers()
     {
-        return $this->hasMany(Customer::class, 'organization_id');
+        return $this->hasMany(Customer::class, 'id');
     }
-
-
 
     /**
      * Create a new company instance associated with a user.
