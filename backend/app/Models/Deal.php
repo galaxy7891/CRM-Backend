@@ -16,7 +16,7 @@ class Deal extends Model
      * @var array
      */
     protected $fillable = [
-        'deals_id',
+        'id',
         'customer_id',
         'user_id',
         'name',
@@ -63,7 +63,7 @@ class Deal extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function products()

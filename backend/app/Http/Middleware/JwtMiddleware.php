@@ -25,7 +25,8 @@ class JwtMiddleware
             
             return response()->json([
                 'success' => false,
-                'message' => 'Token tidak valid'
+                'message' => 'Token tidak valid',
+                'data' => null
             ], 401);
         
         }

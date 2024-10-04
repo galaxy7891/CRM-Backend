@@ -16,7 +16,7 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'product_id',
+        'id',
         'name',
         'category',
         'code',
@@ -29,8 +29,6 @@ class Product extends Model
         'updated_at',
         'deleted_at',
     ];
-
-
 
     /**
      * The attributes that should be cast to date instances.

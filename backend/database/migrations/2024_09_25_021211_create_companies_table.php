@@ -9,7 +9,7 @@ class CreateCompaniesTable extends Migration
     public function up()
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->uuid('company_id')->primary();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('industry');
             $table->string('logo')->nullable();

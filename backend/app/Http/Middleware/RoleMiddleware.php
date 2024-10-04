@@ -24,7 +24,8 @@ class RoleMiddleware
             if ($user->role !== $role) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda tidak memiliki izin untuk mengakses halaman ini'
+                    'message' => 'Anda tidak memiliki izin untuk mengakses halaman ini',
+                    'data' => null
                 ], 403);
             }
 

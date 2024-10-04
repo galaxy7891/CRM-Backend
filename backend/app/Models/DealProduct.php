@@ -15,7 +15,7 @@ class DealProduct extends Model
      * @var array
      */
     protected $fillable = [
-        'dealsProduct_Id',
+        'id',
         'deals_id',
         'product_id',
     ];

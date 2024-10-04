@@ -16,14 +16,13 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, SoftDeletes, Notifiable, HasUuid;
 
-    protected $primaryKey = 'user_id';
     /**
      * The attributes that are mass assignable.
      * 
      * @var array
      */
     protected $fillable = [
-        'user_id',
+        'id',
         'company_id',
         'google_id',
         'email',
@@ -40,16 +39,12 @@ class User extends Authenticatable implements JWTSubject
         'deleted_at',
     ];
 
-
-
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-
-
 
     /**
      * Get the company that owns the user.
@@ -60,10 +55,8 @@ class User extends Authenticatable implements JWTSubject
      */
     public function company()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Company::class, 'id');
     }
-
-
 
     /**
      * Get the customers associated with the user.
@@ -76,20 +69,18 @@ class User extends Authenticatable implements JWTSubject
      */
     public function customers()
     {
-        return $this->hasMany(Customer::class, 'user_id');
+        return $this->hasMany(Customer::class, 'id');
     }
 
     public function deals()
     {
-        return $this->hasMany(Deal::class, 'user_id');
+        return $this->hasMany(Deal::class, 'id');
     }
 
     public function loggers()
     {
-        return $this->hasMany(Logger::class, 'user_id');
+        return $this->hasMany(Logger::class, 'id');
     }
-
-
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -101,8 +92,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
-
-
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
@@ -112,8 +101,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-
-
 
     /**
      * Create or update a user based on Google OAuth data.
@@ -139,8 +126,6 @@ class User extends Authenticatable implements JWTSubject
         );
     }
 
-
-
     /**
      * Create a new user instance after a valid registration.
      *
@@ -148,16 +133,16 @@ class User extends Authenticatable implements JWTSubject
      * @param string $company_id 
      * @return User
      */
-    public static function registerUser(array $dataUser, string $company_id): self
+    public static function createUser(array $dataUser, ?string $company_id): self
     {
         return self::create([
-            'company_id' => $company_id,
+            'company_id' => $company_id ?? null,
             'email' => $dataUser['email'],
             'first_name' => $dataUser['first_name'],
             'last_name' => $dataUser['last_name'],
-            'password' => Hash::make($dataUser['password']),
-            'phone' => $dataUser['phone'],
-            'job_position' => $dataUser['job_position'],
+            'password' => Hash::make($dataUser['password']) ?? null,
+            'phone' => $dataUser['phone'] ?? null,
+            'job_position' => $dataUser['job_position'] ?? null,
         ]);
     }
 }

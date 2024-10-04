@@ -60,6 +60,6 @@ class Organization extends Model
      */
     public function customers()
     {
-        return $this->hasMany(Customer::class, 'organization_id');
+        return $this->hasMany(Customer::class, 'id');
     }
 }

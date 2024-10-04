@@ -16,7 +16,7 @@ class Logger extends Model
      * @var array
      */
     protected $fillable = [
-        'logger_id',
+        'id',
         'user_id',
         'table_name',
         'action',
@@ -45,7 +45,7 @@ class Logger extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id');
     }
 }
 

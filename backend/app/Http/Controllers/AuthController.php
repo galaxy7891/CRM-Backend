@@ -56,8 +56,6 @@ class AuthController extends Controller
         }
     }
 
-
-
     /**
      * Register a User and Get a JWT via given credentials.
      *
@@ -65,15 +63,33 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|unique:users,email',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'password' => 'required',
+            'phone' => 'required',
+            'job_position' => 'required',
+            'name' => 'required',
+            'industry' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         try {
 
             $company = Company::registerCompany($request->all());
-            User::registerUser($request->all(), $company->company_id);
+            User::createUser($request->all(), $company->id);
 
             $credentials = [
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
+                'email' => $request->email,
+                'password' => $request->password,
             ];
 
             if (!$token = auth()->attempt($credentials)) {
@@ -85,6 +101,7 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
+            
         } catch (\Exception $e) {
 
             return response()->json([
@@ -92,10 +109,9 @@ class AuthController extends Controller
                 'message' => 'Internal Server Error',
                 'errors' => $e->getMessage()
             ], 500);
+
         }
     }
-
-    
 
     /**
      * Redirect the user to the Google login page.
@@ -106,8 +122,6 @@ class AuthController extends Controller
     {
         return Socialite::driver('google')->stateless()->redirect();
     }
-
-
 
     /**
      * Handle the callback from Google after authentication.
@@ -140,8 +154,6 @@ class AuthController extends Controller
         }
     }
 
-
-
     /**
      * Logout (Invalidate the token).
      *
@@ -158,6 +170,7 @@ class AuthController extends Controller
                 'message' => 'Logout berhasil',
                 'data' => null
             ]);
+
         } catch (\Exception $e) {
 
             return response()->json([
@@ -168,8 +181,6 @@ class AuthController extends Controller
         }
     }
 
-
-
     /**
      * Refresh a token.
      *
@@ -179,8 +190,6 @@ class AuthController extends Controller
     {
         return $this->respondWithToken(auth()->refresh());
     }
-
-
 
     /**
      * Get the JWT array structure.

@@ -14,7 +14,7 @@ class CompanySeeder extends Seeder
     public function run(): void
     {
         Company::create([
-            'company_id' => '123e4567-e89b-12d3-a456-426614174000',
+            'id' => '123e4567-e89b-12d3-a456-426614174000',
             'name' => 'PT Jaya Abadi',
             'industry' => 'Tekstil',
             'logo' => null,

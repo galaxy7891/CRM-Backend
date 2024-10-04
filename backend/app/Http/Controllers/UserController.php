@@ -51,7 +51,6 @@ class UserController extends Controller
                 'data' => null
             ], 404);
 
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -62,8 +61,6 @@ class UserController extends Controller
 
         }
     }
-
-
 
     /**
      * Reset the user's password using the provided token and new password.
