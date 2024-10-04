@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
 use App\Models\Organization;
 
 use Illuminate\Http\Request;
@@ -20,9 +19,21 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        $organizations = Organization::latest()->paginate(10);
+        try {
+            $organizations = Organization::latest()->paginate(10);
 
-        return new OrganizationResource(true, 'Daftar Organization', $organizations);
+            return new OrganizationResource(
+                true, // success
+                'Daftar Organization', // message
+                $organizations // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
     /**
@@ -62,41 +73,58 @@ class OrganizationController extends Controller
             'zip_code.max' => 'Kode pos maksimal 10 karakter.',
         ]);
 
+
         //check if validation fails
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => null
+            ], 422);
         }
 
-        $organization = Organization::create([
-            'id' => Str::uuid(),
-            'name' => $request->name,
-            'industry' => $request->industry,
-            'status' => $request->status,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'owner' => $request->owner,
-            'website' => $request->website,
-            'address' => $request->address,
-            'country' => $request->country,
-            'city' => $request->city,
-            'subdistrict' => $request->subdistrict,
-            'village' => $request->village,
-            'zip_code' => $request->zip_code,
-        ]);
-
-        return new OrganizationResource(true, "Data {$organization->name} Berhasil Ditambahkan!", $organization);
+        try {
+            $organization = Organization::createOrganization($request->all());
+            return new OrganizationResource(
+                true, // success
+                "Data {$organization->name} Berhasil Ditambahkan!", // message
+                $organization // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
-
     /**
      * Display the specified resource.
      */
     public function show($id)
     {
-        $organization = Organization::find($id);
-        if (is_null($organization)) {
-            return new OrganizationResource(false, 'Data Organisasi Tidak Ditemukan!', null);
+        try {
+            $organization = Organization::find($id);
+
+            if (is_null($organization)) {
+                return new OrganizationResource(
+                    false, // success
+                    'Data Organisasi Tidak Ditemukan!', // message
+                    null // data
+                );
+            }
+            return new OrganizationResource(
+                true, // success
+                'Data Organisasi Ditemukan!', // message
+                $organization // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
         }
-        return new OrganizationResource(true, 'Data Organisasi Ditemukan!', $organization);
     }
 
     /**
@@ -104,16 +132,19 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Check if customer exists
+        // Check if organization exists
         $organization = Organization::find($id);
 
         if (!$organization) {
-            return response()->json(['success' => false, 'message' => 'Organization tidak ditemukan', 'data' => null], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Organization tidak ditemukan',
+                'data' => null
+            ], 404);
         }
 
         $validator = Validator::make($request->all(), [
             'name' => [
-
                 'required',
                 'string',
                 'max:255',
@@ -164,26 +195,27 @@ class OrganizationController extends Controller
 
         //check if validation fails
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => $validator->errors(), 'data' => null], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => null
+            ], 422);
         }
 
-        $organization->update([
-            'name' => $request->name,
-            'industry' => $request->industry,
-            'status' => $request->status,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'owner' => $request->owner,
-            'website' => $request->website,
-            'address' => $request->address,
-            'country' => $request->country,
-            'city' => $request->city,
-            'subdistrict' => $request->subdistrict,
-            'village' => $request->village,
-            'zip_code' => $request->zip_code,
-        ]);
-
-        return new OrganizationResource(true, 'Data Customer Berhasil Diubah!', $organization);
+        try {
+            $organization = Organization::updateOrganization($request->all(), $id);
+            return new OrganizationResource(
+                true, // success
+                'Data Organization Berhasil Diubah!', // message
+                $organization // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
     /**
@@ -191,16 +223,32 @@ class OrganizationController extends Controller
      */
     public function destroy($id)
     {
-        $organization = Organization::find($id);
+        try {
+            $organization = Organization::find($id);
 
-        if (!$organization) {
-            return response()->json(['success' => false, 'message' => 'Customer tidak ditemukan', 'data' => null], 404);
+            if (!$organization) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Organization tidak ditemukan',
+                    'data' => null
+                ], 404);
+            }
+
+            // Delete the organization
+            $organization->delete();
+
+            // Return response with first and last name
+            return new OrganizationResource(
+                true, // success
+                "Organization {$organization->name} Berhasil Dihapus!", // message
+                null // data
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
         }
-
-        // Delete the customer
-        $organization->delete();
-
-        // Return response with first and last name
-        return new OrganizationResource(true, "Organization {$organization->name} Berhasil Dihapus!", null);
     }
 }

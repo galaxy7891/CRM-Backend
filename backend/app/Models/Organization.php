@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,6 @@ class Organization extends Model
 
     protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
     public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
-
 
     /**
      * The attributes that are mass assignable.
@@ -61,5 +61,48 @@ class Organization extends Model
     public function customers()
     {
         return $this->hasMany(Customer::class, 'id');
+    }
+
+
+    public static function createOrganization(array $data): self
+    {
+        return self::create([
+            'id' => Str::uuid(),
+            'name' => $data['name'],
+            'industry' => $data['industry'] ?? null,
+            'status' => $data['status'],
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'owner' => $data['owner'],
+            'website' => $data['website'] ?? null,
+            'address' => $data['address'] ?? null,
+            'country' => $data['country'] ?? null,
+            'city' => $data['city'] ?? null,
+            'subdistrict' => $data['subdistrict'] ?? null,
+            'village' => $data['village'] ?? null,
+            'zip_code' => $data['zip_code'] ?? null
+        ]);
+    }
+    public static function updateOrganization(array $data, $id): self
+    {
+        $organization = self::findOrFail($id);
+        $organization->fill([
+            'name' => $data['name'],
+            'industry' => $data['industry'] ?? null,
+            'status' => $data['status'],
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'owner' => $data['owner'],
+            'website' => $data['website'] ?? null,
+            'address' => $data['address'] ?? null,
+            'country' => $data['country'] ?? null,
+            'city' => $data['city'] ?? null,
+            'subdistrict' => $data['subdistrict'] ?? null,
+            'village' => $data['village'] ?? null,
+            'zip_code' => $data['zip_code'] ?? null,
+        ]);
+
+        $organization->save();
+        return $organization;
     }
 }

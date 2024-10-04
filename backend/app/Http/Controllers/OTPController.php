@@ -32,19 +32,18 @@ class OtpController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-    
+
         $recentOTP = Otp::getRecentOTP($request->email);
-        
-        if ($recentOTP){
+
+        if ($recentOTP) {
             $remainingTime = Otp::getRemainingTime($recentOTP);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Kirim ulang kode otp dalam ' . 
-                "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'message' => 'Kirim ulang kode otp dalam ' .
+                    "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 'data' => null
             ], 429);
-
         }
 
         try {
@@ -61,7 +60,6 @@ class OtpController extends Controller
                     'data' => $recentOTP
                 ]
             ], 200);
-            
         } catch (\Exception $e) {
 
             return response()->json([
@@ -118,7 +116,7 @@ class OtpController extends Controller
                     'success' => true,
                     'message' => 'OTP berhasil diverifikasi.',
                     'data' => null
-                ], 200); 
+                ], 200);
             }
 
             return response()->json([
@@ -126,7 +124,6 @@ class OtpController extends Controller
                 'message' => 'OTP tidak sesuai.',
                 'data' => null
             ], 400);
-
         } catch (\Exception $e) {
 
             return response()->json([

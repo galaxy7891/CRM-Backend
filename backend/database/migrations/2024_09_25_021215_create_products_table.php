@@ -10,14 +10,14 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('category');
             $table->string('code')->nullable();
             $table->integer('quantity');
             $table->string('unit');
             $table->decimal('price', 8, 2);
             $table->text('description')->nullable();
-            $table->string('photo_product');
+            $table->string('photo_product')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

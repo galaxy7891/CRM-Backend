@@ -12,7 +12,7 @@ class CreateDealsProductsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('product_id');
             $table->uuid('deals_id');
-
+            
             // Foreign Key Constraints
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('deals_id')->references('id')->on('deals')->onDelete('cascade');
