@@ -22,7 +22,7 @@ class ProductSeeder extends Seeder
             'unit' => 'pcs',
             'price' => 10000,
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-            'photo_product' => null,
+
         ]);
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614172004',
@@ -33,7 +33,7 @@ class ProductSeeder extends Seeder
             'unit' => 'pcs',
             'price' => 20000,
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-            'photo_product' => null,
+
         ]);
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614173004',
@@ -44,7 +44,7 @@ class ProductSeeder extends Seeder
             'unit' => 'pcs',
             'price' => 100000,
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-            'photo_product' => null,
+
         ]);
     }
 }

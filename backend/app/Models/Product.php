@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Cloudinary\Cloudinary;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
@@ -10,10 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
-
-    protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
-    public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
+    use HasFactory, SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -29,7 +27,8 @@ class Product extends Model
         'unit',
         'price',
         'description',
-        'photo_product',
+        'image_url',         // Update this line
+        'image_public_id',   // Add this line
         'created_at',
         'updated_at',
         'deleted_at',
@@ -52,16 +51,24 @@ class Product extends Model
         ]);
 
         // Return the URL of the uploaded image
-        return $result['secure_url'];
+        return [
+            'url' => $result['secure_url'],
+            'public_id' => $result['public_id'],
+        ];
     }
 
     public static function createProduct(array $data): self
     {
-        // Check if a photo is provided
+
         if (isset($data['photo_product'])) {
-            $photoUrl = self::uploadPhoto($data['photo_product']);
+
+            // $photoUrl = self::uploadPhoto($data['photo_product']);
+            $uploadResult = self::uploadPhoto($data['photo_product']);
+            $photoUrl = $uploadResult['url'];
+            $publicId = $uploadResult['public_id'];
         } else {
-            $photoUrl = null; // Default value if no photo is uploaded
+            $photoUrl = null;
+            $publicId = null;
         }
 
         return self::create([
@@ -73,8 +80,26 @@ class Product extends Model
             'unit' => $data['unit'],
             'price' => $data['price'],
             'description' => $data['description'] ?? null,
-            'photo_product' => $photoUrl ?? null, // Store the Cloudinary URL
+            'image_url' => $photoUrl ?? null, // Store the Cloudinary URL
+            'image_public_id' => $publicId ?? null, // Store the Cloudinary URL
         ]);
+    }
+
+    public static function deleteProduct($id): self
+    {
+        $product = Product::find($id);
+        // Create a Cloudinary instance
+        $cloudinary = new Cloudinary();
+
+        // Check if the product has an associated image
+        if ($product->image_public_id) {
+            // Delete the image from Cloudinary using the public ID
+            $cloudinary->uploadApi()->destroy($product->image_public_id);
+        }
+
+        // Delete the product from the database
+        $product->delete();
+        return $product;
     }
     public static function updateProduct(array $data, string $productId): self
     {
@@ -87,16 +112,19 @@ class Product extends Model
         // Check if a new photo is provided
         if (isset($data['photo_product'])) {
             // If there is an existing photo, delete it from Cloudinary
-            if ($product->photo_product) {
+            if ($product->image_public_id) {
                 // Use the public ID stored in the database to delete the old photo
                 $cloudinary->uploadApi()->destroy($product->image_public_id);
             }
 
             // Upload the new photo
-            $photoUrl = self::uploadPhoto($data['photo_product']);
+            $uploadResult = self::uploadPhoto($data['photo_product']);
+            $photoUrl = $uploadResult['url'];
+            $publicId = $uploadResult['public_id'];
         } else {
             // Keep the existing photo URL if no new photo is provided
-            $photoUrl = $product->photo_product;
+            $photoUrl = $product->image_url;
+            $publicId = $product->image_public_id; // Keep the existing public ID
         }
 
         // Update the product's attributes
@@ -108,7 +136,8 @@ class Product extends Model
             'unit' => $data['unit'],
             'price' => $data['price'],
             'description' => $data['description'] ?? null,
-            'photo_product' => $photoUrl, // Store the updated Cloudinary URL
+            'image_url' => $photoUrl, // Store the updated Cloudinary URL
+            'image_public_id' => $publicId, // Store the updated Cloudinary public ID
         ]);
 
         return $product; // Return the updated product
