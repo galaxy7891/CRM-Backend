@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,10 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends Model
 {
-    use HasFactory, SoftDeletes;
-
-    protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
-    public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
+    use HasFactory, SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.

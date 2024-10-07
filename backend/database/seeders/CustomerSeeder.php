@@ -327,5 +327,26 @@ class CustomerSeeder extends Seeder
             'village' => 'Pondok Indah',
             'zip_code' => '12359'
         ]);
+
+        Customer::create([
+            'id' => '123e4567-e89b-12d3-a456-426614171011',
+            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'user_id' => '123e4567-e89b-12d3-a456-426614174010',
+            'first_name' => 'Rina',
+            'last_name' => 'Sulastri',
+            'customerCategory' => 'leads',
+            'job' => 'Bidan',
+            'description' => 'Bidan berpengalaman di klinik.',
+            'status' => 'warm',
+            'email' => 'rina.sulastri@gmail.com',
+            'phone' => '08578900956',
+            'owner' => '123e4567-e89b-12d3-a456-426614174010',
+            'address' => 'Jl Pondok Indah',
+            'country' => 'Indonesia',
+            'city' => 'Jakarta',
+            'subdistrict' => 'Kebayoran Lama',
+            'village' => 'Pondok Indah',
+            'zip_code' => '12359'
+        ]);
     }
 }

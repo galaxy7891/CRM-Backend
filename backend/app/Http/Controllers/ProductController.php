@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+
+
 use Exception;
 use App\Models\Product;
-use App\Http\Resources\ProductResource;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
+
 class ProductController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -39,7 +44,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:products,name|string|max:255',
+            'name' => 'required|string|max:255|unique:products,name ',
             'category' => 'required|string|max:255',
             'code' => 'required|string|max:255',
             'quantity' => 'required|numeric|min:0',
@@ -130,16 +135,16 @@ class ProductController extends Controller
             ], 404);
         }
         $validator = Validator::make($request->all(), [
-            [
-                'name' => 'required|string|max:255',
-                'category' => 'required|string|max:255',
-                'code' => 'required|string|max:255',
-                'quantity' => 'required|numeric|min:0',
-                'unit' => 'required|string|max:255',
-                'price' => 'required|numeric|min:0',
-                'description' => 'nullable|string',
-                'photo_product' => 'nullable|max:2048',
-            ]
+
+            'name' => 'required|string|max:255|unique:products,name,' . $id,
+            'category' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'quantity' => 'required|numeric|min:0',
+            'unit' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'photo_product' => 'nullable|max:2048',
+
         ], [
             'name.required' => 'Nama wajib diisi.',
             'name.string' => 'Nama harus berupa string.',
@@ -196,7 +201,9 @@ class ProductController extends Controller
             }
 
             // Delete the product
-            $product->delete();
+            $product = Product::deleteProduct($id);
+
+            // Return response with first and last name 
             return new ProductResource(
                 true,
                 "Produk {$product->name} Berhasil Dihapus!",

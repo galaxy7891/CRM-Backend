@@ -20,7 +20,13 @@ class OrganizationController extends Controller
     public function index()
     {
         try {
-            $organizations = Organization::latest()->paginate(10);
+            // Is employee accessing his own organization data?
+            $user = auth()->user();
+            if ($user->role == 'employee') {
+                $organizations = Organization::where('owner', $user->id)->latest()->paginate(25);
+            } else {
+                $organizations = Organization::latest()->paginate(25);
+            }
 
             return new OrganizationResource(
                 true, // success
@@ -104,15 +110,27 @@ class OrganizationController extends Controller
     public function show($id)
     {
         try {
-            $organization = Organization::find($id);
 
+            // Check if organization exists
+            $organization = Organization::find($id);
             if (is_null($organization)) {
-                return new OrganizationResource(
-                    false, // success
-                    'Data Organisasi Tidak Ditemukan!', // message
-                    null // data
-                );
+                return response()->json([
+                    'success' => false, // success
+                    'message' => 'Data Organisasi Tidak Ditemukan!', // message
+                    'data' => null // data
+                ], 404);
             }
+
+            // Is employee accessing his own organization data?
+            $user = auth()->user();
+            if ($user->role == 'employee' && $organization->owner !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk menampilkan data organisasi ini!',
+                    'data' => null
+                ], 403);
+            }
+
             return new OrganizationResource(
                 true, // success
                 'Data Organisasi Ditemukan!', // message
@@ -141,6 +159,16 @@ class OrganizationController extends Controller
                 'message' => 'Organization tidak ditemukan',
                 'data' => null
             ], 404);
+        }
+
+        // Is employee accessing his own customer data?
+        $user = auth()->auth();
+        if ($user == 'employee' && $organization->owner !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah data organisasi ini!',
+                'data' => null
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -224,8 +252,8 @@ class OrganizationController extends Controller
     public function destroy($id)
     {
         try {
-            $organization = Organization::find($id);
 
+            $organization = Organization::find($id);
             if (!$organization) {
                 return response()->json([
                     'success' => false,
@@ -233,6 +261,16 @@ class OrganizationController extends Controller
                     'data' => null
                 ], 404);
             }
+
+            $user = auth()->auth();
+            if ($user == 'employee' && $organization->owner !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk menghapus data organisasi ini!',
+                    'data' => null
+                ], 403);
+            }
+
 
             // Delete the organization
             $organization->delete();
