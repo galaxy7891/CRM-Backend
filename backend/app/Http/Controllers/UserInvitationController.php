@@ -23,6 +23,10 @@ class UserInvitationController extends Controller
     {
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email|unique:users,email',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'email.unique' => 'Email sudah terdaftar',
         ]);
 
         if ($validator->fails()) {
@@ -51,25 +55,30 @@ class UserInvitationController extends Controller
 
             $email = $request->email;
             $token = Str::uuid()->toString();
-            $expired_at = now()->addWeek()->toDateTimeString();; 
-            
+            $expired_at = now()->addWeek()->toDateTimeString();
+            $invited_by = Auth::user()->email;
+            $nama = explode('@', $email)[0];
+
             $dataUser = [
                 'email' => $email, 
                 'token' => $token,
                 'expired_at' => $expired_at,
                 'status' => 'pending',
-                'invited_by' => Auth::user()->email,
+                'invited_by' => $invited_by,
             ];
 
             $url = url('/accept-invitation?email=' . urlencode($email) . '&token=' . $token);
-            Mail::to($email)->send(new TemplateInviteUser($email, $url));
+            Mail::to($email)->send(new TemplateInviteUser($email, $url, $nama, $invited_by));
 
             UserInvitation::createInvitation($dataUser);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Link invitasi berhasil dikirimkan ke email anda.',
-                'data' => null
+                'data' => [
+                    'email' => $email,
+                    'nama' => $nama
+                ]
             ], 200);
 
         } catch (\Exception $e) {
@@ -97,6 +106,16 @@ class UserInvitationController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'password' => 'required|string|min:8',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'token.required' => 'Token wajib diisi',
+            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.string' => 'Nama depan harus berupa string',
+            'first_name.max' => 'Nama depan maksimal 255 karakter',
+            'last_name.required' => 'Nama belakang wajib diisi',
+            'last_name.string' => 'Nama belakang harus berupa string',
+            'last_name.max' => 'Nama belakang maksimal 255 karakter',
         ]);
 
         if ($validator->fails()) {

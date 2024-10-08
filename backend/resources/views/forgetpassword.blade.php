@@ -83,6 +83,7 @@
             color: #1A1A1A;
             text-align: center;
             margin: 28px 0;
+            padding-bottom: 28px; 
         }
 
         .footer p {
@@ -102,13 +103,13 @@
         <div class="content">
             <h3>Permintaan Atur Ulang Kata Sandi Akun</h3>
             <p>Halo {{ $nama }},</p>
-            <p>Anda telah diundang oleh {{ $invited_by }} untuk membuat akun dan berkolaborasi di LoyalCust, silakan klik tombol di bawah ini untuk melanjutkan.</p>
+            <p>Anda telah mengajukan permintaan untuk mengatur ulang kata sandi akun LoyalCust Anda. Klik tombol di bawah ini untuk melanjutkan.</p>
 
             <div class="link">
-                <a href="{{ $url }}">Buat Akun</a>
+                <a href="{{ $url }}">Atur Ulang</a>
             </div>
 
-            <p>Apabila anda tidak ingin menerima undangan, anda dapat mengabaikan Email ini.</p>
+            <p>Apabila bukan anda yang mengirim permintaan, anda dapat mengabaikan Email ini.</p>
             <p>Salam Hormat,<br>Tim LoyalCust</p>
         </div>
 

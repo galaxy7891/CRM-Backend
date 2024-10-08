@@ -65,7 +65,7 @@ class UserInvitation extends Model
     public static function getRecentInvitation(string $email): ?self
     {
         return self::where('email', $email)
-            ->where('updated_at', '>=', now()->subDays(7))
+            ->where('created_at', '>=', now()->subDays(7))
             ->first();
     }
 
@@ -77,7 +77,7 @@ class UserInvitation extends Model
      */
     public static function getRemainingTime(self $invitation): array
     {
-        $nextInviteTime = $invitation->updated_at;
+        $nextInviteTime = $invitation->created_at;
         $remainingTime = $nextInviteTime->diff(now()->subDays(7));
 
         return [
@@ -107,8 +107,7 @@ class UserInvitation extends Model
      * Create a new user invitation .
      *
      * @param array $dataUser
-     * @param string $invited_by
-     * @return User
+     * @return UserInvitation
      */
     public static function createInvitation(array $dataUser): self
     {
@@ -119,6 +118,7 @@ class UserInvitation extends Model
             'expired_at' => $dataUser['expired_at'],
             'status' => $dataUser['status'],
             'invited_by' => $dataUser['invited_by'],
+            'created_at' => now()
             ]
         );
     }

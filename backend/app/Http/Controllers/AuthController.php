@@ -23,6 +23,10 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'password.required' => 'Password wajib diisi',
         ]);
 
         if ($validator->fails()) {
@@ -65,13 +69,28 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
-            'first_name' => 'required',
-            'last_name' => 'required',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'password' => 'required',
             'phone' => 'required',
             'job_position' => 'required',
             'name' => 'required',
             'industry' => 'required',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.string' => 'Nama depan harus berupa string',
+            'first_name.max' => 'Nama depan maksimal 255 karakter',
+            'last_name.required' => 'Nama belakang wajib diisi',
+            'last_name.string' => 'Nama belakang harus berupa string',
+            'last_name.max' => 'Nama belakang maksimal 255 karakter',
+            'password.required' => 'Password wajib diisi',
+            'phone.required' => 'Nomor telepon wajib diisi',
+            'job_position.required' => 'Posisi pekerjaan wajib diisi',
+            'name' => 'Nama perusahaan wajib diisi',
+            'industry.required' => 'Jenis industri wajib diisi'
         ]);
 
         if ($validator->fails()) {

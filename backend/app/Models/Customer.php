@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,10 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends Model
 {
-    use HasFactory, SoftDeletes;
-
-    protected $keyType = 'string'; // String untuk UUID / agar uuid mau dibaca postman
-    public $incrementing = false; //  Non-incrementing karena UUID / agar uuid mau dibaca postman
+    use HasFactory, SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -43,17 +41,13 @@ class Customer extends Model
         'updated_at',
         'deleted_at',
     ];
-
-
-
+    
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'birthdate'];
-
-
 
     /**
      * Get the user that owns the customer.
@@ -73,8 +67,6 @@ class Customer extends Model
         return $this->belongsTo(Organization::class, 'id');
     }
 
-
-
     /**
      * Get the deals associated with the customer.
      * 
@@ -90,7 +82,6 @@ class Customer extends Model
     public static function createCustomer(array $data): self
     {
         return self::create([
-            'id' => Str::uuid(),
             'organization_id' => $data['organization_id'] ?? null,
             'user_id' => $data['user_id'],
             'first_name' => $data['first_name'],
@@ -111,6 +102,7 @@ class Customer extends Model
             'zip_code' => $data['zip_code'] ?? null,
         ]);
     }
+
     public static function updateCustomer(array $data, $id): self
     {
         $customer = self::findOrFail($id);

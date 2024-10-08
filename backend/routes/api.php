@@ -6,18 +6,16 @@ use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
-use Illuminate\Auth\Middleware\Authenticate;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
-
-// Route::apiResource('/customers', CustomerController::class);
+use App\Http\Middleware\RoleMiddleware;
 
 Route::group(['middleware' => 'api'], function () {
     Route::group(['prefix' => 'auth'], function () {
-        Route::post('/login', [AuthController::class, 'login'])->name('login');
-        Route::post('/register', [AuthController::class, 'register'])->name('register');
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/register', [AuthController::class, 'register']);
 
         Route::group(['prefix' => 'otp'], function () {
             Route::post('/send', [OTPController::class, 'sendOTP']);
@@ -37,12 +35,24 @@ Route::group(['middleware' => 'api'], function () {
 
     Route::post('/invitation/accept', [UserInvitationController::class, 'createUser']);
 
-    Route::group(['middleware' => JwtMiddleware::class], function () { //authentikasi terlebih dahulu
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-        Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
-        Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
+    Route::group(['middleware' => JwtMiddleware::class], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::apiResource('/customers', CustomerController::class);
         Route::apiResource('/organizations', OrganizationController::class);
         Route::apiResource('/products', ProductController::class);
+        
+        
+        Route::group(['middleware' => RoleMiddleware::class. ':super_admin'], function(){
+            Route::put('/users/{id}', [ProductController::class, 'update']);
+            Route::delete('/users/{id}', [UserController::class, 'destroy']);
+        });
+
+        Route::group(['middleware' => RoleMiddleware::class. ':super_admin, admin'], function() {
+            Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
+            Route::get('/users', [UserController::class, 'index']);
+            Route::get('/users/{id}', [UserController::class, 'show']);
+        });
+    
     });
 });

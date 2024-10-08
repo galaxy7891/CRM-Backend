@@ -14,13 +14,15 @@ class TemplateOTPEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $otp;
+    public $nama;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($otp)
+    public function __construct($otp, $nama)
     {
         $this->otp = $otp;
+        $this->nama = $nama;
     }
 
     /**
@@ -29,7 +31,7 @@ class TemplateOTPEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'OTP Mail',
+            subject: 'LoyalCust: Verifikasi OTP',
         );
     }
 
@@ -42,6 +44,7 @@ class TemplateOTPEmail extends Mailable
             view: 'otp',
             with: [
                 'otp' => $this->otp,
+                'nama' => $this->nama
             ],
         );
     }

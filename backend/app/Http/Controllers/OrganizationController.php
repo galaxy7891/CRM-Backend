@@ -86,9 +86,9 @@ class OrganizationController extends Controller
         try {
             $organization = Organization::createOrganization($request->all());
             return new OrganizationResource(
-                true, // success
-                "Data {$organization->name} Berhasil Ditambahkan!", // message
-                $organization // data
+                true,
+                "Data {$organization->name} Berhasil Ditambahkan!", 
+                $organization
             );
         } catch (\Exception $e) {
             return response()->json([

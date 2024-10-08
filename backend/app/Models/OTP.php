@@ -44,7 +44,7 @@ class Otp extends Model
     public static function getRecentOTP(string $email): ?self
     {    
         return self::where('email', $email)
-            ->where('updated_at', '>=', now()->subMinutes(5))
+            ->where('created_at', '>=', now()->subMinutes(5))
             ->first();
     }
 
@@ -56,7 +56,7 @@ class Otp extends Model
      */
     public static function getRemainingTime(self $otp): array
     {
-        $nextOtpTime = $otp->updated_at;
+        $nextOtpTime = $otp->created_at;
         $remainingTime = $nextOtpTime->diff(now()->subMinutes(5));
 
 
@@ -83,7 +83,7 @@ class Otp extends Model
      *
      * @param string $email
      * @param string $code
-     * @return self
+     * @return OTP|null
      */
     public static function findOTP(string $email, string $code)
     {
@@ -99,7 +99,7 @@ class Otp extends Model
      * Method to create a new OTP record.
      *
      * @param array $dataOtp
-     * @return self
+     * @return OTP
      */
     public static function createOTP(array $dataOtp): self
     {
@@ -109,6 +109,7 @@ class Otp extends Model
             'code' => $dataOtp['code'],
             'expired_at' => now()->addMinutes(5),
             'is_used' => false,
+            'created_at' => now()
             ]
         );
     }
