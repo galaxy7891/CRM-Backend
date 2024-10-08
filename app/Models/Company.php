@@ -29,16 +29,12 @@ class Company extends Model
         'deleted_at',
     ];
 
-
-
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-
-
 
     /**
      * Get the users associated with the company.

@@ -23,6 +23,10 @@ class OtpController extends Controller
 
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email|unique:users,email',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'email.unique' => 'Email sudah terdaftar',
         ]);
 
         if ($validator->fails()) {
@@ -47,19 +51,20 @@ class OtpController extends Controller
         }
 
         try {
-
+            
             $email = $request->email;
+            $nama = explode('@', $email)[0];
 
-            $SendOTPService->generateAndSendOtp($email);
+            $SendOTPService->generateAndSendOtp($email, $nama);
 
             return response()->json([
                 'success' => true,
                 'message' => 'OTP berhasil dikirimkan ke email anda.',
                 'data' => [
                     'email' => $email,
-                    'data' => $recentOTP
                 ]
             ], 200);
+
         } catch (\Exception $e) {
 
             return response()->json([
@@ -69,7 +74,6 @@ class OtpController extends Controller
             ], 500);
         }
     }
-
 
 
     /**
@@ -85,6 +89,11 @@ class OtpController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'code' => 'required|digits:6',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Email harus valid',
+            'code.required' => 'Code OTP wajib diisi',
+            'code.digits' => 'Code OTP harus 6 digit'
         ]);
 
         if ($validator->fails()) {

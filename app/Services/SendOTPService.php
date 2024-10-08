@@ -12,9 +12,10 @@ class SendOTPService
      * Generate OTP and send email.
      *
      * @param string $email
+     * @param string $username
      * @return void
      */
-    public function generateAndSendOtp(string $email): void
+    public function generateAndSendOtp(string $email, string $nama): void
     {
         $dataOtp = [
             'email' => $email,
@@ -23,6 +24,6 @@ class SendOTPService
 
         Otp::createOTP($dataOtp);
 
-        Mail::to($email)->send(new TemplateOTPEmail($dataOtp['code']));
+        Mail::to($email)->send(new TemplateOTPEmail($dataOtp['code'], $nama));
     }
 }
