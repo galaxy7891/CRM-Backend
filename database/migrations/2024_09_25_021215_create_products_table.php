@@ -17,7 +17,8 @@ class CreateProductsTable extends Migration
             $table->string('unit');
             $table->decimal('price', 8, 2);
             $table->text('description')->nullable();
-            $table->string('photo_product')->nullable();
+            $table->string('image_url')->nullable();
+            $table->string('image_public_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

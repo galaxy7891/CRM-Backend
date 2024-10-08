@@ -22,7 +22,13 @@ class CustomerController extends Controller
     public function index()
     {
         try {
-            $customers = Customer::latest()->paginate(25);
+            $user = auth()->user();
+
+            if ($user->role == 'employee') {
+                $customers = Customer::where('owner', $user->id)->latest()->paginate(25);
+            } else {
+                $customers = Customer::latest()->paginate(25);
+            }
 
             return new CustomerResource(
                 true, // success
@@ -117,18 +123,31 @@ class CustomerController extends Controller
     public function show($id)
     {
         try {
-            $customers = Customer::find($id);
-            if (is_null($customers)) {
+
+            // Check if customer exists
+            $customer = Customer::find($id);
+            if (is_null($customer)) {
                 return new CustomerResource(
                     false, // success
                     'Data Customer Tidak Ditemukan!', // message
                     null // data
                 );
             }
+
+            // Is employee accessing his own customer data?
+            $user = auth()->user();
+            if ($user->role == 'employee' && $customer->owner !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk menampilkan data customer ini!',
+                    'data' => null
+                ], 403);
+            }
+
             return new CustomerResource(
                 true, // success
                 'Data Customer Ditemukan!', // message
-                $customers // data
+                $customer // data
             );
         } catch (\Exception $e) {
             return response()->json([
@@ -146,13 +165,22 @@ class CustomerController extends Controller
     {
         // Check if customer exists
         $customer = Customer::find($id);
-
         if (!$customer) {
             return response()->json([
                 'success' => false,
                 'message' => 'Customer tidak ditemukan',
                 'data' => null
             ], 404);
+        }
+
+        // Is employee accessing his own customer data?
+        $user = auth()->user();
+        if ($user->role == 'employee' && $customer->owner !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah data customer ini!',
+                'data' => null
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -240,6 +268,8 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         try {
+
+            // Check if customer exists
             $customer = Customer::find($id);
             if (!$customer) {
                 return response()->json([
@@ -247,6 +277,16 @@ class CustomerController extends Controller
                     'message' => 'Customer tidak ditemukan',
                     'data' => null
                 ], 404);
+            }
+
+            // Is employee accessing his own customer data?
+            $user = auth()->user();
+            if ($user->role == 'employee' && $customer->owner !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk menghapus data customer ini!',
+                    'data' => null
+                ], 403);
             }
 
             // Delete the customer
