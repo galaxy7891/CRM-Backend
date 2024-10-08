@@ -2,15 +2,16 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\JwtMiddleware;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DealController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Auth\Middleware\Authenticate;
 use App\Http\Controllers\OrganizationController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInvitationController;
-use App\Http\Middleware\JwtMiddleware;
 
 // Route::apiResource('/customers', CustomerController::class);
 
@@ -44,5 +45,6 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('/customers', CustomerController::class);
         Route::apiResource('/organizations', OrganizationController::class);
         Route::apiResource('/products', ProductController::class);
+        Route::apiResource('/deals', DealController::class);
     });
 });
