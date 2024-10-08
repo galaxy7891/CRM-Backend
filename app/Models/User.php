@@ -103,6 +103,29 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Find user by email
+     * 
+     * @param string $email
+     * @return User|null
+     */
+    public static function findByEmail($email)
+    {
+        return self::where('email', $email)->first();
+    }
+
+    /**
+     * Update password user.
+     *
+     * @param string $new_password
+     * @return User
+     */
+    public function updatePassword(string $new_password)
+    {
+        $this->password = Hash::make($new_password);
+        return $this->save();
+    }
+
+    /**
      * Create or update a user based on Google OAuth data.
      * 
      * This method is used for authenticating users through their Google account.

@@ -64,7 +64,6 @@ class Organization extends Model
     public static function createOrganization(array $data): self
     {
         return self::create([
-            'id' => Str::uuid(),
             'name' => $data['name'],
             'industry' => $data['industry'] ?? null,
             'status' => $data['status'],

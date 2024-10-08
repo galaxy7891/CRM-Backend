@@ -41,17 +41,13 @@ class Customer extends Model
         'updated_at',
         'deleted_at',
     ];
-
-
-
+    
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'birthdate'];
-
-
 
     /**
      * Get the user that owns the customer.
@@ -71,8 +67,6 @@ class Customer extends Model
         return $this->belongsTo(Organization::class, 'id');
     }
 
-
-
     /**
      * Get the deals associated with the customer.
      * 
@@ -88,7 +82,6 @@ class Customer extends Model
     public static function createCustomer(array $data): self
     {
         return self::create([
-            'id' => Str::uuid(),
             'organization_id' => $data['organization_id'] ?? null,
             'user_id' => $data['user_id'],
             'first_name' => $data['first_name'],
@@ -109,6 +102,7 @@ class Customer extends Model
             'zip_code' => $data['zip_code'] ?? null,
         ]);
     }
+
     public static function updateCustomer(array $data, $id): self
     {
         $customer = self::findOrFail($id);

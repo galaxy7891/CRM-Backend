@@ -14,14 +14,14 @@ class RoleMiddleware
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @params mixed $roles
      */
-    public function handle($request, Closure $next, $role)
+    public function handle($request, Closure $next, ...$roles)
     {
         try {
-            
             $user = JWTAuth::parseToken()->authenticate();
-            
-            if ($user->role !== $role) {
+
+            if (!in_array($user->role, $roles)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak memiliki izin untuk mengakses halaman ini',
@@ -30,12 +30,11 @@ class RoleMiddleware
             }
 
         } catch (JWTException $e) {
-            
             return response()->json([
                 'success' => false,
-                'message' => 'Token tidak valid'
+                'message' => 'Token tidak valid',
+                'data' => null
             ], 401);
-        
         }
 
         return $next($request);

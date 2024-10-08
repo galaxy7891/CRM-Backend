@@ -9,24 +9,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TemplateInviteUser extends Mailable
+class TemplateForgetPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $email;
     public $url;
     public $nama;
-    public $invited_by;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($email, $url, $nama, $invited_by)
+    public function __construct($email, $url, $nama)
     {
         $this->email = $email;
         $this->url = $url;
         $this->nama = $nama;
-        $this->invited_by = $invited_by;
     }
 
     /**
@@ -35,7 +33,7 @@ class TemplateInviteUser extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'LoyalCust: Invitation Account',
+            subject: 'LoyalCust: Reset Password',
         );
     }
 
@@ -45,12 +43,11 @@ class TemplateInviteUser extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'invitation',
+            view: 'forgetpassword',
             with: [
                 'email' => $this->email,
                 'url' => $this->url,
-                'nama' => $this->nama,
-                'invited_by' => $this->invited_by
+                'nama' => $this->nama
             ],
         );
     }
