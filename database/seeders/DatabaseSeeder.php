@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(OrganizationSeeder::class);
         $this->call(CustomerSeeder::class);
         $this->call(ProductSeeder::class);
+        $this->call(DealSeeder::class);
         // \App\Models\Company::factory(1)->create();
         // \App\Models\User::factory(1)->create();
         // \App\Models\Organization::factory(3)->create();

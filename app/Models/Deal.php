@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasUuid;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Deal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +20,6 @@ class Deal extends Model
     protected $fillable = [
         'id',
         'customer_id',
-        'user_id',
         'name',
         'deals_customer',
         'description',
@@ -69,5 +70,47 @@ class Deal extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
+    }
+
+    public static function createDeal(array $data): self
+    {
+        return self::create([
+            'id' => Str::uuid(),
+            'customer_id' => $data['customer_id'],
+            'name' => $data['name'],
+            'deals_customer' => $data['deals_customer'],
+            'description' => $data['description'] ?? null,
+            'tag' => $data['tag'],
+            'stage' => $data['stage'],
+            'open_date' => $data['open_date'],
+            'close_date' => $data['close_date'] ?? null,
+            'expected_close_date' => $data['expected_close_date'],
+            'payment_expected' => $data['payment_expected'] ?? null,
+            'payment_category' => $data['payment_category'],
+            'payment_duration' => $data['payment_duration'] ?? null,
+            'owner' => $data['owner'],
+        ]);
+    }
+
+    public static function updateDeal(array $data, $id): self
+    {
+        $deal = self::findOrFail($id);
+        $deal->fill([
+            'customer_id' => $data['customer_id'],
+            'name' => $data['name'],
+            'deals_customer' => $data['deals_customer'],
+            'description' => $data['description']  ?? null,
+            'tag' => $data['tag'],
+            'stage' => $data['stage'],
+            'open_date' => $data['open_date'],
+            'close_date' => $data['close_date']  ?? null,
+            'expected_close_date' => $data['expected_close_date'],
+            'payment_expected' => $data['payment_expected'] ?? null,
+            'payment_category' => $data['payment_category'],
+            'payment_duration' => $data['payment_duration'] ?? null,
+            'owner' => $data['owner'],
+        ]);
+        $deal->save();
+        return $deal;
     }
 }

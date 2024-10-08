@@ -12,7 +12,6 @@ class CreateDealsTable extends Migration
         Schema::create('deals', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('customer_id');
-            $table->uuid('user_id');
             $table->string('name');
             $table->string('deals_customer');
             $table->text('description')->nullable();
@@ -21,7 +20,7 @@ class CreateDealsTable extends Migration
             $table->date('open_date');
             $table->date('close_date')->nullable();
             $table->date('expected_close_date');
-            $table->decimal('payment_expected', 8, 2)->nullable();
+            $table->decimal('payment_expected', 20, 2)->nullable();
             $table->enum('payment_category', ['once', 'hours', 'daily', 'weekly', 'monthly', 'quarter', 'yearly']);
             $table->integer('payment_duration')->nullable();
             $table->string('owner');
@@ -30,7 +29,7 @@ class CreateDealsTable extends Migration
 
             // Foreign Key Constraints
             $table->foreign('customer_id')->references('id')->on('customers');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('owner')->references('id')->on('users');
         });
     }
 

@@ -27,8 +27,8 @@ class Product extends Model
         'unit',
         'price',
         'description',
-        'image_url',         // Update this line
-        'image_public_id',   // Add this line
+        'image_url',
+        'image_public_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -75,7 +75,7 @@ class Product extends Model
             'id' => Str::uuid(),
             'name' => $data['name'],
             'category' => $data['category'],
-            'code' => $data['code'],
+            'code' => $data['code'] ?? null,
             'quantity' => $data['quantity'],
             'unit' => $data['unit'],
             'price' => $data['price'],
@@ -131,13 +131,13 @@ class Product extends Model
         $product->update([
             'name' => $data['name'],
             'category' => $data['category'],
-            'code' => $data['code'],
+            'code' => $data['code'] ?? null,
             'quantity' => $data['quantity'],
             'unit' => $data['unit'],
             'price' => $data['price'],
             'description' => $data['description'] ?? null,
-            'image_url' => $photoUrl, // Store the updated Cloudinary URL
-            'image_public_id' => $publicId, // Store the updated Cloudinary public ID
+            'image_url' => $photoUrl ?? null, // Store the updated Cloudinary URL
+            'image_public_id' => $publicId ?? null, // Store the updated Cloudinary public ID
         ]);
 
         return $product; // Return the updated product

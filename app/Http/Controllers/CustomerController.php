@@ -52,7 +52,7 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
-            'user_id' => 'required|uuid',
+            'user_id' => 'required|uuid|exists:users,id',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'customerCategory' => 'required|in:leads,contact',
