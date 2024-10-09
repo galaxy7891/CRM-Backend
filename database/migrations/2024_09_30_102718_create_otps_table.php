@@ -15,7 +15,7 @@ class CreateOtpsTable extends Migration
     {
         Schema::create('otps', function (Blueprint $table) {
             $table->string('email')->primary(); 
-            $table->string('code');
+            $table->string('code', 6);
             $table->dateTime('expired_at');
             $table->boolean('is_used')->default(false);
             $table->timestamps(); 

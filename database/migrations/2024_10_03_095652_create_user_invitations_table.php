@@ -12,11 +12,11 @@ Class CreateUserInvitationsTable extends Migration
     public function up(): void
     {
         Schema::create('user_invitations', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token')->unique();
+            $table->string('email', 100)->primary();
+            $table->string('token', 255)->unique();
             $table->timestamp('expired_at'); 
             $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending'); 
-            $table->string('invited_by');
+            $table->string('invited_by', 100);
             $table->timestamps();
 
             // Foreign Key Constraints

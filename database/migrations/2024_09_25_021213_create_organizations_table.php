@@ -10,19 +10,19 @@ class CreateOrganizationsTable extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('industry')->nullable();
-            $table->string('email')->nullable();
+            $table->string('name', 100);
+            $table->string('industry', 50)->nullable();
+            $table->string('email', 100)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
-            $table->string('phone')->nullable();
-            $table->string('owner');
-            $table->string('website')->nullable();
-            $table->string('address')->nullable();
-            $table->string('country')->nullable();
-            $table->string('city')->nullable();
-            $table->string('subdistrict')->nullable();
-            $table->string('village')->nullable();
-            $table->string('zip_code')->nullable();
+            $table->string('phone', 15)->nullable();
+            $table->string('owner', 100);
+            $table->string('website', 255)->nullable();
+            $table->string('country', 50)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('subdistrict', 100)->nullable();
+            $table->string('village', 100)->nullable();
+            $table->string('zip_code', 5)->nullable();
+            $table->string('address', 100)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
