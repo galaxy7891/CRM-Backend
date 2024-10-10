@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
+use App\Http\Resources\ApiResponseResource;
 use App\Models\Deal;
+
 use Illuminate\Http\Request;
-use App\Http\Resources\DealResource;
 use Illuminate\Support\Facades\Validator;
 
 class DealController extends Controller
@@ -17,18 +17,18 @@ class DealController extends Controller
     {
         try {
             $deals = Deal::latest()->paginate(25);
-            return new DealResource(
-                true, // success
-                'Daftar Deal', // message
-                $deals // data
+            return new ApiResponseResource(
+                true,
+                'Daftar Deal',
+                $deals
             );
-        } catch (Exception $e) {
 
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -39,71 +39,73 @@ class DealController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
-            'name' => 'required|string|max:255',
-            'deals_customer' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
+            'deals_customer' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'tag' => 'required|string|max:255',
+            'status' => 'required|in:hot,warm,cold',
+            'tag' => 'nullable|string|max:255',
             'stage' => 'required|in:qualificated,proposal,negotiate,won,lose',
             'open_date' => 'required|date',
             'close_date' => 'nullable|date',
             'expected_close_date' => 'required|date',
-            'payment_expected' => 'nullable|numeric',
-            'payment_category' => 'required|in:once,hours,daily,weekly,monthly,quarter,yearly',
+            'payment_expected' => 'nullable|numeric|max_digits:20',
+            'payment_category' => 'required|in:once,daily,monthly,yearly',
             'payment_duration' => 'nullable|integer',
-            'owner' => 'required|string|max:255',
+            'owner' => 'required|email|max:100',
         ], [
             'customer_id.required' => 'ID pelanggan wajib diisi.',
             'customer_id.exists' => 'ID pelanggan tidak ditemukan.',
             'name.required' => 'Nama wajib diisi.',
-            'name.string' => 'Nama harus berupa huruf.',
-            'name.max' => 'Nama maksimal 255 karakter.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama maksimal 100 karakter.',
             'deals_customer.required' => 'Pelanggan wajib diisi.',
-            'deals_customer.string' => 'Pelanggan harus berupa huruf.',
-            'deals_customer.max' => 'Pelanggan maksimal 255 karakter.',
-            'description.string' => 'Deskripsi harus berupa huruf.',
-            'tag.required' => 'Tag wajib diisi.',
-            'tag.string' => 'Tag harus berupa huruf.',
+            'deals_customer.string' => 'Pelanggan harus berupa teks.',
+            'deals_customer.max' => 'Pelanggan maksimal 100 karakter.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+            'status.required' => 'Status wajib dipilih.',
+            'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
+            'tag.string' => 'Tag harus berupa teks.',
             'tag.max' => 'Tag maksimal 255 karakter.',
             'stage.required' => 'Status wajib diisi.',
-            'stage.in' => 'Status tidak valid.',
-            'open_date.required' => 'Tanggal buka buka wajib diisi.',
-            'open_date.date' => 'Tanggal buka buka harus berupa tanggal.',
+            'stage.in' => 'Status harus pilih salah satu: qualificated,proposal,negotiate,won,lose.',
+            'open_date.required' => 'Tanggal buka wajib diisi.',
+            'open_date.date' => 'Tanggal buka harus berupa tanggal.',
             'close_date.date' => 'Tanggal tutup harus berupa tanggal.',
-            'expected_close_date.required' => 'Jatuh tempo wajib diisi.',
-            'expected_close_date.date' => 'Jatuh tempo harus berupa tanggal.',
-            'payment_expected.numeric' => 'Pembayaran yang diharapkan harus berupa angka.',
+            'expected_close_date.required' => 'Perkiraan tanggal tutup wajib diisi.',
+            'expected_close_date.date' => 'Perkiraan tanggal tutup harus berupa tanggal.',
+            'payment_expected.numeric' => 'Perkiraan pembayaran harus berupa angka.',
+            'payment_expected.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.',
             'payment_category.required' => 'Kategori pembayaran wajib diisi.',
-            'payment_category.in' => 'Kategori pembayaran tidak valid.',
+            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: once,daily,monthly,yearly.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
             'owner.required' => 'Pemilik wajib diisi.',
-            'owner.string' => 'Pemilik harus berupa huruf.',
-            'owner.max' => 'Pemilik maksimal 255 karakter.',
+            'owner.emaik' => 'Pemilik harus berupa email.',
+            'owner.max' => 'Pemilik maksimal 100 karakter.',
         ]);
 
         // check if validation fails
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors(),
-                'data' => null
-            ], 400);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
 
         // create customer 
         try {
             $deal = Deal::createDeal($request->all());
-            return new DealResource(
-                true, // success
-                'Deal ditambahkan', // message
-                $deal // data
+            return new ApiResponseResource(
+                true,
+                'Deal ditambahkan',
+                $deal 
             );
-        } catch (Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -116,23 +118,25 @@ class DealController extends Controller
         try {
             $deal = Deal::find($id);
             if (is_null($deal)) {
-                return response()->json([
-                    'success ' => false,
-                    'message' => 'Data Customer Tidak Ditemukan!',
-                    'data' => null
-                ], 404);
+                return new ApiResponseResource(
+                    false,
+                    'Data Customer Tidak Ditemukan!',
+                    null
+                );
             }
-            return new DealResource(
-                true, // success
-                'Data Customer Ditemukan!', // message
-                $deal // data
+
+            return new ApiResponseResource(
+                true,
+                'Data Customer Ditemukan!', 
+                $deal 
             );
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+            
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -144,80 +148,82 @@ class DealController extends Controller
         // Check if customer exists
         $deal = Deal::find($id);
         if (!$deal) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Deal tidak ditemukan',
-                'data' => null
-            ], 404);
+            return new ApiResponseResource(
+                false, 
+                'Deal tidak ditemukan',
+                null
+            );
         }
 
 
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
-            'name' => 'required|string|max:255',
-            'deals_customer' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
+            'deals_customer' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'tag' => 'required|string|max:255',
+            'status' => 'required|in:hot,warm,cold',
+            'tag' => 'nullable|string|max:255',
             'stage' => 'required|in:qualificated,proposal,negotiate,won,lose',
             'open_date' => 'required|date',
             'close_date' => 'nullable|date',
             'expected_close_date' => 'required|date',
-            'payment_expected' => 'nullable|numeric',
-            'payment_category' => 'required|in:once,hours,daily,weekly,monthly,quarter,yearly',
+            'payment_expected' => 'nullable|numeric|max_digits:20',
+            'payment_category' => 'required|in:once,daily,monthly,yearly',
             'payment_duration' => 'nullable|integer',
-            'owner' => 'required|string|max:255',
+            'owner' => 'required|email|max:100',
         ], [
             'customer_id.required' => 'ID pelanggan wajib diisi.',
             'customer_id.exists' => 'ID pelanggan tidak ditemukan.',
             'name.required' => 'Nama wajib diisi.',
-            'name.string' => 'Nama harus berupa huruf.',
-            'name.max' => 'Nama maksimal 255 karakter.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama maksimal 100 karakter.',
             'deals_customer.required' => 'Pelanggan wajib diisi.',
-            'deals_customer.string' => 'Pelanggan harus berupa huruf.',
-            'deals_customer.max' => 'Pelanggan maksimal 255 karakter.',
-            'description.string' => 'Deskripsi harus berupa huruf.',
-            'tag.required' => 'Tag wajib diisi.',
-            'tag.string' => 'Tag harus berupa huruf.',
+            'deals_customer.string' => 'Pelanggan harus berupa teks.',
+            'deals_customer.max' => 'Pelanggan maksimal 100 karakter.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+            'status.required' => 'Status wajib dipilih.',
+            'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
+            'tag.string' => 'Tag harus berupa teks.',
             'tag.max' => 'Tag maksimal 255 karakter.',
             'stage.required' => 'Status wajib diisi.',
-            'stage.in' => 'Status tidak valid.',
-            'open_date.required' => 'Tanggal buka buka wajib diisi.',
-            'open_date.date' => 'Tanggal buka buka harus berupa tanggal.',
+            'stage.in' => 'Status harus pilih salah satu: qualificated,proposal,negotiate,won,lose.',
+            'open_date.required' => 'Tanggal buka wajib diisi.',
+            'open_date.date' => 'Tanggal buka harus berupa tanggal.',
             'close_date.date' => 'Tanggal tutup harus berupa tanggal.',
-            'expected_close_date.required' => 'Jatuh tempo wajib diisi.',
-            'expected_close_date.date' => 'Jatuh tempo harus berupa tanggal.',
-            'payment_expected.numeric' => 'Pembayaran yang diharapkan harus berupa angka.',
+            'expected_close_date.required' => 'Perkiraan tanggal tutup wajib diisi.',
+            'expected_close_date.date' => 'Perkiraan tanggal tutup harus berupa tanggal.',
+            'payment_expected.numeric' => 'Perkiraan pembayaran harus berupa angka.',
+            'payment_expected.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.',
             'payment_category.required' => 'Kategori pembayaran wajib diisi.',
-            'payment_category.in' => 'Kategori pembayaran tidak valid.',
+            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: once,daily,monthly,yearly.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
             'owner.required' => 'Pemilik wajib diisi.',
-            'owner.string' => 'Pemilik harus berupa huruf.',
-            'owner.max' => 'Pemilik maksimal 255 karakter.',
+            'owner.emaik' => 'Pemilik harus berupa email.',
+            'owner.max' => 'Pemilik maksimal 100 karakter.',
         ]);
 
         // Check if validation fails
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors(),
-                'data' => null
-            ], 422);
+            return new ApiResponseResource(
+                false, 
+                $validator->errors(),
+                null 
+            );
         }
 
         try {
             $deal = Deal::updateDeal($request->all(), $id);
-            return new DealResource(
-                true, // successs
-                'Data Deal Berhasil Diubah!', // message
-                $deal // data
+            return new ApiResponseResource(
+                true, 
+                'Data Deal Berhasil Diubah!', 
+                $deal 
             );
         } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -231,28 +237,28 @@ class DealController extends Controller
             // Check if deal exists
             $deal = Deal::find($id);
             if (!$deal) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Deal tidak ditemukan',
-                    'data' => null
-                ], 404);
+                return new ApiResponseResource(
+                    false, 
+                    'Deal tidak ditemukan',
+                    null
+                );
             }
 
             // Delete the customer
             $deal->delete();
 
             // Return response with first and last name
-            return new DealResource(
-                true, // success
-                "Deal {$deal->name} Berhasil Dihapus!", // message
-                null // data
+            return new ApiResponseResource(
+                true, 
+                "Deal {$deal->name} Berhasil Dihapus!", 
+                null 
             );
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 }

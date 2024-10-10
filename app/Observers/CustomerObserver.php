@@ -13,13 +13,13 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        // Logger::create([
-        //     'id' => Str::uuid(),
-        //     'user_id' => auth()->id(),
-        //     'table_name' => 'customers',
-        //     'action' => 'CREATE',
-        //     'description' => "Customer {$customer->first_name} {$customer->last_name} telah ditambahkan.",
-        // ]);
+        Logger::create([
+            'id' => Str::uuid(),
+            'user_id' => auth()->id(),
+            'table_name' => 'customers',
+            'action' => 'CREATE',
+            'description' => "Customer {$customer->first_name} {$customer->last_name} telah ditambahkan.",
+        ]);
     }
 
     /**

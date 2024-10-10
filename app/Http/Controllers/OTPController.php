@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ApiResponseResource;
 use App\Models\Otp;
 use App\Services\SendOTPService;
+
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -22,19 +24,20 @@ class OtpController extends Controller
     {
 
         $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email|max:100',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
+            'email.max' => 'Email maksimal 100 karakter',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
 
         $recentOTP = Otp::getRecentOTP($request->email);
@@ -42,12 +45,11 @@ class OtpController extends Controller
         if ($recentOTP) {
             $remainingTime = Otp::getRemainingTime($recentOTP);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Kirim ulang kode otp dalam ' .
-                    "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                'data' => null
-            ], 429);
+            return new ApiResponseResource(
+                false,
+                'Kirim ulang kode otp dalam ' . `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+                null
+            );
         }
 
         try {
@@ -57,21 +59,20 @@ class OtpController extends Controller
 
             $SendOTPService->generateAndSendOtp($email, $nama);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'OTP berhasil dikirimkan ke email anda.',
-                'data' => [
+            return new ApiResponseResource(
+                true,
+                'OTP berhasil dikirimkan ke email anda.',
+                [
                     'email' => $email,
                 ]
-            ], 200);
+            );
 
         } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -87,21 +88,23 @@ class OtpController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'code' => 'required|digits:6',
+            'email' => 'required|email|max:100',
+            'code' => 'required|numeric|digits:6',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
+            'email.email' => 'Email maksimal 100 karakter',
             'code.required' => 'Code OTP wajib diisi',
+            'code.numeric' => 'Code OTP harus berupa angka',
             'code.digits' => 'Code OTP harus 6 digit'
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
 
         try {
@@ -111,35 +114,33 @@ class OtpController extends Controller
 
             $otp = Otp::findOTP($email, $code);
             if (!$otp) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kode OTP invalid atau OTP telah digunakan atau hangus.',
-                    'data' => null
-                ], 404);
+                return new ApiResponseResource(
+                    false,
+                    'Kode OTP invalid atau OTP telah digunakan atau hangus.',
+                    null
+                );
             }
 
             if ($otp->code === $code) {
                 $otp->markAsUsed($email);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'OTP berhasil diverifikasi.',
-                    'data' => null
-                ], 200);
+                return new ApiResponseResource(
+                    true,
+                    'OTP berhasil diverifikasi.',
+                    null
+                );
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'OTP tidak sesuai.',
-                'data' => null
-            ], 400);
+            return new ApiResponseResource(
+                false,
+                'OTP tidak sesuai.',
+                null
+            );
         } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 }
