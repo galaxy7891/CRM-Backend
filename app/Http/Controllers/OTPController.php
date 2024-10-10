@@ -53,7 +53,7 @@ class OtpController extends Controller
         }
 
         try {
-            
+
             $email = $request->email;
             $nama = explode('@', $email)[0];
 
@@ -66,10 +66,9 @@ class OtpController extends Controller
                     'email' => $email,
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -137,7 +136,7 @@ class OtpController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
