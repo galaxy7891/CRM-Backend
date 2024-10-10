@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-
-
-use Exception;
+use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
-use Illuminate\Support\Str;
+
 use Illuminate\Http\Request;
-use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
@@ -23,18 +20,18 @@ class ProductController extends Controller
     {
         try {
             $product = Product::latest()->paginate(10);
-
-            return new ProductResource(
-                true, // success
-                'Daftar Product', // message
-                $product // data
+            return new ApiResponseResource(
+                true,
+                'Daftar Product',
+                $product
             );
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -44,21 +41,22 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:products,name ',
-            'category' => 'required|string|max:255',
-            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:100|unique:products,name ',
+            'category' => 'required|string|max:100',
+            'code' => 'required|string|max:100',
             'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'unit' => 'required|in:box,pcs,unit',
+            'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|max:2048',
         ], [
-            'name.required' => 'Nama wajib diisi.',
-            'name.string' => 'Nama harus berupa string.',
-            'name.max' => 'Nama terlalu panjang.',
-            'category.required' => 'Kategori wajib diisi.',
-            'category.string' => 'Kategori harus berupa string.',
-            'category.max' => 'Kategori terlalu panjang.',
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.string' => 'Nama produk harus berupa teks.',
+            'name.max' => 'Nama produk maksimal 100 karakter.',
+            'name.unique' => 'Nama produk sudah terdaftar.',
+            'category.required' => 'Kategori produk wajib diisi.',
+            'category.string' => 'Kategori produk harus berupa teks.',
+            'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode wajib diisi.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
@@ -66,34 +64,38 @@ class ProductController extends Controller
             'quantity.numeric' => 'Jumlah harus berupa angka.',
             'quantity.min' => 'Jumlah harus lebih dari 0.',
             'unit.required' => 'Unit wajib diisi.',
-            'unit.string' => 'Unit harus berupa string.',
-            'unit.max' => 'Unit terlalu panjang.',
+            'unit.in' => 'Unit harus pilih salah satu: box, pcs, unit.',
             'price.required' => 'Harga wajib diisi.',
             'price.numeric' => 'Harga harus berupa angka.',
+            'price.min' => 'Harga harus lebih dari 0.',
+            'price.max_digits' => 'Harga maksimal 20 digit.',
+            'description.string' => 'Harga maksimal 20 digit.',
+            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
 
         //check if validation fails
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors(),
-                'data' => null
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
 
         try {
             $product = Product::createProduct($request->all());
-            return new ProductResource(
-                true, // success
-                'Product berhasil ditambahkan', // message
-                $product // data
+            return new ApiResponseResource(
+                true,
+                'Product berhasil ditambahkan',
+                $product
             );
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -105,19 +107,25 @@ class ProductController extends Controller
         try {
             $product = Product::find($id);
             if (!$product) {
-                return new ProductResource(false, 'Data Product Tidak Ditemukan!', null);
+                return new ApiResponseResource(
+                    false, 
+                    'Data Product Tidak Ditemukan!', 
+                    null
+                );
             }
-            return new ProductResource(
-                true, // success
-                'Data Product Ditemukan!', // message
-                $product // datas
+
+            return new ApiResponseResource(
+                true,
+                'Data Product Ditemukan!',
+                $product
             );
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -128,30 +136,30 @@ class ProductController extends Controller
     {
         $product = product::find($id);
         if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product Tidak Ditemukan',
-                'data' => null
-            ], 404);
+            return new ApiResponseResource(
+                false, 
+                'Product Tidak Ditemukan',
+                null
+            );
         }
+        
         $validator = Validator::make($request->all(), [
-
-            'name' => 'required|string|max:255|unique:products,name,' . $id,
-            'category' => 'required|string|max:255',
-            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:100|unique:products,name ',
+            'category' => 'required|string|max:100',
+            'code' => 'required|string|max:100',
             'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'unit' => 'required|in:box,pcs,unit',
+            'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|max:2048',
-
         ], [
-            'name.required' => 'Nama wajib diisi.',
-            'name.string' => 'Nama harus berupa string.',
-            'name.max' => 'Nama terlalu panjang.',
-            'category.required' => 'Kategori wajib diisi.',
-            'category.string' => 'Kategori harus berupa string.',
-            'category.max' => 'Kategori terlalu panjang.',
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.string' => 'Nama produk harus berupa teks.',
+            'name.max' => 'Nama produk maksimal 100 karakter.',
+            'name.unique' => 'Nama produk sudah terdaftar.',
+            'category.required' => 'Kategori produk wajib diisi.',
+            'category.string' => 'Kategori produk harus berupa teks.',
+            'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode wajib diisi.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
@@ -159,29 +167,36 @@ class ProductController extends Controller
             'quantity.numeric' => 'Jumlah harus berupa angka.',
             'quantity.min' => 'Jumlah harus lebih dari 0.',
             'unit.required' => 'Unit wajib diisi.',
-            'unit.string' => 'Unit harus berupa string.',
+            'unit.in' => 'Unit harus pilih salah satu: box, pcs, unit.',
+            'price.required' => 'Harga wajib diisi.',
+            'price.numeric' => 'Harga harus berupa angka.',
+            'price.min' => 'Harga harus lebih dari 0.',
+            'price.max_digits' => 'Harga maksimal 20 digit.',
+            'description.string' => 'Harga maksimal 20 digit.',
+            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors(),
-                'data' => null
-            ], 500);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
         try {
             $product = Product::updateProduct($request->all(), $id);
-            return new ProductResource(
-                true, // success
-                'Data Product Berhasil Diubah', // message
-                $product // data
+            return new ApiResponseResource(
+                true,
+                'Data Product Berhasil Diubah',
+                $product
             );
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -193,28 +208,29 @@ class ProductController extends Controller
         try {
             $product = Product::find($id);
             if (!$product) {
-                return response()->json([
-                    'success' => false, // success
-                    'message' => 'Product Tidak Ditemukan', // message
-                    'data' => null // data
-                ], 404);
+                return new ApiResponseResource(
+                    false, 
+                    'Product Tidak Ditemukan',
+                    null
+                );
             }
 
             // Delete the product
             $product = Product::deleteProduct($id);
 
             // Return response with first and last name 
-            return new ProductResource(
+            return new ApiResponseResource(
                 true,
                 "Produk {$product->name} Berhasil Dihapus!",
                 null
             );
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false, // success
-                'message' => $e->getMessage(), // message
-                'data' => null // data
-            ], 500);
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 }

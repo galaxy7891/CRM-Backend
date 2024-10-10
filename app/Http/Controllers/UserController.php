@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
+use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateForgetPassword;
 use App\Models\PasswordResetToken;
 use App\Models\User;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,7 +25,7 @@ class UserController extends Controller
         try {
             $users = User::latest()->paginate(25);
 
-            return new UserResource(
+            return new ApiResponseResource(
                 true, 
                 'Daftar Customer',                  
                 $users
@@ -35,7 +33,7 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
@@ -52,14 +50,14 @@ class UserController extends Controller
             $user = User::find($id);
             
             if (!$user) {
-                return new UserResource(
+                return new ApiResponseResource(
                     false,
                     'Data User Tidak Ditemukan!',
                     null
                 );
             }
 
-            return new UserResource(
+            return new ApiResponseResource(
                 true,
                 'Data User Ditemukan!',
                 $user
@@ -67,7 +65,7 @@ class UserController extends Controller
         
         } catch (\Exception $e) {
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
@@ -83,7 +81,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 'User tidak ditemukan',
                 null
@@ -92,27 +90,37 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'company_id' => 'nullable|uuid',
-            'email' => 'required|email|unique:users, email',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:',
-            'job_position' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'phone' => 'required|numeric|max_digits:15|unique:users, phone',
+            'job_position' => 'required|max:50',
             'role' => 'required|in:super_admin,admin,employee',
             'gender' => 'nullable|in:male,female,other',
         ], [
             'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terpakai',
-            'first_name.required' => 'Nama depan wajib diisi.',
-            'last_name.required' => 'Nama belakang wajib diisi.',
+            'email.email' => 'Email harus valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.string' => 'Nama depan harus berupa teks',
+            'first_name.max' => 'Nama depan maksimal 50 karakter',
+            'last_name.required' => 'Nama belakang wajib diisi',
+            'last_name.string' => 'Nama belakang harus berupa teks',
+            'last_name.max' => 'Nama belakang maksimal 50 karakter',
+            'phone.required' => 'Nomor telepon wajib diisi',
+            'phone.numeric' => 'Nomor telepon harus berupa angka',
+            'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'job_position.required' => 'Posisi pekerjaan wajib diisi',
+            'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus berupa salah satu: rendah, sedang, atau tinggi.',
-            'gender.in' => 'Gender harus berupa salah satu: Laki-laki, Perempuan, Lain-lain.',
+            'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
+            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
         ]);
 
         if ($validator->fails()) {
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $validator->errors(),
                 null
@@ -122,7 +130,7 @@ class UserController extends Controller
         try {
             $user = User::updateCustomer($request->all(), $id);
             
-            return new UserResource(
+            return new ApiResponseResource(
                 true, 
                 `Data User {$user->first_name}{$user->last_name} Berhasil Diubah!`,
                 $user
@@ -130,7 +138,7 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
@@ -147,7 +155,7 @@ class UserController extends Controller
 
             $customer = User::find($id);
             if (!$customer) {
-                return new UserResource(
+                return new ApiResponseResource(
                     false,
                     'Customer tidak ditemukan',
                     null
@@ -158,7 +166,7 @@ class UserController extends Controller
             $last_name = $customer->last_name;
             $customer->delete();
 
-            return new UserResource(
+            return new ApiResponseResource(
                 true, 
                 "Customer {$first_name} {$last_name} Berhasil Dihapus!",
                 null
@@ -166,7 +174,7 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
@@ -186,15 +194,16 @@ class UserController extends Controller
     {
 
         $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email|exists:users,email|max:100'
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
             'email.exists' => 'Email belum terdaftar',
+            'email.max' => 'Email maksimal 100 karakter',
         ]);
         
         if($validator->fails()){
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $validator->errors(),
                 null
@@ -206,9 +215,9 @@ class UserController extends Controller
         if ($recentResetPassword){
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
-                'Dapat mengirim ulang link reset password dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'Dapat mengirim ulang link reset password dalam ' .     `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
                 null
             );
 
@@ -232,20 +241,20 @@ class UserController extends Controller
             
             PasswordResetToken::createPasswordResetToken($dataUser);
 
-            return new UserResource(
+            return new ApiResponseResource(
                 true,
                 'Link Reset Password telah dikirim ke email anda.',
-                ['email' => $email]
+                [
+                    'email' => $email
+                ]
             );
 
         } catch (\Exception $e) {
-
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
             );
-
         }
     }
 
@@ -260,19 +269,21 @@ class UserController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|email|exists:users,email|max:100',
             'token' => 'required',
             'new_password' => 'required|min:8',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
+            'email.exists' => 'Email belum terdaftar',
+            'email.max' => 'Email maksimal 100 karakter',
             'token.required' => 'Token harus diisi',
             'new_password.required' => 'Password baru wajib diisi',
             'new_password.min' => 'Password baru minimal 8 digit'
         ]);
 
         if($validator->fails()){
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $validator->errors(),
                 null 
@@ -280,7 +291,7 @@ class UserController extends Controller
         }
 
         if (!PasswordResetToken::findPasswordResetToken($request->only('email', 'token'))) {
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 'Token reset password tidak valid atau telah kadaluarsa.',
                 null
@@ -293,7 +304,7 @@ class UserController extends Controller
             $user->updatePassword($request->new_password);
             PasswordResetToken::deletePasswordResetToken($request->email);
     
-            return new UserResource(
+            return new ApiResponseResource(
                 true,
                 'Password berhasil diubah.',
                 null 
@@ -301,7 +312,7 @@ class UserController extends Controller
 
         } catch (\Exception $e){
 
-            return new UserResource(
+            return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null

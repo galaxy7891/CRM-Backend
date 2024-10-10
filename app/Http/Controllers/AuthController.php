@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Company;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ApiResponseResource;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -30,11 +31,11 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null,
+            );
         }
 
         try {
@@ -42,21 +43,23 @@ class AuthController extends Controller
             $credentials = $request->only(['email', 'password']);
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Email dan password tidak sesuai',
-                    'data' => null
-                ], 401);
+                return new ApiResponseResource(
+                    false,
+                    'Email dan password tidak sesuai',
+                    null,
+                );
             }
 
             return $this->respondWithToken($token);
+
         } catch (\Exception $e) {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null,
+            );
+
         }
     }
 
@@ -69,36 +72,41 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
             'password' => 'required',
-            'phone' => 'required',
-            'job_position' => 'required',
-            'name' => 'required',
-            'industry' => 'required',
+            'phone' => 'required|numeric|max_digits:15|unique:users, phone',
+            'job_position' => 'required|max:50',
+            'name' => 'required|max:100',
+            'industry' => 'required|max:50',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'first_name.required' => 'Nama depan wajib diisi',
-            'first_name.string' => 'Nama depan harus berupa string',
-            'first_name.max' => 'Nama depan maksimal 255 karakter',
+            'first_name.string' => 'Nama depan harus berupa teks',
+            'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.required' => 'Nama belakang wajib diisi',
-            'last_name.string' => 'Nama belakang harus berupa string',
-            'last_name.max' => 'Nama belakang maksimal 255 karakter',
+            'last_name.string' => 'Nama belakang harus berupa teks',
+            'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'password.required' => 'Password wajib diisi',
             'phone.required' => 'Nomor telepon wajib diisi',
+            'phone.numeric' => 'Nomor telepon harus berupa angka',
+            'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Posisi pekerjaan wajib diisi',
+            'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
             'name' => 'Nama perusahaan wajib diisi',
-            'industry.required' => 'Jenis industri wajib diisi'
+            'industry.required' => 'Jenis industri wajib diisi',
+            'industry.max' => 'Jenis industri maksimal 50 karakter'
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null,
+            );
         }
 
         try {
@@ -112,22 +120,22 @@ class AuthController extends Controller
             ];
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Email dan password tidak sesuai',
-                    'data' => null
-                ], 401);
+                return new ApiResponseResource(
+                    false,
+                    'Email dan password tidak sesuai',
+                    null,
+                );
             }
 
             return $this->respondWithToken($token);
             
         } catch (\Exception $e) {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null,
+            );
 
         }
     }
@@ -165,11 +173,12 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
         } catch (\Exception $e) {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null,
+            );
+
         }
     }
 
@@ -181,22 +190,22 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-
             auth()->logout();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Logout berhasil',
-                'data' => null
-            ]);
+            return new ApiResponseResource(
+                true,
+                'Logout berhasil',
+                null,
+            );
 
         } catch (\Exception $e) {
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Logout gagal',
-                'errors' => $e->getMessage()
-            ], 500);
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null,
+            );
+
         }
     }
 
@@ -219,14 +228,14 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Token berhasil dibuat',
-            'data' => [
+        return new ApiResponseResource(
+            true,
+            'Token berhasil dibuat',
+            [
                 'access_token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60
-            ]
-        ], 200);
+            ],
+        );
     }
 }

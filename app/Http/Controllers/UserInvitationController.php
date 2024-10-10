@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateInviteUser;
 use App\Models\User;
 use App\Models\UserInvitation;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -22,19 +24,20 @@ class UserInvitationController extends Controller
     public function sendInvitation(Request $request)
     {
         $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email|max:100',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
+            'email.max' => 'Email maksimal 100 karakter',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false, 
+                $validator->errors(),
+                null
+            );
         }
         
         $recentInvitation = UserInvitation::getRecentInvitation($request->email);
@@ -42,12 +45,12 @@ class UserInvitationController extends Controller
         if ($recentInvitation){
             $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' . 
-                "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                'data' => null
-            ], 429);
+            return new ApiResponseResource(
+                false,
+                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' . 
+                `{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+                null
+            );
 
         }
 
@@ -72,23 +75,21 @@ class UserInvitationController extends Controller
 
             UserInvitation::createInvitation($dataUser);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Link invitasi berhasil dikirimkan ke email anda.',
-                'data' => [
+            return new ApiResponseResource(
+                true,
+                'Link invitasi berhasil dikirimkan ke email anda.',
+                [
                     'email' => $email,
                     'nama' => $nama
                 ]
-            ], 200);
+            );
 
         } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage()
-            ], 500);
-        
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
         }
     }
 
@@ -101,36 +102,39 @@ class UserInvitationController extends Controller
     public function createUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users, email|max:100',
             'token' => 'required',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
             'password' => 'required|string|min:8',
         ], [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Email harus valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'email.max' => 'Email maksimal 100 karakter',
             'token.required' => 'Token wajib diisi',
             'first_name.required' => 'Nama depan wajib diisi',
-            'first_name.string' => 'Nama depan harus berupa string',
-            'first_name.max' => 'Nama depan maksimal 255 karakter',
+            'first_name.string' => 'Nama depan harus berupa teks',
+            'first_name.max' => 'Nama depan maksimal 50  karakter',
             'last_name.required' => 'Nama belakang wajib diisi',
-            'last_name.string' => 'Nama belakang harus berupa string',
-            'last_name.max' => 'Nama belakang maksimal 255 karakter',
+            'last_name.string' => 'Nama belakang harus berupa teks',
+            'last_name.max' => 'Nama belakang maksimal 50 karakter',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
         }
         
         if (!$invitation = UserInvitation::findInvitation($request->only('email', 'token'))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token invitation tidak valid atau telah kadaluarsa.'
-            ], 400);
+            return new ApiResponseResource(
+                false,
+                'Token invitation tidak valid atau telah kadaluarsa.',
+                null
+            );
         }
 
         try {
@@ -145,20 +149,18 @@ class UserInvitationController extends Controller
             $user = User::createUser($dataUser, null);
             $invitation->updateStatus('accepted');
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Akun berhasil dibuat.',
-                'data' => $user,
-            ], 201);
+            return new ApiResponseResource(
+                true,
+                'Akun berhasil dibuat.',
+                $user,
+            );
 
         } catch (\Exception $e) {
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal Server Error',
-                'errors' => $e->getMessage(),
-            ], 500);
-        
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
         }
     }
 

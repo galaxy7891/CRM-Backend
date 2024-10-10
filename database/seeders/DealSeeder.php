@@ -20,6 +20,7 @@ class DealSeeder extends Seeder
             'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
             'description' => 'Lorem ipsum dolor sit amet.',
             'tag' => 'Alat Tulis',
+            'status' => 'warm',
             'stage' => 'negotiate',
             'open_date' => '2022-01-01',
             'close_date' => '2022-01-31',
@@ -27,7 +28,7 @@ class DealSeeder extends Seeder
             'payment_expected' => 1000000,
             'payment_category' => 'once',
             'payment_duration' => 1,
-            'owner' => '123e4567-e89b-12d3-a456-426614174003',
+            'owner' => 'user_satu@gmail.com',
         ]);
     }
 }

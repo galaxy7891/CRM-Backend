@@ -5,24 +5,38 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CustomerResource extends JsonResource
+class ApiResponseResource extends JsonResource
 {
-    //define properti
     public $status;
     public $message;
     public $resource;
-    public function __construct($status, $message, $resource)
+
+    /**
+     * Constructor's ApiResponseResource
+     *
+     * @param bool $status
+     * @param string $message 
+     * @param mixed|null $resource
+     */
+    public function __construct($status, $message, $resource = null)
     {
         parent::__construct($resource);
         $this->status  = $status;
         $this->message = $message;
     }
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
             'success'   => $this->status,
             'message'   => $this->message,
-            'data'      => $this->resource
+            'data'      => $this->resource,
         ];
     }
 }
+
