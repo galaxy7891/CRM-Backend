@@ -37,21 +37,21 @@ class OtpController extends Controller
             ], 422);
         }
 
-        $recentOTP = Otp::getRecentOTP($request->email);
+        // $recentOTP = Otp::getRecentOTP($request->email);
 
-        if ($recentOTP) {
-            $remainingTime = Otp::getRemainingTime($recentOTP);
+        // if ($recentOTP) {
+        //     $remainingTime = Otp::getRemainingTime($recentOTP);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Kirim ulang kode otp dalam ' .
-                    "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                'data' => null
-            ], 429);
-        }
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Kirim ulang kode otp dalam ' .
+        //             "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+        //         'data' => null
+        //     ], 429);
+        // }
 
         try {
-            
+
             $email = $request->email;
             $nama = explode('@', $email)[0];
 
@@ -64,7 +64,6 @@ class OtpController extends Controller
                     'email' => $email,
                 ]
             ], 200);
-
         } catch (\Exception $e) {
 
             return response()->json([
