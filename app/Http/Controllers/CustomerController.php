@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-
+use App\Imports\CustomersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
@@ -317,6 +318,7 @@ class CustomerController extends Controller
                 "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!",
                 null
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -325,4 +327,7 @@ class CustomerController extends Controller
             );
         }
     }
+
+    
+
 }

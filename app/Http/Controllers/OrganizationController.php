@@ -90,7 +90,7 @@ class OrganizationController extends Controller
             'village.string' => 'Desa/Kelurahan harus berupa teks.',
             'village.max' => 'Desa/Kelurahan maksimal 100 karakter.',
             'zip_code.string' => 'Kode pos harus berupa teks.',
-            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
+            'zip_code.max' => 'Kode pos maksimal 5 karakter.',
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
@@ -109,7 +109,7 @@ class OrganizationController extends Controller
             $organization = Organization::createOrganization($request->all());
             return new ApiResponseResource(
                 true,
-                `Data {$organization->name} Berhasil Ditambahkan!`, 
+                "Data {$organization->name} Berhasil Ditambahkan!", 
                 $organization
             );
 
@@ -232,7 +232,7 @@ class OrganizationController extends Controller
             'village.string' => 'Desa/Kelurahan harus berupa teks.',
             'village.max' => 'Desa/Kelurahan maksimal 100 karakter.',
             'zip_code.string' => 'Kode pos harus berupa teks.',
-            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
+            'zip_code.max' => 'Kode pos maksimal 5 karakter.',
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
@@ -295,7 +295,7 @@ class OrganizationController extends Controller
             // Return response with first and last name
             return new ApiResponseResource(
                 true,
-                `Organization {$organization->name} Berhasil Dihapus!`,
+                "Organization {$organization->name} Berhasil Dihapus!",
                 null
             );
 

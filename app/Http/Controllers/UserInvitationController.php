@@ -48,14 +48,12 @@ class UserInvitationController extends Controller
             return new ApiResponseResource(
                 false,
                 'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' . 
-                `{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+                "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
-
         }
 
         try {
-
             $email = $request->email;
             $token = Str::uuid()->toString();
             $expired_at = now()->addWeek()->toDateTimeString();
@@ -138,7 +136,6 @@ class UserInvitationController extends Controller
         }
 
         try {
-
             $dataUser = [
                 'email' => $request->email,
                 'first_name' => $request->first_name,

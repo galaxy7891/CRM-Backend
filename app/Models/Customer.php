@@ -20,7 +20,6 @@ class Customer extends Model
     protected $fillable = [
         'id',
         'organization_id',
-        'user_id',
         'first_name',
         'last_name',
         'customerCategory',
@@ -79,11 +78,24 @@ class Customer extends Model
         return $this->hasMany(Deal::class, 'id');
     }
 
+    /**
+     * Count Customer User by Category
+     * 
+     * @param string $email
+     * @param string $category
+     * @return int
+     */
+    public static function countCustomerByCategory($email, $category)
+    {
+        return self::where('owner', $email)
+            ->where('customerCategory', $category)
+            ->count();
+    }
+
     public static function createCustomer(array $data): self
     {
         return self::create([
             'organization_id' => $data['organization_id'] ?? null,
-            'user_id' => $data['user_id'],
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'customerCategory' => $data['customerCategory'],
@@ -108,7 +120,6 @@ class Customer extends Model
         $customer = self::findOrFail($id);
         $customer->fill([
             'organization_id' => $data['organization_id'] ?? null,
-            'user_id' => $data['user_id'],
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'customerCategory' => $data['customerCategory'],

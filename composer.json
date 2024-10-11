@@ -11,8 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.9",
-        "maatwebsite/excel": "^1.1",
-        "php-open-source-saver/jwt-auth": "^2.3",
+        "maatwebsite/excel": "^3.1.58",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
@@ -30,7 +29,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-        "app/Helpers/StringHelper.php"
+            "app/Helpers/StringHelper.php",
+            "app/Helpers/TimeGreetingHelper.php"
         ]
     },
     "autoload-dev": {

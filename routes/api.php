@@ -8,6 +8,7 @@ use App\Http\Controllers\DealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
@@ -39,6 +40,8 @@ Route::group(['middleware' => 'api'], function () {
     Route::group(['middleware' => JwtMiddleware::class], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::get('/dashboard', [UserController::class, 'getSummary']);
+        Route::post('/import/{type}', [ImportController::class, 'import']);
         Route::apiResource('/customers', CustomerController::class);
         Route::apiResource('/organizations', OrganizationController::class);
         Route::apiResource('/products', ProductController::class);

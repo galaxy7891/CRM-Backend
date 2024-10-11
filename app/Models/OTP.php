@@ -13,6 +13,7 @@ class Otp extends Model
     use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'email';
+    
     /**
      * The attributes that are mass assignable.
      * 
