@@ -51,15 +51,26 @@ class OrganizationImport implements ToCollection, WithHeadingRow
     public function collection($rows)
     {
         $this->headingRowValidator($rows->first());
-        
+
         $nameMap = []; 
         $emailMap = []; 
         $phoneMap = []; 
         $rowMap = []; 
+        $statusMapping = [
+            'tinggi' => 'hot',
+            'sedang' => 'warm',
+            'rendah' => 'cold',
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
+            if (isset($row['status'])) {
+                $lowerStatus = strtolower($row['status']);
+                if (array_key_exists($lowerStatus, $statusMapping)) {
+                    $row['status'] = $statusMapping[$lowerStatus];
+                }
+            }
 
             // Periksa apakah baris kosong
             if ($this->isEmptyRow($row)) {
@@ -147,7 +158,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             }
 
             // Validasi data menggunakan Validator
-            $validator = Validator::make($rowArray, [
+            $validator = Validator::make($row->toArray(), [
                 'nama_perusahaan' => 'required|unique:organizations,name|string|max:100',
                 'jenis_industri' => 'nullable|string|max:50',
                 'status' => 'required|in:hot,warm,cold',

@@ -55,10 +55,21 @@ class CustomerImport implements ToCollection, WithHeadingRow
         $emailMap = []; 
         $phoneMap = []; 
         $rowMap = []; 
+        $statusMapping = [
+            'tinggi' => 'hot',
+            'sedang' => 'warm',
+            'rendah' => 'cold',
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
+            if (isset($row['status'])) {
+                $lowerStatus = strtolower($row['status']);
+                if (array_key_exists($lowerStatus, $statusMapping)) {
+                    $row['status'] = $statusMapping[$lowerStatus];
+                }
+            }
 
             if ($this->isEmptyRow($row)) {
                 $this->invalidData[] = [
@@ -145,7 +156,7 @@ class CustomerImport implements ToCollection, WithHeadingRow
             }
 
             // Validasi data menggunakan Validator
-            $validator = Validator::make($rowArray, [
+            $validator = Validator::make($row->toArray(), [
                 'nama_depan' => 'required|string|max:50',
                 'nama_belakang' => 'required|string|max:50',
                 'kategori_pelanggan' => 'required|in:leads,contact',

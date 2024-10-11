@@ -55,10 +55,21 @@ class ProductImport implements ToCollection, WithHeadingRow
         $namaMap = []; 
         $codeMap = []; 
         $rowMap = []; 
+        $categoryMapping = [
+            'barang' => 'stuff',
+            'jasa' => 'service',
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
+            if (isset($row['kategori_produk'])) {
+                $categoryStatus = strtolower($row['kategori_produk']);
+                if (array_key_exists($categoryStatus, $categoryMapping)) {
+                    $row['kategori_produk'] = $categoryMapping[$categoryStatus];
+                }
+            }
+            
 
             // Periksa apakah baris kosong
             if ($this->isEmptyRow($row)) {
