@@ -44,8 +44,8 @@ class ProductController extends Controller
             'name' => 'required|string|max:100|unique:products,name ',
             'category' => 'required|string|max:100',
             'code' => 'required|string|max:100',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|in:box,pcs,unit',
+            'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
+            'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|max:2048',
@@ -60,11 +60,13 @@ class ProductController extends Controller
             'code.required' => 'Kode wajib diisi.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required' => 'Jumlah wajib diisi.',
-            'quantity.numeric' => 'Jumlah harus berupa angka.',
-            'quantity.min' => 'Jumlah harus lebih dari 0.',
-            'unit.required' => 'Unit wajib diisi.',
-            'unit.in' => 'Unit harus pilih salah satu: box, pcs, unit.',
+            'quantity.required_if' => 'Jumlah produk wajib diisi.',
+            'quantity.numeric' => 'Jumlah produk harus berupa angka.',
+            'quantity.min' => 'Jumlah produk harus lebih dari 0.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
+            'unit.required_if' => 'Satuan produk wajib diisi.',
+            'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
             'price.required' => 'Harga wajib diisi.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
@@ -72,8 +74,6 @@ class ProductController extends Controller
             'description.string' => 'Harga maksimal 20 digit.',
             'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
-
-        //check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -147,8 +147,8 @@ class ProductController extends Controller
             'name' => 'required|string|max:100|unique:products,name ',
             'category' => 'required|string|max:100',
             'code' => 'required|string|max:100',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|in:box,pcs,unit',
+            'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
+            'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|max:2048',
@@ -163,11 +163,13 @@ class ProductController extends Controller
             'code.required' => 'Kode wajib diisi.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required' => 'Jumlah wajib diisi.',
-            'quantity.numeric' => 'Jumlah harus berupa angka.',
-            'quantity.min' => 'Jumlah harus lebih dari 0.',
-            'unit.required' => 'Unit wajib diisi.',
-            'unit.in' => 'Unit harus pilih salah satu: box, pcs, unit.',
+            'quantity.required_if' => 'Jumlah produk wajib diisi.',
+            'quantity.numeric' => 'Jumlah produk harus berupa angka.',
+            'quantity.min' => 'Jumlah produk harus lebih dari 0.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
+            'unit.required_if' => 'Satuan produk wajib diisi.',
+            'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
             'price.required' => 'Harga wajib diisi.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
@@ -175,7 +177,6 @@ class ProductController extends Controller
             'description.string' => 'Harga maksimal 20 digit.',
             'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,

@@ -35,7 +35,6 @@ class UserController extends Controller
             );
 
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),

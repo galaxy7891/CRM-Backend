@@ -12,10 +12,10 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
-            $table->string('category', 100);
+            $table->enum('category', ['stuff', 'service']);
             $table->string('code', 100)->nullable();
-            $table->integer('quantity');
-            $table->enum('unit', ['box', 'pcs', 'unit']);
+            $table->integer('quantity')->nullable();
+            $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
             $table->decimal('price', 20, 2);
             $table->text('description')->nullable();
             $table->string('image_url', 255)->nullable();

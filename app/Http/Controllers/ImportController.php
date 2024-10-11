@@ -17,67 +17,76 @@ class ImportController extends Controller
 {
     public function import(Request $request, $type)
     {
-        $user = auth()->user();
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv|max:2048',
-        ], [
-            'file.required' => 'File wajib diisi.',
-            'file.mimes' => 'File harus sesuai format.',
-            'file.max' => 'Ukuran file maksimal 2mb.',
-        ]);
+        try {
+            $user = auth()->user();
+            $request->validate([
+                'file' => 'required|mimes:xlsx,csv|max:2048',
+            ], [
+                'file.required' => 'File wajib diisi.',
+                'file.mimes' => 'File harus sesuai format.',
+                'file.max' => 'Ukuran file maksimal 2mb.',
+            ]);
 
-        switch ($type) {
-            case 'customer':
-                $import = new CustomerImport($user->email);
-                $model = Customer::class;
-                break;
+            switch ($type) {
+                case 'customer':
+                    $import = new CustomerImport($user->email);
+                    $model = Customer::class;
+                    break;
 
-            case 'organization':
-                $import = new OrganizationImport($user->email);
-                $model = Organization::class;
-                break;
+                case 'organization':
+                    $import = new OrganizationImport($user->email);
+                    $model = Organization::class;
+                    break;
 
-            case 'product':
-                $import = new ProductImport($user->email);
-                $model = Product::class;
-                break;
+                case 'product':
+                    $import = new ProductImport($user->email);
+                    $model = Product::class;
+                    break;
 
-            default:
-                return new ApiResponseResource(false, 'Invalid import type.', []);
-        }
-
-        Excel::import($import, $request->file('file'));
-
-        $validData = $import->getValidData();
-        $invalidData = $import->getInvalidData();
-        $summaryCounts = $import->getsummaryCounts();
-
-        $data = [
-            'validData' => $validData,
-            'invalidData' => $invalidData,
-            'summaryCounts' => $summaryCounts,
-        ];
-
-        if (empty($invalidData)) {
-            foreach ($validData as $data) {
-                $model::create($data); 
+                default:
+                    return new ApiResponseResource(false, 'Invalid import type.', []);
             }
-    
-            return new ApiResponseResource(
-                true,
-                'File berhasil di import dan data berhasil disimpan .',
-                [ $validData ]
-            );
-        }
-    
-        return new ApiResponseResource(
-            false,
-            'Terdapat data yang tidak valid',
-            [
+
+            Excel::import($import, $request->file('file'));
+
+            $validData = $import->getValidData();
+            $invalidData = $import->getInvalidData();
+            $summaryCounts = $import->getsummaryCounts();
+
+            $data = [
                 'validData' => $validData,
                 'invalidData' => $invalidData,
                 'summaryCounts' => $summaryCounts,
-            ]
-        );
+            ];
+
+            if (empty($invalidData)) {
+
+                return new ApiResponseResource(
+                    true,
+                    'Data aman dan tidak ditemukan data rusak.',
+                    [
+                        'validData' => $validData,
+                        'invalidData' => $invalidData,
+                        'summaryCounts' => $summaryCounts,
+                    ]
+                );
+            }
+
+            return new ApiResponseResource(
+                false,
+                'Terdapat data yang rusak',
+                [
+                    'validData' => $validData,
+                    'invalidData' => $invalidData,
+                    'summaryCounts' => $summaryCounts,
+                ]
+            );
+        } catch(\Exception $e){
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -49,6 +50,8 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     public function collection($rows)
     {
+        $this->headingRowValidator($rows->first());
+
         $namaMap = []; 
         $codeMap = []; 
         $rowMap = []; 
@@ -61,7 +64,15 @@ class ProductImport implements ToCollection, WithHeadingRow
             if ($this->isEmptyRow($row)) {
                 $this->invalidData[] = [
                     'row' => $index + 1,
-                    'data' => $rowArray,
+                    'data' => [
+                        'name' => $row['nama_produk'] ?? null,
+                        'category' => $row['kategori_produk'] ?? null,
+                        'code' => $row['kode_produk'] ?? null,
+                        'quantity' => $row['jumlah_produk'] ?? null,
+                        'unit' => $row['satuan_produk'] ?? null,
+                        'price' => $row['harga_produk'] ?? null,
+                        'description' => $row['deskripsi'] ?? null,
+                    ],
                     'message' => 'Data kosong'
                 ];
                 $this->summaryCounts['empty_rows']++;
@@ -98,7 +109,15 @@ class ProductImport implements ToCollection, WithHeadingRow
             if (!empty($errorMessages)) {
                 $this->invalidData[] = [
                     'row' => $index + 1,
-                    'data' => $rowArray,
+                    'data' => [
+                        'name' => $row['nama_produk'],
+                        'category' => $row['kategori_produk'],
+                        'code' => $row['kode_produk'],
+                        'quantity' => $row['jumlah_produk'],
+                        'unit' => $row['satuan_produk'],
+                        'price' => $row['harga_produk'],
+                        'description' => $row['deskripsi'],
+                    ],
                     'message' => $errorMessages
                 ];
                 continue;
@@ -109,8 +128,8 @@ class ProductImport implements ToCollection, WithHeadingRow
                 'nama_produk' => 'required|string|max:100|unique:products,name',
                 'kode_produk' => 'required|string|max:100',
                 'kategori_produk' => 'nullable|in:stuff,services',
-                'jumlah_produk' => 'required|numeric|min:0',
-                'satuan_produk' => 'required|in:box,pcs,unit',
+                'jumlah_produk' => 'required_if:kategori_produk,stuff|numeric|min:0|prohibited_if:kategori_produk,services',
+                'satuan_produk' => 'required_if:kategori_produk,stuff|in:box,pcs,unit|prohibited_if:kategori_produk,services',
                 'harga_produk' => 'required|numeric|min:0|max_digits:20',
                 'deskripsi' => 'required|string',
             ], [
@@ -123,11 +142,13 @@ class ProductImport implements ToCollection, WithHeadingRow
                 'kode_produk.max' => 'Kode terlalu panjang.',
                 'kategori_produk.required' => 'Kategori produk wajib diisi salah satu: stuff atau services.',
                 'kategori_produk.in' => 'Kategori produk harus pilih salah satu : stuff atau services.',
-                'jumlah_produk.required' => 'Jumlah wajib diisi.',
-                'jumlah_produk.numeric' => 'Jumlah harus berupa angka.',
-                'jumlah_produk.min' => 'Jumlah harus lebih dari 0.',
-                'satuan_produk.required' => 'Satuan produk wajib diisi.',
+                'jumlah_produk.required_if' => 'Jumlah produk wajib diisi.',
+                'jumlah_produk.numeric' => 'Jumlah produk harus berupa angka.',
+                'jumlah_produk.min' => 'Jumlah produk harus lebih dari 0.',
+                'jumlah_produk.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
+                'satuan_produk.required_if' => 'Satuan produk wajib diisi.',
                 'satuan_produk.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
+                'satuan_produk.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
                 'harga_produk.required' => 'Harga wajib diisi.',
                 'harga_produk.numeric' => 'Harga harus berupa angka.',
                 'harga_produk.min' => 'Harga harus lebih dari 0.',
@@ -137,7 +158,15 @@ class ProductImport implements ToCollection, WithHeadingRow
             if ($validator->fails()) {
                 $this->invalidData[] = [
                     'row' => $index + 1,
-                    'data' => $rowArray,
+                    'data' => [
+                        'name' => $row['nama_produk'],
+                        'category' => $row['kategori_produk'],
+                        'code' => $row['kode_produk'],
+                        'quantity' => $row['jumlah_produk'],
+                        'unit' => $row['satuan_produk'],
+                        'price' => $row['harga_produk'],
+                        'description' => $row['deskripsi'],
+                    ],
                     'message' => $validator->errors()->all()
                 ];
                 $this->summaryCounts['validation_errors']++;
@@ -172,4 +201,16 @@ class ProductImport implements ToCollection, WithHeadingRow
             return !is_null($value) && $value !== '';
         }));
     }
+
+    public function headingRowValidator($row)
+    {
+        $expectedHeadings = ['nama_produk', 'kode_produk','kategori_produk', 'jumlah_produk', 'satuan_produk', 'harga_produk', 'deskripsi'];
+        $fileHeadings = array_keys($row->toArray());
+
+        // Cek apakah semua heading sesuai dengan yang diharapkan
+        if ($fileHeadings !== $expectedHeadings) {
+            throw new \Exception('File tidak sesuai dengan template yang diberikan.');
+        }
+    }
+
 }

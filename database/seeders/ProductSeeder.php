@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614171004',
             'name' => 'Pensil',
-            'category' => 'Alat Tulis Kantor',
+            'category' => 'stuff',
             'code' => 'PEN-001',
             'quantity' => 10,
             'unit' => 'pcs',
@@ -27,7 +27,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614172004',
             'name' => 'Pulpen',
-            'category' => 'Alat Tulis Kantor',
+            'category' => 'stuff',
             'code' => 'BOL-001',
             'quantity' => 10,
             'unit' => 'pcs',
@@ -38,7 +38,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614173004',
             'name' => 'Bantal',
-            'category' => 'Perabotan',
+            'category' => 'stuff',
             'code' => 'BAN-001',
             'quantity' => 10,
             'unit' => 'pcs',
