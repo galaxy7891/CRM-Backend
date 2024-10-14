@@ -130,8 +130,8 @@ class UserController extends Controller
             $user = User::updateCustomer($request->all(), $id);
 
             return new ApiResponseResource(
-                true,
-                "Data User {$user->first_name}{$user->last_name} Berhasil Diubah!",
+                true, 
+                `Data User {$user->first_name}{$user->last_name} Berhasil Diubah!`,
                 $user
             );
         } catch (\Exception $e) {
@@ -331,6 +331,48 @@ class UserController extends Controller
 
         $organizationsCount = Organization::countOrganization($user->email);
 
+        $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
+        $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
+        $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
+        $dealsWon = Deal::countDealsByStage($user->email, 'won');
+        $dealsLost = Deal::countDealsByStage($user->email, 'lose');
+
+        return new ApiResponseResource(
+            true,
+            $greetingMessage,
+            [
+                'user' => $nama,
+                'leads' => $leadsCount,
+                'contacts' => $contactsCount,
+                'organizations' => $organizationsCount,
+                'deals_pipeline' => [
+                    'qualification' => $dealsQualification,
+                    'proposal' => $dealsProposal,
+                    'negotiation' => $dealsNegotiation,
+                    'won' => $dealsWon,
+                    'lose' => $dealsLost,
+                ]
+            ]
+        );
+    }
+
+    /**
+     * Get Summary data for dashboard user
+     *
+     * @return \Illuminate\Http\JsonResponse 
+     */
+    public function getSummary()
+    {
+        $user = auth()->user();
+        $nama = $user->first_name . ' ' . $user->last_name;
+
+        $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting() . ', ' . $nama;
+
+        $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
+        $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
+
+        $organizationsCount = Organization::countOrganization($user->email);
+        
         $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
         $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
         $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
