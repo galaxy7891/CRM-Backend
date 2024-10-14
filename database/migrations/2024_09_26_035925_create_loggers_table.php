@@ -15,7 +15,7 @@ class CreateLoggersTable extends Migration
     {
         Schema::create('loggers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
+            $table->uuid('user_id')->nullable();
             $table->string('table_name', 100);
             $table->string('action', 255);
             $table->text('description')->nullable();

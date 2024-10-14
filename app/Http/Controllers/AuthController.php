@@ -51,7 +51,6 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -59,7 +58,6 @@ class AuthController extends Controller
                 $e->getMessage(),
                 null,
             );
-
         }
     }
 
@@ -75,7 +73,7 @@ class AuthController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'password' => 'required',
-            'phone' => 'required|numeric|max_digits:15|unique:users, phone',
+            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'required|max:50',
             'name' => 'required|max:100',
             'industry' => 'required|max:50',
@@ -128,7 +126,6 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
-            
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -136,7 +133,6 @@ class AuthController extends Controller
                 $e->getMessage(),
                 null,
             );
-
         }
     }
 
@@ -178,7 +174,6 @@ class AuthController extends Controller
                 $e->getMessage(),
                 null,
             );
-
         }
     }
 
@@ -197,7 +192,6 @@ class AuthController extends Controller
                 'Logout berhasil',
                 null,
             );
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -205,7 +199,6 @@ class AuthController extends Controller
                 $e->getMessage(),
                 null,
             );
-
         }
     }
 

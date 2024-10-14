@@ -40,17 +40,17 @@ class OtpController extends Controller
             );
         }
 
-        $recentOTP = Otp::getRecentOTP($request->email);
+        // $recentOTP = Otp::getRecentOTP($request->email);
 
-        if ($recentOTP) {
-            $remainingTime = Otp::getRemainingTime($recentOTP);
+        // if ($recentOTP) {
+        //     $remainingTime = Otp::getRemainingTime($recentOTP);
 
-            return new ApiResponseResource(
-                false,
-                'Kirim ulang kode otp dalam ' . `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
-                null
-            );
-        }
+        //     return new ApiResponseResource(
+        //         false,
+        //         'Kirim ulang kode otp dalam ' . `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+        //         null
+        //     );
+        // }
 
         try {
 
@@ -115,7 +115,7 @@ class OtpController extends Controller
             if (!$otp) {
                 return new ApiResponseResource(
                     false,
-                    'Kode OTP invalid atau OTP telah digunakan atau hangus.',
+                    'Kode OTP salah atau telah kadaluwarsa.',
                     null
                 );
             }
