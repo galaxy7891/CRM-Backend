@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -60,6 +59,18 @@ class Organization extends Model
         return $this->hasMany(Customer::class, 'id');
     }
 
+    /**
+     * Count Organization Owned
+     * 
+     * @param string $email
+     * @param string $category
+     * @return int
+     */
+    public static function countOrganization($email)
+    {
+        return self::where('owner', $email)
+            ->count();
+    }
 
     public static function createOrganization(array $data): self
     {

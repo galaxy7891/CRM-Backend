@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-
+use App\Imports\CustomersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
@@ -61,6 +62,7 @@ class CustomerController extends Controller
             'phone' => 'nullable|numeric|max_digits:15|unique:customers,phone',
             'owner' => 'required|email|max:100',
             'country' => 'nullable|string|max:50',
+            'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'subdistrict' => 'nullable|string|max:100',
             'village' => 'nullable|string|max:100',
@@ -93,6 +95,8 @@ class CustomerController extends Controller
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',
             'country.max' => 'Asal negara maksimal 50 karakter.',
+            'province.string' => 'Provinsi harus berupa teks.',
+            'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
             'city.max' => 'Kota maksimal 100 karakter.',
             'subdistrict.string' => 'Kecamatan harus berupa teks.',
@@ -317,6 +321,7 @@ class CustomerController extends Controller
                 "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!",
                 null
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -325,4 +330,7 @@ class CustomerController extends Controller
             );
         }
     }
+
+    
+
 }

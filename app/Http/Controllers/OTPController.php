@@ -47,7 +47,7 @@ class OtpController extends Controller
 
         //     return new ApiResponseResource(
         //         false,
-        //         'Kirim ulang kode otp dalam ' . `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+        //         'Kirim ulang kode otp dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
         //         null
         //     );
         // }

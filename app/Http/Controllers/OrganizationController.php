@@ -56,6 +56,7 @@ class OrganizationController extends Controller
             'website' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100',
             'country' => 'nullable|string|max:50',
+            'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'subdistrict' => 'nullable|string|max:100',
             'village' => 'nullable|string|max:100',
@@ -83,6 +84,8 @@ class OrganizationController extends Controller
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',
             'country.max' => 'Asal negara maksimal 50 karakter.',
+            'province.string' => 'Provinsi harus berupa teks.',
+            'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
             'city.max' => 'Kota maksimal 100 karakter.',
             'subdistrict.string' => 'Kecamatan harus berupa teks.',
@@ -90,13 +93,10 @@ class OrganizationController extends Controller
             'village.string' => 'Desa/Kelurahan harus berupa teks.',
             'village.max' => 'Desa/Kelurahan maksimal 100 karakter.',
             'zip_code.string' => 'Kode pos harus berupa teks.',
-            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
+            'zip_code.max' => 'Kode pos maksimal 5 karakter.',
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
-
-
-        //check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -109,7 +109,7 @@ class OrganizationController extends Controller
             $organization = Organization::createOrganization($request->all());
             return new ApiResponseResource(
                 true,
-                `Data {$organization->name} Berhasil Ditambahkan!`, 
+                "Data {$organization->name} Berhasil Ditambahkan!", 
                 $organization
             );
 
@@ -198,6 +198,7 @@ class OrganizationController extends Controller
             'website' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100',
             'country' => 'nullable|string|max:50',
+            'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'subdistrict' => 'nullable|string|max:100',
             'village' => 'nullable|string|max:100',
@@ -225,6 +226,8 @@ class OrganizationController extends Controller
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',
             'country.max' => 'Asal negara maksimal 50 karakter.',
+            'province.string' => 'Provinsi harus berupa teks.',
+            'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
             'city.max' => 'Kota maksimal 100 karakter.',
             'subdistrict.string' => 'Kecamatan harus berupa teks.',
@@ -232,12 +235,10 @@ class OrganizationController extends Controller
             'village.string' => 'Desa/Kelurahan harus berupa teks.',
             'village.max' => 'Desa/Kelurahan maksimal 100 karakter.',
             'zip_code.string' => 'Kode pos harus berupa teks.',
-            'zip_code.max' => 'Kode pos maksimal 10 karakter.',
+            'zip_code.max' => 'Kode pos maksimal 5 karakter.',
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
-
-        //check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false, 
@@ -295,7 +296,7 @@ class OrganizationController extends Controller
             // Return response with first and last name
             return new ApiResponseResource(
                 true,
-                `Organization {$organization->name} Berhasil Dihapus!`,
+                "Organization {$organization->name} Berhasil Dihapus!",
                 null
             );
 

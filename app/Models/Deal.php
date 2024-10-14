@@ -72,10 +72,23 @@ class Deal extends Model
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
     }
 
+    /**
+     * Count Deals User by Stage
+     * 
+     * @param string $email
+     * @param string $stage
+     * @return int
+     */
+    public static function countDealsByStage($email, $stage)
+    {
+        return self::where('owner', $email)
+            ->where('stage', $stage)
+            ->count();
+    }
+
     public static function createDeal(array $data): self
     {
         return self::create([
-            'id' => Str::uuid(),
             'customer_id' => $data['customer_id'],
             'name' => $data['name'],
             'deals_customer' => $data['deals_customer'],

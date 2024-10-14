@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateForgetPassword;
+use App\Models\Customer;
+use App\Models\Deal;
+use App\Models\Organization;
 use App\Models\PasswordResetToken;
 use App\Models\User;
 
@@ -31,7 +34,6 @@ class UserController extends Controller
                 $users
             );
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -62,7 +64,6 @@ class UserController extends Controller
                 $user
             );
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -130,7 +131,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                `Data User {$user->first_name}{$user->last_name} Berhasil Diubah!`,
+                "Data User {$user->first_name}{$user->last_name} Berhasil Diubah!",
                 $user
             );
         } catch (\Exception $e) {
@@ -212,7 +213,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 false,
-                'Dapat mengirim ulang link reset password dalam ' .     `{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.`,
+                'Dapat mengirim ulang link reset password dalam ' .     "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -311,5 +312,47 @@ class UserController extends Controller
                 null
             );
         }
+    }
+
+    /**
+     * Get Summary data for dashboard user
+     *
+     * @return \Illuminate\Http\JsonResponse 
+     */
+    public function getSummary()
+    {
+        $user = auth()->user();
+        $nama = $user->first_name . ' ' . $user->last_name;
+
+        $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting() . ', ' . $nama;
+
+        $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
+        $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
+
+        $organizationsCount = Organization::countOrganization($user->email);
+
+        $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
+        $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
+        $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
+        $dealsWon = Deal::countDealsByStage($user->email, 'won');
+        $dealsLost = Deal::countDealsByStage($user->email, 'lose');
+
+        return new ApiResponseResource(
+            true,
+            $greetingMessage,
+            [
+                'user' => $nama,
+                'leads' => $leadsCount,
+                'contacts' => $contactsCount,
+                'organizations' => $organizationsCount,
+                'deals_pipeline' => [
+                    'qualification' => $dealsQualification,
+                    'proposal' => $dealsProposal,
+                    'negotiation' => $dealsNegotiation,
+                    'won' => $dealsWon,
+                    'lose' => $dealsLost,
+                ]
+            ]
+        );
     }
 }
