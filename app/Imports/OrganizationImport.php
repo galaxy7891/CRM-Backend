@@ -8,6 +8,8 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
+use function PHPUnit\Framework\isEmpty;
+
 class OrganizationImport implements ToCollection, WithHeadingRow
 {
     use Importable;
@@ -17,7 +19,6 @@ class OrganizationImport implements ToCollection, WithHeadingRow
     protected $validData = [];
     protected $summaryCounts = [
         'valid_data' => 0,
-        'empty_rows' => 0,
         'validation_errors' => 0,
         'duplicate_name' => 0,
         'duplicate_email' => 0,
@@ -65,67 +66,54 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
-            if (isset($row['status'])) {
-                $lowerStatus = strtolower($row['status']);
-                if (array_key_exists($lowerStatus, $statusMapping)) {
-                    $row['status'] = $statusMapping[$lowerStatus];
-                }
+            
+            if ($this->isEmptyRow($row)) {
+                continue;
             }
 
-            // Periksa apakah baris kosong
-            if ($this->isEmptyRow($row)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
-                    'data' => [
-                        'name' => $row['nama_perusahaan'] ?? null,
-                        'industry' => $row['jenis_industri'] ?? null,
-                        'email' => $row['email'] ?? null,
-                        'status' => $row['status'] ?? null,
-                        'phone' => $row['nomor_telepon'] ?? null,
-                        'owner' => $this->owner ?? null,
-                        'website' => $row['website'] ?? null,
-                        'address' => $row['alamat'] ?? null,
-                        'country' => $row['negara'] ?? null,
-                        'province' => $row['provinsi'] ?? null,
-                        'city' => $row['kota'] ?? null,
-                        'subdistrict' => $row['kecamatan'] ?? null,
-                        'village' => $row['kelurahan'] ?? null,
-                        'zip_code' => $row['kode_pos'] ?? null,
-                    ],
-                    'message' => 'Data kosong'
-                ];
-                $this->summaryCounts['empty_rows']++;
-                continue;
+            if (!empty($rowArray['status'])) {
+                if (isset($row['status'])) {
+                    $lowerStatus = strtolower($row['status']);
+                    if (array_key_exists($lowerStatus, $statusMapping)) {
+                        $row['status'] = $statusMapping[$lowerStatus];
+                    }
+                }
             }
 
             // Cari duplikat menggunakan hash map
             // Pengecekan nama perusahaan duplikat
-            if (isset($nameMap[$rowArray['nama_perusahaan']])) {
-                $errorMessages[] = 'Nama perusahaan sudah digunakan dalam file (duplikat di baris ' . ($nameMap[$rowArray['nama_perusahaan']] + 1) . ')';
-                $this->summaryCounts['duplicate_name']++;
-            } else {
-                $nameMap[$rowArray['nama_perusahaan']] = $index;
+            if (!empty($rowArray['nama_perusahaan'])) {
+                if (isset($nameMap[$rowArray['nama_perusahaan']])) {
+                    $errorMessages[] = 'Nama perusahaan sudah digunakan dalam file (duplikat di baris ' . ($nameMap[$rowArray['nama_perusahaan']] + 1) . ')';
+                    $this->summaryCounts['duplicate_name']++;
+                } else {
+                    $nameMap[$rowArray['nama_perusahaan']] = $index;
+                }
             }
 
             // Pengecekan email duplikat
-            if (isset($emailMap[$rowArray['email']])) {
-                $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
-                $this->summaryCounts['duplicate_email']++;
-            } else {
-                $emailMap[$rowArray['email']] = $index;
+            if (!empty($rowArray['email'])) {
+                if (isset($emailMap[$rowArray['email']])) {
+                    $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
+                    $this->summaryCounts['duplicate_email']++;
+                } else {
+                    $emailMap[$rowArray['email']] = $index;
+                }
             }
 
             // Pengecekan nomor telepon duplikat
-            if (isset($phoneMap[$rowArray['nomor_telepon']])) {
-                $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray['nomor_telepon']] + 1) . ')';
-                $this->summaryCounts['duplicate_phone']++;
-            } else {
-                $phoneMap[$rowArray['nomor_telepon']] = $index;
+            if (!empty($rowArray['nomor_telepon'])) {
+                if (isset($phoneMap[$rowArray['nomor_telepon']])) {
+                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray['nomor_telepon']] + 1) . ')';
+                    $this->summaryCounts['duplicate_phone']++;
+                } else {
+                    $phoneMap[$rowArray['nomor_telepon']] = $index;
+                }
             }
 
             // Cek jika baris secara keseluruhan duplikat
             $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey])) {
+            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
                 $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
                 $this->summaryCounts['duplicate_data']++;
             } else {
@@ -266,7 +254,21 @@ class OrganizationImport implements ToCollection, WithHeadingRow
     
     public function headingRowValidator($row)
     {
-        $expectedHeadings = ['nama_perusahaan', 'jenis_industri', 'email', 'status', 'nomor_telepon', 'website', 'alamat', 'negara', 'provinsi', 'kota','kecamatan', 'kelurahan', 'kode_pos'];
+        $expectedHeadings = [
+            'nama_perusahaan', 
+            'jenis_industri', 
+            'email', 
+            'status', 
+            'nomor_telepon', 
+            'website', 
+            'alamat', 
+            'negara', 
+            'provinsi', 
+            'kota',
+            'kecamatan', 
+            'kelurahan', 
+            'kode_pos'
+        ];
         $fileHeadings = array_keys($row->toArray());
 
         // Cek apakah semua heading sesuai dengan yang diharapkan

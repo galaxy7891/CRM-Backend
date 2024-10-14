@@ -61,9 +61,9 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Get the customers associated with the user.
      * Get the deals associated with the user.
-     * Get the loggers associated with the user.
+     * Get the activitylogs associated with the user.
      * 
-     * This defines a one-to-many relationship where the user can have multiple customers, deals, loggers.
+     * This defines a one-to-many relationship where the user can have multiple customers, deals, activitylogs.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -77,9 +77,9 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Deal::class, 'id');
     }
 
-    public function loggers()
+    public function activitylogs()
     {
-        return $this->hasMany(Logger::class, 'id');
+        return $this->hasMany(ActivityLog::class, 'id');
     }
 
     /**

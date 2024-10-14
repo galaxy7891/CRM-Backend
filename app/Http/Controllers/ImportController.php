@@ -11,7 +11,9 @@ use App\Models\Customer;
 use App\Models\Organization;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Claims\Custom;
 
 class ImportController extends Controller
 {
@@ -29,22 +31,26 @@ class ImportController extends Controller
 
             switch ($type) {
                 case 'customer':
-                    $import = new CustomerImport($user->email);
                     $model = Customer::class;
+                    $import = new CustomerImport($user->email);
                     break;
 
                 case 'organization':
                     $import = new OrganizationImport($user->email);
-                    $model = Organization::class;
+                    $model = 'organization';
                     break;
 
                 case 'product':
                     $import = new ProductImport($user->email);
-                    $model = Product::class;
+                    $model = 'product';
                     break;
 
                 default:
-                    return new ApiResponseResource(false, 'Invalid import type.', []);
+                    return new ApiResponseResource(
+                        false, 
+                        'Invalid import type.', 
+                        []
+                    );
             }
 
             Excel::import($import, $request->file('file'));
@@ -53,34 +59,48 @@ class ImportController extends Controller
             $invalidData = $import->getInvalidData();
             $summaryCounts = $import->getsummaryCounts();
 
+            $perPage = 25;
+            $page = LengthAwarePaginator::resolveCurrentPage();
+            $validDataPaginated = new LengthAwarePaginator(
+                array_slice($validData, ($page - 1) * $perPage, $perPage), 
+                count($validData), 
+                $perPage, 
+                $page, 
+                ['path' => LengthAwarePaginator::resolveCurrentPath()]
+            );
+            $invalidDataPaginated = new LengthAwarePaginator(
+                array_slice($invalidData, ($page - 1) * $perPage, $perPage), 
+                count($invalidData), 
+                $perPage, 
+                $page, 
+                ['path' => LengthAwarePaginator::resolveCurrentPath()]
+            );
+
             $data = [
-                'validData' => $validData,
-                'invalidData' => $invalidData,
+                'model' => $model,
+                'validData' => $validDataPaginated,
+                'invalidData' => $invalidDataPaginated,
                 'summaryCounts' => $summaryCounts,
             ];
 
             if (empty($invalidData)) {
+                foreach($validData as $row){
+                    $model::create($row);
+                }
 
                 return new ApiResponseResource(
                     true,
                     'Data aman dan tidak ditemukan data rusak.',
-                    [
-                        'validData' => $validData,
-                        'invalidData' => $invalidData,
-                        'summaryCounts' => $summaryCounts,
-                    ]
+                    $data
                 );
             }
 
             return new ApiResponseResource(
                 false,
                 'Terdapat data yang rusak',
-                [
-                    'validData' => $validData,
-                    'invalidData' => $invalidData,
-                    'summaryCounts' => $summaryCounts,
-                ]
+                $data
             );
+
         } catch(\Exception $e){
             return new ApiResponseResource(
                 false,

@@ -5,18 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-use App\Imports\CustomersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
-    /**
+    /** 
      * Display a listing of the resource.
-     *
+     *  
      * @return \Illuminate\Http\Response
-     */
+     */ 
 
     public function index()
     {
@@ -52,7 +50,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -73,7 +71,6 @@ class CustomerController extends Controller
             'first_name.required' => 'Nama depan wajib diisi',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang wajib diisi',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',
@@ -108,8 +105,6 @@ class CustomerController extends Controller
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
-
-        //check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -118,12 +113,11 @@ class CustomerController extends Controller
             );
         }
 
-        //create customer
         try {
             $customer = Customer::createCustomer($request->all());
             return new ApiResponseResource(
                 true, 
-                "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
+                "Data Customer {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
                 $customer
             );
 
@@ -142,8 +136,6 @@ class CustomerController extends Controller
     public function show($id)
     {
         try {
-
-            // Check if customer exists
             $customer = Customer::find($id);
             if (is_null($customer)) {
                 return new ApiResponseResource(
@@ -186,7 +178,7 @@ class CustomerController extends Controller
         if (!$customer) {
             return new ApiResponseResource(
                 false, 
-                'Customer tidak ditemukan',
+                'Data Customer tidak ditemukan',
                 null
             );
         }
@@ -204,7 +196,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -224,7 +216,6 @@ class CustomerController extends Controller
             'first_name.required' => 'Nama depan wajib diisi',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang wajib diisi',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',

@@ -12,14 +12,14 @@ class CreateCustomersTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->nullable();
             $table->string('first_name', 50);
-            $table->string('last_name', 50);
+            $table->string('last_name', 50)->nullable();
             $table->enum('customerCategory', ['leads', 'contact'])->default('leads');
             $table->string('job', 100)->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->date('birthdate')->nullable();
             $table->string('email', 100)->nullable();
-            $table->string('phone', 15)->nullable();
+            $table->string('phone', 15);
             $table->string('owner', 100);
             $table->string('address', 100)->nullable();
             $table->string('country', 50)->nullable();

@@ -93,7 +93,7 @@ class UserController extends Controller
             'company_id' => 'nullable|uuid',
             'email' => 'required|email|unique:users,email',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'phone' => 'required|numeric|max_digits:15|unique:users, phone',
             'job_position' => 'required|max:50',
             'role' => 'required|in:super_admin,admin,employee',
