@@ -115,7 +115,7 @@ class OtpController extends Controller
             if (!$otp) {
                 return new ApiResponseResource(
                     false,
-                    'Kode OTP invalid atau OTP telah digunakan atau hangus.',
+                    'Kode OTP salah atau telah kadaluwarsa.',
                     null
                 );
             }
