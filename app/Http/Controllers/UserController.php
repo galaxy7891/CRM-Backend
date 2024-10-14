@@ -29,11 +29,10 @@ class UserController extends Controller
             $users = User::latest()->paginate(25);
 
             return new ApiResponseResource(
-                true, 
-                'Daftar Customer',                  
+                true,
+                'Daftar Customer',
                 $users
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -50,7 +49,7 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-            
+
             if (!$user) {
                 return new ApiResponseResource(
                     false,
@@ -64,7 +63,6 @@ class UserController extends Controller
                 'Data User Ditemukan!',
                 $user
             );
-        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -130,13 +128,12 @@ class UserController extends Controller
 
         try {
             $user = User::updateCustomer($request->all(), $id);
-            
+
             return new ApiResponseResource(
                 true, 
-                "Data User {$user->first_name}{$user->last_name} Berhasil Diubah!",
+                `Data User {$user->first_name}{$user->last_name} Berhasil Diubah!`,
                 $user
             );
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -162,17 +159,16 @@ class UserController extends Controller
                     null
                 );
             }
-            
+
             $first_name = $customer->first_name;
             $last_name = $customer->last_name;
             $customer->delete();
 
             return new ApiResponseResource(
-                true, 
+                true,
                 "Customer {$first_name} {$last_name} Berhasil Dihapus!",
                 null
             );
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -180,7 +176,6 @@ class UserController extends Controller
                 $e->getMessage(),
                 null
             );
-
         }
     }
 
@@ -202,18 +197,18 @@ class UserController extends Controller
             'email.exists' => 'Email belum terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
         ]);
-        
-        if($validator->fails()){
+
+        if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
                 $validator->errors(),
                 null
-            );          
+            );
         }
 
         $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($request->email);
 
-        if ($recentResetPassword){
+        if ($recentResetPassword) {
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
 
             return new ApiResponseResource(
@@ -221,14 +216,13 @@ class UserController extends Controller
                 'Dapat mengirim ulang link reset password dalam ' .     "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
-
         }
 
         try {
 
             $email = $request->email;
             $token = Str::uuid()->toString();
-            
+
             $user = User::findByEmail($email);
             $nama = $user->first_name . ' ' . $user->last_name;
 
@@ -236,10 +230,11 @@ class UserController extends Controller
                 'email' => $email,
                 'token' => $token
             ];
-            
-            $url = url('/reset-password?email=' . urlencode($email) . '&token=' . $token);
+
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $url = $frontendUrl . '/reset-password?email=' . urlencode($email) . '&token=' . $token;
             Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama));
-            
+
             PasswordResetToken::createPasswordResetToken($dataUser);
 
             return new ApiResponseResource(
@@ -249,7 +244,6 @@ class UserController extends Controller
                     'email' => $email
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -283,11 +277,11 @@ class UserController extends Controller
             'new_password.min' => 'Password baru minimal 8 digit'
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
                 $validator->errors(),
-                null 
+                null
             );
         }
 
@@ -304,21 +298,19 @@ class UserController extends Controller
             $user = User::findByEmail($request->email);
             $user->updatePassword($request->new_password);
             PasswordResetToken::deletePasswordResetToken($request->email);
-    
+
             return new ApiResponseResource(
                 true,
                 'Password berhasil diubah.',
-                null 
+                null
             );
-
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
 
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
-            );  
-
+            );
         }
     }
 
@@ -338,7 +330,7 @@ class UserController extends Controller
         $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
 
         $organizationsCount = Organization::countOrganization($user->email);
-        
+
         $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
         $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
         $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
