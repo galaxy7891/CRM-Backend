@@ -336,6 +336,7 @@ class UserController extends Controller
         $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
         $dealsWon = Deal::countDealsByStage($user->email, 'won');
         $dealsLost = Deal::countDealsByStage($user->email, 'lose');
+        $dealsValue = Deal::sumValueEstimatedByStage($user->email);
 
         return new ApiResponseResource(
             true,
@@ -345,13 +346,17 @@ class UserController extends Controller
                 'leads' => $leadsCount,
                 'contacts' => $contactsCount,
                 'organizations' => $organizationsCount,
-                'deals_pipeline' => [
-                    'qualification' => $dealsQualification,
-                    'proposal' => $dealsProposal,
-                    'negotiation' => $dealsNegotiation,
-                    'won' => $dealsWon,
-                    'lose' => $dealsLost,
-                ]
+                'deals_pipeline' => [ 
+                    'count' => [
+                        'qualification' => $dealsQualification,
+                        'proposal' => $dealsProposal,
+                        'negotiation' => $dealsNegotiation,
+                        'won' => $dealsWon,
+                        'lose' => $dealsLost
+                    ],
+                    'value' => $dealsValue
+                ],
+                'date' => now()->format('Y:m:d H:i:s')
             ]
         );
     }

@@ -21,7 +21,8 @@ class CreateDealsTable extends Migration
             $table->date('open_date');
             $table->date('close_date')->nullable();
             $table->date('expected_close_date');
-            $table->decimal('payment_expected', 20, 2)->nullable();
+            $table->decimal('value_estimated', 20, 2);
+            $table->decimal('value_actual', 20, 2)->nullable();
             $table->enum('payment_category', ['once', 'daily', 'monthly', 'yearly']);
             $table->integer('payment_duration')->nullable();
             $table->string('owner', 100);

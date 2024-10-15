@@ -17,10 +17,12 @@ class ModelChangeLoggerHelper
         $changes = [];
         foreach ($changedAttributes as $attribute => $newValue) {
             $oldValue = $originalAttributes[$attribute] ?? null;
-            $changes[$attribute] = [
-                'old' => $oldValue,
-                'new' => $newValue,
-            ];
+            if ($oldValue !== $newValue) {
+                $changes[$attribute] = [
+                    'old' => $oldValue,
+                    'new' => $newValue,
+                ];
+            }
         }
 
         return $changes;

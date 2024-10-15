@@ -4,34 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\ActivityLog;
-use App\Models\Customer;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * 
+     * @param ActivityLogService $activityLogService
      */
-    public function index()
+    public function index(ActivityLogService $activityLogService)
     {
         try {
-            $user = auth()->user();
-
-            if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->id)->latest()->paginate(25);
-            } else {
-                $customers = Customer::latest()->paginate(25);
-            }
-
+            $result = $activityLogService->getFormattedLogs();
+    
             return new ApiResponseResource(
                 true,
-                'Daftar Customer',
-                $customers
+                'Daftar Aktivitas',
+                $result
             );
+        }
 
-        } catch (\Exception $e) {
+        catch (\Exception $e){
             return new ApiResponseResource(
-                true,
+                false,
                 $e->getMessage(),
                 null
             );

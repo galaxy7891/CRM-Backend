@@ -6,6 +6,7 @@ use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class ActivityLog extends Model
 {
@@ -43,7 +44,27 @@ class ActivityLog extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public static function getPaginatedLogs()
+    {
+        return self::with('user:id,first_name,last_name')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(25);
+    }
+    
+    public static function getLogsGroupedByMonth()
+    {
+        $paginatedLogs = self::getPaginatedLogs();
+        $logs = $paginatedLogs->getCollection()->groupBy(function ($log) {
+            return Carbon::parse($log->updated_at)->format('F Y');
+        });
+
+        return [
+            'paginatedLogs' => $paginatedLogs,
+            'logs' => $logs
+        ];
     }
 }
 

@@ -13,14 +13,14 @@ class ProductObserver
      */
     public function created(Product $product): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($product);
+        // $changes = ModelChangeLoggerHelper::getModelChanges($product);
 
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'model_name' => 'products',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        // ActivityLog::create([
+        //     'user_id' => auth()->id(),
+        //     'model_name' => 'products',
+        //     'action' => 'CREATE',
+        //     'changes' => $changes ? json_encode($changes) : null,
+        // ]);
     }
 
     /**

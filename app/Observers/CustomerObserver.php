@@ -15,14 +15,14 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+        // $changes = ModelChangeLoggerHelper::getModelChanges($customer);
 
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'model_name' => 'customers',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        // ActivityLog::create([
+        //     'user_id' => auth()->id(),
+        //     'model_name' => 'customers',
+        //     'action' => 'CREATE',
+        //     'changes' => $changes ? json_encode($changes) : null,
+        // ]);
     }
 
     /**

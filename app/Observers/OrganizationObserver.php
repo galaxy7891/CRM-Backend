@@ -13,14 +13,14 @@ class OrganizationObserver
      */
     public function created(Organization $organization): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($organization);
+        // $changes = ModelChangeLoggerHelper::getModelChanges($organization);
 
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'model_name' => 'organizations',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        // ActivityLog::create([
+        //     'user_id' => auth()->id(),
+        //     'model_name' => 'organizations',
+        //     'action' => 'CREATE',
+        //     'changes' => $changes ? json_encode($changes) : null,
+        // ]);
     }
 
     /**

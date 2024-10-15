@@ -127,7 +127,6 @@ class AuthController extends Controller
 
             return $this->respondWithToken($token);
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -167,8 +166,8 @@ class AuthController extends Controller
             $token = auth()->login($user);
 
             return $this->respondWithToken($token);
-        } catch (\Exception $e) {
 
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),

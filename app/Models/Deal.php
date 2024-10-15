@@ -28,7 +28,8 @@ class Deal extends Model
         'open_date',
         'close_date',
         'expected_close_date',
-        'payment_expected',
+        'value_estimated',
+        'value_actual',
         'payment_category',
         'payment_duration',
         'owner',
@@ -37,16 +38,12 @@ class Deal extends Model
         'deleted_at',
     ];
 
-
-
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'open_date', 'close_date', 'expected_close_date'];
-
-
 
     /**
      * Get the customer that owns the deal.
@@ -66,7 +63,6 @@ class Deal extends Model
     {
         return $this->belongsTo(User::class, 'id');
     }
-
     public function products()
     {
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
@@ -86,6 +82,35 @@ class Deal extends Model
             ->count();
     }
 
+    /**
+     * Get total value_estimated for each stage.
+     * 
+     * @param string $email
+     * @return \Illuminate\Support\Collection
+     */
+    public static function sumValueEstimatedByStage($email)
+    {
+        $results = self::select('stage', \Illuminate\Support\Facades\DB::raw("
+                SUM(
+                    CASE 
+                        WHEN stage = 'won' THEN value_actual 
+                        ELSE value_estimated 
+                    END
+                ) as total_value
+            "))
+            ->where('owner', $email)
+            ->groupBy('stage')
+            ->pluck('total_value', 'stage');
+
+        return [
+            'qualification' => $results->get('qualificated', 0),
+            'proposal' => $results->get('proposal', 0),
+            'negotiation' => $results->get('negotiate', 0),
+            'won' => $results->get('won', 0),
+            'lose' => $results->get('lose', 0),
+        ];
+    }
+
     public static function createDeal(array $data): self
     {
         return self::create([
@@ -93,12 +118,12 @@ class Deal extends Model
             'name' => $data['name'],
             'deals_customer' => $data['deals_customer'],
             'description' => $data['description'] ?? null,
-            'tag' => $data['tag'],
+            'tag' => $data['tag'] ?? null,
             'stage' => $data['stage'],
             'open_date' => $data['open_date'],
             'close_date' => $data['close_date'] ?? null,
             'expected_close_date' => $data['expected_close_date'],
-            'payment_expected' => $data['payment_expected'] ?? null,
+            'value_estimated' => $data['value_estimated'] ?? null,
             'payment_category' => $data['payment_category'],
             'payment_duration' => $data['payment_duration'] ?? null,
             'owner' => $data['owner'],

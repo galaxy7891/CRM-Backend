@@ -36,16 +36,12 @@ class Organization extends Model
         'deleted_at',
     ];
 
-
-
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-
-
 
     /**
      * Get the customers associated with the organization.
@@ -63,7 +59,6 @@ class Organization extends Model
      * Count Organization Owned
      * 
      * @param string $email
-     * @param string $category
      * @return int
      */
     public static function countOrganization($email)
@@ -90,6 +85,7 @@ class Organization extends Model
             'zip_code' => $data['zip_code'] ?? null
         ]);
     }
+
     public static function updateOrganization(array $data, $id): self
     {
         $organization = self::findOrFail($id);

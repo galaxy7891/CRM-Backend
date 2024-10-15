@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
@@ -41,6 +42,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
+        Route::get('/activity/log', [ActivityLogController::class, 'index']);
         Route::post('/import/{type}', [ImportController::class, 'import']);
         Route::apiResource('/customers', CustomerController::class);
         Route::apiResource('/organizations', OrganizationController::class);
