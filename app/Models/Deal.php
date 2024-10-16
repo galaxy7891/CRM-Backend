@@ -56,12 +56,12 @@ class Deal extends Model
      */
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'id');
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'owner', 'email');
     }
     public function products()
     {

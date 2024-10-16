@@ -24,7 +24,7 @@ class ImportController extends Controller
             $request->validate([
                 'file' => 'required|mimes:xlsx,csv|max:2048',
             ], [
-                'file.required' => 'File wajib diisi.',
+                'file.required' => 'File tidak boleh kosong.',
                 'file.mimes' => 'File harus sesuai format.',
                 'file.max' => 'Ukuran file maksimal 2mb.',
             ]);

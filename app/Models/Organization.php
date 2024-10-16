@@ -52,7 +52,7 @@ class Organization extends Model
      */
     public function customers()
     {
-        return $this->hasMany(Customer::class, 'id');
+        return $this->hasMany(Customer::class, 'organization_id', 'id');
     }
 
     /**

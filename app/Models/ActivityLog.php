@@ -3,14 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 class ActivityLog extends Model
 {
-    use HasFactory, SoftDeletes, HasUuid;
+    use SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.

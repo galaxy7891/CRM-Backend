@@ -26,7 +26,7 @@ class OtpController extends Controller
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email|unique:users,email|max:100',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
@@ -47,7 +47,7 @@ class OtpController extends Controller
 
             return new ApiResponseResource(
                 false,
-                'Kirim ulang kode otp dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                "Kirim ulang kode otp dalam {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -90,10 +90,10 @@ class OtpController extends Controller
             'email' => 'required|email|max:100',
             'code' => 'required|numeric|digits:6',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.email' => 'Email maksimal 100 karakter',
-            'code.required' => 'Code OTP wajib diisi',
+            'code.required' => 'Code OTP tidak boleh kosong',
             'code.numeric' => 'Code OTP harus berupa angka',
             'code.digits' => 'Code OTP harus 6 digit'
         ]);

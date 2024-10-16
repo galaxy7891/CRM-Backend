@@ -41,7 +41,7 @@ class UserInvitation extends Model
      */
     public function inviter()
     {
-        return $this->belongsTo(User::class, 'email');
+        return $this->belongsTo(User::class, 'invited_by', 'email');
     }
 
     /**

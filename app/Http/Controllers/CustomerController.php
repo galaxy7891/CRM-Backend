@@ -22,9 +22,12 @@ class CustomerController extends Controller
             $user = auth()->user();
 
             if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->id)->latest()->paginate(25);
+                $customers = Customer::where('owner', $user->id)
+                    ->latest()
+                    ->paginate(25);
             } else {
-                $customers = Customer::latest()->paginate(25);
+                $customers = Customer::latest()
+                    ->paginate(25);
             }
 
             return new ApiResponseResource(
@@ -68,7 +71,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string|max:100',
         ], [
             'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
@@ -87,7 +90,7 @@ class CustomerController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'owner.required' => 'Pemilik kontak wajib diisi.',
+            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',
@@ -213,7 +216,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string|max:100',
         ], [
             'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
@@ -232,7 +235,7 @@ class CustomerController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'owner.required' => 'Pemilik kontak wajib diisi.',
+            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',

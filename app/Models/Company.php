@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use HasFactory, SoftDeletes, HasUuid;
+    use SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -38,7 +37,6 @@ class Company extends Model
 
     /**
      * Get the users associated with the company.
-     * Get the customers associated with the company.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers.
      * 
@@ -46,12 +44,7 @@ class Company extends Model
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'id');
-    }
-
-    public function customers()
-    {
-        return $this->hasMany(Customer::class, 'id');
+        return $this->hasMany(User::class, 'company_id', 'id');
     }
 
     /**

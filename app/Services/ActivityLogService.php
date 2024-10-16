@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use App\Helpers\ActionMapperHelper;
-use App\Http\Resources\ApiResponseResource;
 
 class ActivityLogService
 {

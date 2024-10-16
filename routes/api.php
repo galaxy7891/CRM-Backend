@@ -9,6 +9,7 @@ use App\Http\Controllers\DealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserInvitationController;
@@ -48,14 +49,15 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('/organizations', OrganizationController::class);
         Route::apiResource('/products', ProductController::class);
         Route::apiResource('/deals', DealController::class);
+        Route::get('/user', [UserController::class, 'index']);
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
-            Route::put('/users/{id}', [ProductController::class, 'update']);
-            Route::delete('/users/{id}', [UserController::class, 'destroy']);
+            Route::put('/employee/{id}', [EmployeeController::class, 'update']);
+            Route::delete('/employee/{id}', [EmployeeController::class, 'destroy']);
         });
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin, admin'], function () {
             Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
-            Route::get('/users', [UserController::class, 'index']);
-            Route::get('/users/{id}', [UserController::class, 'show']);
+            Route::get('/employee', [EmployeeController::class, 'index']);
+            Route::get('/employee/{id}', [EmployeeController::class, 'show']);
         });
     });
 });
