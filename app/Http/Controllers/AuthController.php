@@ -71,7 +71,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'password' => 'required',
             'phone' => 'required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'required|max:50',
@@ -84,7 +84,6 @@ class AuthController extends Controller
             'first_name.required' => 'Nama depan wajib diisi',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang wajib diisi',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'password.required' => 'Password wajib diisi',
@@ -162,13 +161,19 @@ class AuthController extends Controller
 
             $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
 
-            $user = User::createOrUpdateGoogleUser($googleUser, $nameParts);
-
-            $token = auth()->login($user);
-
-            return $this->respondWithToken($token);
+            return new ApiResponseResource(
+                true,
+                'Data User Google',
+                [
+                    'email' => $googleUser->email,
+                    'first_name' => $nameParts['first_name'],
+                    'last_name' => $nameParts['last_name'],
+                    'role' => 'super_admin',
+                    'photo' => $googleUser->avatar,
+                    'google_id' => $googleUser->id,
+                ]
+            );
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),

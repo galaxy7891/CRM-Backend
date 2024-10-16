@@ -34,7 +34,6 @@ class CustomerController extends Controller
                 'Daftar Customer',
                 $customers
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 true,
@@ -52,7 +51,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nulalable|string|max:50',
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -73,7 +72,6 @@ class CustomerController extends Controller
             'first_name.required' => 'Nama depan wajib diisi',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang wajib diisi',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',
@@ -122,14 +120,13 @@ class CustomerController extends Controller
         try {
             $customer = Customer::createCustomer($request->all());
             return new ApiResponseResource(
-                true, 
+                true,
                 "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -149,7 +146,7 @@ class CustomerController extends Controller
                 return new ApiResponseResource(
                     false,
                     'Data Customer Tidak Ditemukan!',
-                    null 
+                    null
                 );
             }
 
@@ -169,7 +166,7 @@ class CustomerController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -185,7 +182,7 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
         if (!$customer) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Customer tidak ditemukan',
                 null
             );
@@ -195,7 +192,7 @@ class CustomerController extends Controller
         $user = auth()->user();
         if ($user->role == 'employee' && $customer->owner !== $user->id) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Anda tidak memiliki akses untuk mengubah data customer ini!',
                 null
             );
@@ -204,7 +201,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -224,7 +221,6 @@ class CustomerController extends Controller
             'first_name.required' => 'Nama depan wajib diisi',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang wajib diisi',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'customerCategory.required' => 'Kategori pelanggan wajib dipilih.',
@@ -261,7 +257,7 @@ class CustomerController extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $validator->errors(),
                 null
             );
@@ -274,7 +270,6 @@ class CustomerController extends Controller
                 'Data Customer Berhasil Diubah!',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -317,11 +312,10 @@ class CustomerController extends Controller
 
             // Return response with first and last name
             return new ApiResponseResource(
-                true, 
+                true,
                 "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!",
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -330,7 +324,4 @@ class CustomerController extends Controller
             );
         }
     }
-
-    
-
 }

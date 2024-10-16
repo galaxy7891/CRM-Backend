@@ -90,12 +90,12 @@ class OtpController extends Controller
             'email' => 'required|email|max:100',
             'code' => 'required|numeric|digits:6',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.email' => 'Email maksimal 100 karakter',
-            'code.required' => 'Code OTP wajib diisi',
-            'code.numeric' => 'Code OTP harus berupa angka',
-            'code.digits' => 'Code OTP harus 6 digit'
+            'code.required' => 'Kode OTP tidak boleh kosong',
+            'code.numeric' => 'Kode OTP harus berupa angka',
+            'code.digits' => 'Kode OTP harus 6 digit'
         ]);
 
         if ($validator->fails()) {
