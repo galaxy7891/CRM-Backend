@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
-use App\Models\Logger;
+use App\Helpers\ModelChangeLoggerHelper;
+use App\Models\ActivityLog;
 use App\Models\Customer;
+
 use Illuminate\Support\Str;
 
 class CustomerObserver
@@ -13,13 +15,14 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        Logger::create([
-            'id' => Str::uuid(),
-            'user_id' => auth()->id(),
-            'table_name' => 'customers',
-            'action' => 'CREATE',
-            'description' => "Customer {$customer->first_name} {$customer->last_name} telah ditambahkan.",
-        ]);
+        // $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+
+        // ActivityLog::create([
+        //     'user_id' => auth()->id(),
+        //     'model_name' => 'customers',
+        //     'action' => 'CREATE',
+        //     'changes' => $changes ? json_encode($changes) : null,
+        // ]);
     }
 
     /**
@@ -27,12 +30,13 @@ class CustomerObserver
      */
     public function updated(Customer $customer): void
     {
-        Logger::create([
-            'id' => Str::uuid(),
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+
+        ActivityLog::create([
             'user_id' => auth()->id(),
-            'table_name' => 'customers',
+            'model_name' => 'customers',
             'action' => 'UPDATE',
-            'description' => "Customer {$customer->first_name} {$customer->last_name} telah diubah.",
+            'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
 
@@ -41,12 +45,13 @@ class CustomerObserver
      */
     public function deleted(Customer $customer): void
     {
-        Logger::create([
-            'id' => Str::uuid(),
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+
+        ActivityLog::create([
             'user_id' => auth()->id(),
-            'table_name' => 'customers',
+            'model_name' => 'customers',
             'action' => 'DELETE',
-            'description' => "Customer {$customer->first_name} {$customer->last_name} telah dihapus.",
+            'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
 

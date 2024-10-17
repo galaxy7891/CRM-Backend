@@ -26,7 +26,7 @@ class UserInvitationController extends Controller
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email|unique:users,email|max:100',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
@@ -105,15 +105,19 @@ class UserInvitationController extends Controller
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|string|min:8',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
-            'token.required' => 'Token wajib diisi',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'token.required' => 'Token tidak boleh kosong',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50  karakter',
+<<<<<<< HEAD
 
+=======
+            'last_name.required' => 'Nama belakang tidak boleh kosong',
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
         ]);

@@ -25,9 +25,9 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'password.required' => 'Password wajib diisi',
+            'password.required' => 'Password tidak boleh kosong',
         ]);
 
         if ($validator->fails()) {
@@ -69,33 +69,45 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'google_id' => 'nullable|string|unique:users,google_id',
             'email' => 'required|email|unique:users,email',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
+<<<<<<< HEAD
             'password' => 'required',
+=======
+            'password' => 'required|min:8',
+            'new_password' => 'required|min:8|same:password',
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'phone' => 'required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'required|max:50',
             'name' => 'required|max:100',
             'industry' => 'required|max:50',
+            'photo' => 'nullable|url',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'google_id.unique' => 'Akun Google sudah terdaftar',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
-            'password.required' => 'Password wajib diisi',
-            'phone.required' => 'Nomor telepon wajib diisi',
+            'password.required' => 'Password tidak boleh kosong',
+            'password.mnin' => 'Password tidak boleh kosong',
+            'new_password.required' => 'Password tidak boleh kosong',
+            'new_password.required' => 'Password tidak boleh kosong',
+            'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'job_position.required' => 'Posisi pekerjaan wajib diisi',
+            'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
-            'name' => 'Nama perusahaan wajib diisi',
-            'industry.required' => 'Jenis industri wajib diisi',
-            'industry.max' => 'Jenis industri maksimal 50 karakter'
+            'name' => 'Nama perusahaan tidak boleh kosong',
+            'industry.required' => 'Jenis industri tidak boleh kosong',
+            'industry.max' => 'Jenis industri maksimal 50 karakter',
+           'photo.url' => 'URL photo tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -125,8 +137,8 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
+            
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -164,7 +176,11 @@ class AuthController extends Controller
             return new ApiResponseResource(
                 true,
                 'Data User Google',
+<<<<<<< HEAD
                 [
+=======
+                [   
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
                     'email' => $googleUser->email,
                     'first_name' => $nameParts['first_name'],
                     'last_name' => $nameParts['last_name'],
@@ -173,6 +189,10 @@ class AuthController extends Controller
                     'google_id' => $googleUser->id,
                 ]
             );
+<<<<<<< HEAD
+=======
+
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

@@ -6,11 +6,10 @@ use App\Traits\HasUuid;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends Model
 {
-    use HasFactory, SoftDeletes, HasUuid;
+    use SoftDeletes, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -58,12 +57,12 @@ class Customer extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'owner', 'email');
     }
 
     public function organization()
     {
-        return $this->belongsTo(Organization::class, 'id');
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
     }
 
     /**
@@ -75,7 +74,7 @@ class Customer extends Model
      */
     public function deals()
     {
-        return $this->hasMany(Deal::class, 'id');
+        return $this->hasMany(Deal::class, 'customer_id', 'id');
     }
 
     /**
@@ -97,14 +96,14 @@ class Customer extends Model
         return self::create([
             'organization_id' => $data['organization_id'] ?? null,
             'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'last_name' => $data['last_name'] ?? null,
             'customerCategory' => $data['customerCategory'],
             'job' => $data['job'] ?? null,
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
             'birthdate' => $data['birthdate'] ?? null,
             'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
+            'phone' => $data['phone'],
             'owner' => $data['owner'],
             'address' => $data['address'] ?? null,
             'country' => $data['country'] ?? null,
@@ -121,14 +120,14 @@ class Customer extends Model
         $customer->fill([
             'organization_id' => $data['organization_id'] ?? null,
             'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'last_name' => $data['last_name'] ?? null,
             'customerCategory' => $data['customerCategory'],
             'job' => $data['job'] ?? null,
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
             'birthdate' => $data['birthdate'] ?? null,
             'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
+            'phone' => $data['phone'],
             'owner' => $data['owner'] ?? null,
             'address' => $data['address'] ?? null,
             'country' => $data['country'] ?? null,

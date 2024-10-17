@@ -5,18 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-use App\Imports\CustomersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
-    /**
+    /** 
      * Display a listing of the resource.
-     *
+     *  
      * @return \Illuminate\Http\Response
-     */
+     */ 
 
     public function index()
     {
@@ -24,9 +22,12 @@ class CustomerController extends Controller
             $user = auth()->user();
 
             if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->id)->latest()->paginate(25);
+                $customers = Customer::where('owner', $user->id)
+                    ->latest()
+                    ->paginate(25);
             } else {
-                $customers = Customer::latest()->paginate(25);
+                $customers = Customer::latest()
+                    ->paginate(25);
             }
 
             return new ApiResponseResource(
@@ -51,7 +52,11 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
+<<<<<<< HEAD
             'last_name' => 'nulalable|string|max:50',
+=======
+            'last_name' => 'nullable|string|max:50',
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -69,7 +74,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string|max:100',
         ], [
             'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
@@ -88,7 +93,7 @@ class CustomerController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'owner.required' => 'Pemilik kontak wajib diisi.',
+            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',
@@ -106,8 +111,6 @@ class CustomerController extends Controller
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
         ]);
-
-        //check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -116,12 +119,16 @@ class CustomerController extends Controller
             );
         }
 
-        //create customer
         try {
             $customer = Customer::createCustomer($request->all());
             return new ApiResponseResource(
+<<<<<<< HEAD
                 true,
                 "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
+=======
+                true, 
+                "Data Customer {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
                 $customer
             );
         } catch (\Exception $e) {
@@ -139,8 +146,6 @@ class CustomerController extends Controller
     public function show($id)
     {
         try {
-
-            // Check if customer exists
             $customer = Customer::find($id);
             if (is_null($customer)) {
                 return new ApiResponseResource(
@@ -182,8 +187,13 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
         if (!$customer) {
             return new ApiResponseResource(
+<<<<<<< HEAD
                 false,
                 'Customer tidak ditemukan',
+=======
+                false, 
+                'Data Customer tidak ditemukan',
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
                 null
             );
         }
@@ -218,7 +228,7 @@ class CustomerController extends Controller
             'address' => 'nullable|string|max:100',
         ], [
             'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
@@ -237,7 +247,7 @@ class CustomerController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'owner.required' => 'Pemilik kontak wajib diisi.',
+            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
             'country.string' => 'Asal negara harus berupa teks.',

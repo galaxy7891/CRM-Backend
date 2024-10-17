@@ -17,7 +17,6 @@ class CustomerImport implements ToCollection, WithHeadingRow
     protected $validData = [];
     protected $summaryCounts = [
         'valid_data' => 0,
-        'empty_rows' => 0,
         'validation_errors' => 0,
         'organization_not_found' => 0,
         'duplicate_email' => 0,
@@ -55,55 +54,60 @@ class CustomerImport implements ToCollection, WithHeadingRow
         $emailMap = []; 
         $phoneMap = []; 
         $rowMap = []; 
+        $statusMapping = [
+            'tinggi' => 'hot',
+            'sedang' => 'warm',
+            'rendah' => 'cold',
+        ];
+        $categoryMapping = [
+            'kontak' => 'contact'
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
 
             if ($this->isEmptyRow($row)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
-                    'data' => [
-                        'organization_name' => $row['nama_perusahaan'] ?? null,
-                        'first_name' => $row['nama_depan'] ?? null,
-                        'last_name' => $row['nama_belakang'] ?? null,
-                        'customerCategory' => $row['kategori_pelanggan'] ?? null,
-                        'job' => $row['pekerjaan'] ?? null,
-                        'description' => $row['deskripsi'] ?? null,
-                        'status' => $row['status'] ?? null,
-                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']) ?? null,
-                        'email' => $row['email'] ?? null,
-                        'phone' => $row['nomor_telepon'] ?? null,
-                        'owner' => $this->owner ?? null,
-                        'address' => $row['alamat'] ?? null,
-                        'country' => $row['negara'] ?? null,
-                        'province' => $row['provinsi'] ?? null,
-                        'city' => $row['kota'] ?? null,
-                        'subdistrict' => $row['kecamatan'] ?? null,
-                        'village' => $row['kelurahan'] ?? null,
-                        'zip_code' => $row['kode_pos'] ?? null,
-                    ],
-                    'message' => 'Data kosong'
-                ];
-                $this->summaryCounts['empty_rows']++;
                 continue;
+            }
+
+            if (!empty($rowArray['status'])) {
+                if (isset($row['status'])) {
+                    $lowerStatus = strtolower($row['status']);
+                    if (array_key_exists($lowerStatus, $statusMapping)) {
+                        $row['status'] = $statusMapping[$lowerStatus];
+                    }
+                }
+            }
+
+            if (!empty($rowArray['kategori_pelanggan'])) {
+                if (isset($row['kategori_pelanggan'])) {
+                    $lowerCategory = strtolower($row['kategori_pelanggan']);
+                    if (array_key_exists($lowerCategory, $categoryMapping)) {
+                        $row['kategori_pelanggan'] = $categoryMapping[$lowerCategory];
+                    }
+                }
             }
 
             // Cari duplikat menggunakan hash map
             // Pengecekan email duplikat
-            if (isset($emailMap[$rowArray['email']])) {
-                $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
-                $this->summaryCounts['duplicate_email']++;
-            } else {
-                $emailMap[$rowArray['email']] = $index;
+            if (!empty($rowArray['email'])) {
+                if (isset($emailMap[$rowArray['email']])) {
+                    $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
+                    $this->summaryCounts['duplicate_email']++;
+                } else {
+                    $emailMap[$rowArray['email']] = $index;
+                }
             }
 
             // Pengecekan nomor telepon duplikat
-            if (isset($phoneMap[$rowArray['nomor_telepon']])) {
-                $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray['nomor_telepon']] + 1) . ')';
-                $this->summaryCounts['duplicate_phone']++;
-            } else {
-                $phoneMap[$rowArray['nomor_telepon']] = $index;
+            if (!empty($rowArray['nomor_telepon'])) {
+                if (isset($phoneMap[$rowArray['nomor_telepon']])) {
+                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray    ['nomor_telepon']] + 1) . ')';
+                    $this->summaryCounts['duplicate_phone']++;
+                } else {
+                    $phoneMap[$rowArray['nomor_telepon']] = $index;
+                }
             }
 
             // Cek jika baris secara keseluruhan duplikat
@@ -145,16 +149,16 @@ class CustomerImport implements ToCollection, WithHeadingRow
             }
 
             // Validasi data menggunakan Validator
-            $validator = Validator::make($rowArray, [
+            $validator = Validator::make($row->toArray(), [
                 'nama_depan' => 'required|string|max:50',
-                'nama_belakang' => 'required|string|max:50',
+                'nama_belakang' => 'nullable|string|max:50',
                 'kategori_pelanggan' => 'required|in:leads,contact',
                 'pekerjaan' => 'nullable|string|max:100',
                 'deskripsi' => 'nullable|string',
                 'status' => 'required|in:hot,warm,cold',
                 'tanggal_lahir' => 'nullable|date',
                 'email' => 'nullable|email|unique:customers,email|max:100',
-                'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:customers,phone',
+                'nomor_telepon' => 'required|numeric|max_digits:15|unique:customers,phone',
                 'negara' => 'nullable|string|max:50',
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
@@ -166,7 +170,6 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'nama_depan.required' => 'Nama depan wajib diisi',
                 'nama_depan.string' => 'Nama depan harus berupa teks',
                 'nama_depan.max' => 'Nama depan maksimal 50 karakter',
-                'nama_belakang.required' => 'Nama belakang wajib diisi',
                 'nama_belakang.string' => 'Nama belakang harus berupa teks',
                 'nama_belakang.max' => 'Nama belakang maksimal 50 karakter',
                 'kategori_pelanggan.required' => 'Kategori pelanggan wajib diisi salah satu: leads atau contact.',
@@ -180,6 +183,7 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'email.max' => 'Email maksimal 100 karakter.',
+                'nomor_telepon.required' => 'Nomor telepon wajib diisi.',
                 'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka.',
                 'nomor_telepon.max_digits' => 'Nomor telepon maksimal 15 angka.',
                 'nomor_telepon.unique' => 'Nomor telepon sudah terdaftar.',
@@ -297,7 +301,25 @@ class CustomerImport implements ToCollection, WithHeadingRow
 
     public function headingRowValidator($row)
     {
-        $expectedHeadings = ['nama_perusahaan', 'nama_depan', 'nama_belakang', 'kategori_pelanggan', 'pekerjaan', 'deskripsi', 'status', 'tanggal_lahir', 'email', 'nomor_telepon','alamat', 'negara', 'provinsi', 'kota', 'kecamatan', 'kelurahan', 'kode_pos'];
+        $expectedHeadings = [
+            'nama_perusahaan', 
+            'nama_depan', 
+            'nama_belakang', 
+            'kategori_pelanggan', 
+            'pekerjaan', 
+            'deskripsi', 
+            'status', 
+            'tanggal_lahir', 
+            'email', 
+            'nomor_telepon',
+            'alamat', 
+            'negara', 
+            'provinsi', 
+            'kota', 
+            'kecamatan', 
+            'kelurahan', 
+            'kode_pos'
+        ];
         $fileHeadings = array_keys($row->toArray());
 
         if ($fileHeadings !== $expectedHeadings) {

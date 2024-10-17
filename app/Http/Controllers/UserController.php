@@ -11,6 +11,7 @@ use App\Models\PasswordResetToken;
 use App\Models\User;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -26,13 +27,10 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::latest()->paginate(25);
+            $user = auth()->user();
 
-            return new ApiResponseResource(
-                true,
-                'Daftar Customer',
-                $users
-            );
+            return $user->load('company');
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -48,27 +46,9 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = User::find($id);
 
-            if (!$user) {
-                return new ApiResponseResource(
-                    false,
-                    'Data User Tidak Ditemukan!',
-                    null
-                );
-            }
-
-            return new ApiResponseResource(
-                true,
-                'Data User Ditemukan!',
-                $user
-            );
         } catch (\Exception $e) {
-            return new ApiResponseResource(
-                false,
-                $e->getMessage(),
-                null
-            );
+
         }
     }
 
@@ -82,7 +62,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'User tidak ditemukan',
+                'Data user tidak ditemukan',
                 null
             );
         }
@@ -98,20 +78,19 @@ class UserController extends Controller
             'gender' => 'nullable|in:male,female,other',
         ], [
             'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
-            'first_name.required' => 'Nama depan wajib diisi',
+            'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
-            'phone.required' => 'Nomor telepon wajib diisi',
+            'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'job_position.required' => 'Posisi pekerjaan wajib diisi',
+            'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
@@ -127,13 +106,14 @@ class UserController extends Controller
         }
 
         try {
-            $user = User::updateCustomer($request->all(), $id);
 
+            $user = User::updateUser($request->all(), $id);
             return new ApiResponseResource(
-                true,
-                `Data User {$user->first_name}{$user->last_name} Berhasil Diubah!`,
+                true, 
+                "Data User {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $user
             );
+
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -151,26 +131,26 @@ class UserController extends Controller
     {
         try {
 
-            $customer = User::find($id);
-            if (!$customer) {
+            $user = User::find($id);
+            if (!$user) {
                 return new ApiResponseResource(
                     false,
-                    'Customer tidak ditemukan',
+                    'User tidak ditemukan',
                     null
                 );
             }
 
-            $first_name = $customer->first_name;
-            $last_name = $customer->last_name;
-            $customer->delete();
+            $first_name = $user->first_name;
+            $last_name = $user->last_name;
+            $user->delete();
 
             return new ApiResponseResource(
                 true,
-                "Customer {$first_name} {$last_name} Berhasil Dihapus!",
+                "User {$first_name} {$last_name} Berhasil Dihapus!",
                 null
             );
-        } catch (\Exception $e) {
 
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -192,7 +172,7 @@ class UserController extends Controller
         $validator = Validator::make($request->only('email'), [
             'email' => 'required|email|exists:users,email|max:100'
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.exists' => 'Email belum terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
@@ -213,7 +193,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 false,
-                'Dapat mengirim ulang link reset password dalam ' .     "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'Dapat mengirim ulang link reset password dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -262,19 +242,22 @@ class UserController extends Controller
      */
     public function reset(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email|max:100',
             'token' => 'required',
-            'new_password' => 'required|min:8',
+            'password' => 'required|min:8',
+            'new_password' => 'required|min:8|same:new_password',
         ], [
-            'email.required' => 'Email wajib diisi',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.exists' => 'Email belum terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'token.required' => 'Token harus diisi',
-            'new_password.required' => 'Password baru wajib diisi',
-            'new_password.min' => 'Password baru minimal 8 digit'
+            'password.required' => 'Kata sandi baru tidak boleh kosong',
+            'password.min' => 'Kata sandi baru minimal 8 digit',
+            'new_password.required' => 'Kata sandi baru tidak boleh kosong',
+            'new_password.min' => 'Konfirmasi kata sandi baru minimal 8 digit',
+            'new_password.same' => 'Konfirmasi kata sandi baru minimal 8 digit'
         ]);
 
         if ($validator->fails()) {
@@ -322,7 +305,7 @@ class UserController extends Controller
     public function getSummary()
     {
         $user = auth()->user();
-        $nama = $user->first_name . ' ' . $user->last_name;
+        $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting() . ', ' . $nama;
 
@@ -336,29 +319,33 @@ class UserController extends Controller
         $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
         $dealsWon = Deal::countDealsByStage($user->email, 'won');
         $dealsLost = Deal::countDealsByStage($user->email, 'lose');
+        $dealsValue = Deal::sumValueEstimatedByStage($user->email);
+
+        Carbon::setLocale('id');
+        $formattedDate = now()->translatedFormat('l, d F Y');
 
         return new ApiResponseResource(
             true,
             $greetingMessage,
             [
                 'user' => $nama,
-                'leads' => $leadsCount,
-                'contacts' => $contactsCount,
-                'organizations' => $organizationsCount,
-                'deals_pipeline' => [
-                    'qualification' => $dealsQualification,
-                    'proposal' => $dealsProposal,
-                    'negotiation' => $dealsNegotiation,
-                    'won' => $dealsWon,
-                    'lose' => $dealsLost,
-                ]
+                'date' => $formattedDate,
+                'activities' => [
+                    'leads' => $leadsCount,
+                    'contacts' => $contactsCount,
+                    'organizations' => $organizationsCount,
+                ],
+                'deals_pipeline' => [ 
+                    'count' => [
+                        'qualification' => $dealsQualification,
+                        'proposal' => $dealsProposal,
+                        'negotiation' => $dealsNegotiation,
+                        'won' => $dealsWon,
+                        'lose' => $dealsLost
+                    ],
+                    'value' => $dealsValue
+                ],
             ]
         );
     }
-
-    /**
-     * Get Summary data for dashboard user
-     *
-     * @return \Illuminate\Http\JsonResponse 
-     */
 }

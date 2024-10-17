@@ -18,7 +18,6 @@ class ProductImport implements ToCollection, WithHeadingRow
     protected $validData = [];
     protected $summaryCounts = [
         'valid_data' => 0,
-        'empty_rows' => 0,
         'validation_errors' => 0,
         'duplicate_name' => 0,
         'duplicate_code' => 0,
@@ -55,50 +54,52 @@ class ProductImport implements ToCollection, WithHeadingRow
         $namaMap = []; 
         $codeMap = []; 
         $rowMap = []; 
+        $categoryMapping = [
+            'barang' => 'stuff',
+            'jasa' => 'service',
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
-
-            // Periksa apakah baris kosong
+            
             if ($this->isEmptyRow($row)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
-                    'data' => [
-                        'name' => $row['nama_produk'] ?? null,
-                        'category' => $row['kategori_produk'] ?? null,
-                        'code' => $row['kode_produk'] ?? null,
-                        'quantity' => $row['jumlah_produk'] ?? null,
-                        'unit' => $row['satuan_produk'] ?? null,
-                        'price' => $row['harga_produk'] ?? null,
-                        'description' => $row['deskripsi'] ?? null,
-                    ],
-                    'message' => 'Data kosong'
-                ];
-                $this->summaryCounts['empty_rows']++;
                 continue;
+            }
+
+            if (!empty($rowArray['kategori_produk'])) {
+                if (isset($row['kategori_produk'])) {
+                    $categoryStatus = strtolower($row['kategori_produk']);
+                    if (array_key_exists($categoryStatus, $categoryMapping)) {
+                        $row['kategori_produk'] = $categoryMapping[$categoryStatus];
+                    }
+                }
             }
 
             // Cari duplikat menggunakan hash map
             // Pengecekan nama duplikat
-            if (isset($namaMap[$rowArray['nama_produk']])) {
-                $errorMessages[] = 'Nama produk sudah digunakan dalam file (duplikat di baris ' . ($namaMap[$rowArray['nama_produk']] + 1) . ')';
-                $this->summaryCounts['duplicate_name']++;
-            } else {
-                $namaMap[$rowArray['nama_produk']] = $index;
+            if (!empty($rowArray['nama_produk'])) {
+                if (isset($namaMap[$rowArray['nama_produk']])) {
+                    $errorMessages[] = 'Nama produk sudah digunakan dalam file (duplikat di baris ' . ($namaMap[$rowArray['nama_produk']] + 1) . ')';
+                    $this->summaryCounts['duplicate_name']++;
+                } else {
+                    $namaMap[$rowArray['nama_produk']] = $index;
+                }
             }
 
             // Pengecekan kode produk duplikat
-            if (isset($codeMap[$rowArray['kode_produk']])) {
-                $errorMessages[] = 'Kode produk sudah digunakan dalam file (duplikat di baris ' . ($codeMap[$rowArray['kode_produk']] + 1) . ')';
-                $this->summaryCounts['duplicate_code']++;
-            } else {
-                $codeMap[$rowArray['kode_produk']] = $index;
+            if (!empty($rowArray['kode_produk'])) {
+                if (isset($codeMap[$rowArray['kode_produk']])) {
+                    $errorMessages[] = 'Kode produk sudah digunakan dalam file (duplikat di baris ' . ($codeMap[$rowArray['kode_produk']] + 1) . ')';
+                    $this->summaryCounts['duplicate_code']++;
+                } else {
+                    $codeMap[$rowArray['kode_produk']] = $index;
+                }
             }
 
             // Cek jika baris secara keseluruhan duplikat
             $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey])) {
+            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
                 $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
                 $this->summaryCounts['duplicate_data']++;
             } else {
@@ -204,7 +205,15 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     public function headingRowValidator($row)
     {
-        $expectedHeadings = ['nama_produk', 'kode_produk','kategori_produk', 'jumlah_produk', 'satuan_produk', 'harga_produk', 'deskripsi'];
+        $expectedHeadings = [
+            'nama_produk', 
+            'kode_produk',
+            'kategori_produk', 
+            'jumlah_produk', 
+            'satuan_produk', 
+            'harga_produk', 
+            'deskripsi'
+        ];
         $fileHeadings = array_keys($row->toArray());
 
         // Cek apakah semua heading sesuai dengan yang diharapkan

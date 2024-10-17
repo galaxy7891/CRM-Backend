@@ -12,13 +12,13 @@ class TimeGreetingHelper
 
         switch (true) {
             case ($currentHour >= 5 && $currentHour < 12):
-                return 'Selamat Pagi';
+                return 'Selamat pagi';
             case ($currentHour >= 12 && $currentHour < 15):
-                return 'Selamat Siang';
+                return 'Selamat siang';
             case ($currentHour >= 15 && $currentHour < 18):
-                return 'Selamat Sore';
+                return 'Selamat sore';
             default:
-                return 'Selamat Malam';
+                return 'Selamat malam';
         }        
     }
 }

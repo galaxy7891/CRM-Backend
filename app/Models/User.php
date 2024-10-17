@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasUuid;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +13,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, SoftDeletes, Notifiable, HasUuid;
+    use SoftDeletes, Notifiable, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -39,12 +38,21 @@ class User extends Authenticatable implements JWTSubject
         'deleted_at',
     ];
 
+    protected $hidden = [
+        'password',
+        'google_id',
+    ];
+
     /**
      * The attributes that should be cast to date instances.
      * 
      * @var array
      */
-    protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+    protected $dates = [
+        'created_at', 
+        'updated_at', 
+        'deleted_at'
+    ];
 
     /**
      * Get the company that owns the user.
@@ -55,31 +63,31 @@ class User extends Authenticatable implements JWTSubject
      */
     public function company()
     {
-        return $this->belongsTo(Company::class, 'id');
+        return $this->belongsTo(Company::class,'company_id', 'id');
     }
 
     /**
      * Get the customers associated with the user.
      * Get the deals associated with the user.
-     * Get the loggers associated with the user.
+     * Get the activitylogs associated with the user.
      * 
-     * This defines a one-to-many relationship where the user can have multiple customers, deals, loggers.
+     * This defines a one-to-many relationship where the user can have multiple customers, deals, activitylogs.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function customers()
     {
-        return $this->hasMany(Customer::class, 'id');
+        return $this->hasMany(Customer::class, 'owner', 'email');
     }
 
     public function deals()
     {
-        return $this->hasMany(Deal::class, 'id');
+        return $this->hasMany(Deal::class, 'owner','email');
     }
 
-    public function loggers()
+    public function activitylogs()
     {
-        return $this->hasMany(Logger::class, 'id');
+        return $this->hasMany(ActivityLog::class, 'user_id', 'id');
     }
 
     /**

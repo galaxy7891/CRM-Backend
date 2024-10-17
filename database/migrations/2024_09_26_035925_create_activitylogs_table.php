@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLoggersTable extends Migration
+class CreateActivityLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateLoggersTable extends Migration
      */
     public function up()
     {
-        Schema::create('loggers', function (Blueprint $table) {
+        Schema::create('activity_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->nullable();
-            $table->string('table_name', 100);
+            $table->uuid('user_id');
+            $table->string('model_name', 100);
             $table->string('action', 255);
-            $table->text('description')->nullable();
+            $table->text('changes')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -34,6 +34,6 @@ class CreateLoggersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('loggers');
+        Schema::dropIfExists('activity_logs');
     }
 }
