@@ -30,7 +30,6 @@ class UserController extends Controller
             $user = auth()->user();
 
             return $user->load('company');
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -46,9 +45,7 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-
         } catch (\Exception $e) {
-
         }
     }
 
@@ -72,7 +69,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:users, phone',
+            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'required|max:50',
             'role' => 'required|in:super_admin,admin,employee',
             'gender' => 'nullable|in:male,female,other',
@@ -84,7 +81,6 @@ class UserController extends Controller
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
-            'last_name.required' => 'Nama belakang tidak boleh kosong',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'phone.required' => 'Nomor telepon tidak boleh kosong',
@@ -108,11 +104,10 @@ class UserController extends Controller
         try {
             $user = User::updateUser($request->all(), $id);
             return new ApiResponseResource(
-                true, 
+                true,
                 "Data User {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $user
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -197,7 +192,6 @@ class UserController extends Controller
                 "User {$first_name} {$last_name} Berhasil Dihapus!",
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -294,19 +288,19 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email|max:100',
             'token' => 'required',
-            'password' => 'required|min:8',
-            'new_password' => 'required|min:8|same:new_password',
+            'new_password' => 'required|min:8',
+            'confirm_new_password' => 'required|min:8|same:new_password',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.exists' => 'Email belum terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'token.required' => 'Token harus diisi',
-            'password.required' => 'Kata sandi baru tidak boleh kosong',
-            'password.min' => 'Kata sandi baru minimal 8 digit',
             'new_password.required' => 'Kata sandi baru tidak boleh kosong',
-            'new_password.min' => 'Konfirmasi kata sandi baru minimal 8 digit',
-            'new_password.same' => 'Konfirmasi kata sandi baru minimal 8 digit'
+            'new_password.min' => 'Kata sandi baru minimal 8 digit',
+            'confirm_new_password.required' => 'Kata sandi baru tidak boleh kosong',
+            'confirm_new_password.min' => 'Konfirmasi kata sandi baru minimal 8 digit',
+            'confirm_new_password.same' => 'Kata sandi tidak sama'
         ]);
 
         if ($validator->fails()) {
@@ -384,7 +378,7 @@ class UserController extends Controller
                     'contacts' => $contactsCount,
                     'organizations' => $organizationsCount,
                 ],
-                'deals_pipeline' => [ 
+                'deals_pipeline' => [
                     'count' => [
                         'qualification' => $dealsQualification,
                         'proposal' => $dealsProposal,
