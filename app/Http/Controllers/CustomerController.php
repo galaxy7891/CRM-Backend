@@ -52,11 +52,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'organization_id' => 'nullable|uuid',
             'first_name' => 'required|string|max:50',
-<<<<<<< HEAD
-            'last_name' => 'nulalable|string|max:50',
-=======
             'last_name' => 'nullable|string|max:50',
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'customerCategory' => 'required|in:leads,contact',
             'job' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -122,13 +118,8 @@ class CustomerController extends Controller
         try {
             $customer = Customer::createCustomer($request->all());
             return new ApiResponseResource(
-<<<<<<< HEAD
-                true,
-                "Data {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
-=======
                 true, 
                 "Data Customer {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
                 $customer
             );
         } catch (\Exception $e) {
@@ -187,13 +178,8 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
         if (!$customer) {
             return new ApiResponseResource(
-<<<<<<< HEAD
-                false,
-                'Customer tidak ditemukan',
-=======
                 false, 
                 'Data Customer tidak ditemukan',
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
                 null
             );
         }

@@ -40,17 +40,17 @@ class OtpController extends Controller
             );
         }
 
-        $recentOTP = Otp::getRecentOTP($request->email);
+        // $recentOTP = Otp::getRecentOTP($request->email);
 
-        if ($recentOTP) {
-            $remainingTime = Otp::getRemainingTime($recentOTP);
+        // if ($recentOTP) {
+        //     $remainingTime = Otp::getRemainingTime($recentOTP);
 
-            return new ApiResponseResource(
-                false,
-                "Kirim ulang kode otp dalam {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                null
-            );
-        }
+        //     return new ApiResponseResource(
+        //         false,
+        //         "OTP akan dikirim dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik.",
+        //         null
+        //     );
+        // }
 
         try {
 
@@ -93,15 +93,9 @@ class OtpController extends Controller
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.email' => 'Email maksimal 100 karakter',
-<<<<<<< HEAD
-            'code.required' => 'Kode OTP tidak boleh kosong',
-            'code.numeric' => 'Kode OTP harus berupa angka',
-            'code.digits' => 'Kode OTP harus 6 digit'
-=======
             'code.required' => 'Code OTP tidak boleh kosong',
             'code.numeric' => 'Code OTP harus berupa angka',
             'code.digits' => 'Code OTP harus 6 digit'
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
         ]);
 
         if ($validator->fails()) {

@@ -19,9 +19,9 @@ use App\Http\Middleware\RoleMiddleware;
 Route::group(['middleware' => 'api'], function () {
     Route::group(['prefix' => 'auth'], function () {
         Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/register', [AuthController::class, 'register']); 
+        Route::post('/register', [AuthController::class, 'register']);
 
-        Route::group(['prefix' => 'otp'], function () { 
+        Route::group(['prefix' => 'otp'], function () {
             Route::post('/send', [OTPController::class, 'sendOTP']);
             Route::post('/verify', [OTPController::class, 'verifyOTP']);
         });
