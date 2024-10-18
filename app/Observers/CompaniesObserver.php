@@ -13,14 +13,14 @@ class CompaniesObserver
      */
     public function created(Company $company): void
     {
-        // $changes = ModelChangeLoggerHelper::getModelChanges($company);
+        $changes = ModelChangeLoggerHelper::getModelChanges($company);
 
-        // ActivityLog::create([
-        //     'user_id' => auth()->id(),
-        //     'model_name' => 'companies',
-        //     'action' => 'CREATE',
-        //     'changes' => $changes ? json_encode($changes) : null,
-        // ]);
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'model_name' => 'companies',
+            'action' => 'CREATE',
+            'changes' => $changes ? json_encode($changes) : null,
+        ]);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,7 +20,8 @@ class Company extends Model
         'id',
         'name',
         'industry',
-        'logo',
+        'image_url',
+        'image_public_id',
         'email',
         'phone',
         'website',
@@ -45,6 +47,26 @@ class Company extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'company_id', 'id');
+    }
+
+    /**
+     * Update the logo of the companies.
+     *
+     * @param \Illuminate\Http\UploadedFile $logo
+     * @return array
+     */
+    public function updateLogo($lofo)
+    {
+        $cloudinary = new Cloudinary();
+
+        $result = $cloudinary->uploadApi()->upload($lofo->getRealPath(), [
+            'folder' => 'companies',
+        ]);
+
+        $this->update([
+            'image_url' => $result['secure_url'],
+            'image_public_id' => $result['public_id'],
+        ]);
     }
 
     /**

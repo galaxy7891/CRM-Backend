@@ -8,19 +8,18 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
-use function PHPUnit\Framework\isEmpty;
-
-class OrganizationImport implements ToCollection, WithHeadingRow
+class CustomersImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
     protected $owner;
+    protected $customerCategory;
     protected $invalidData = [];
     protected $validData = [];
     protected $summaryCounts = [
         'valid_data' => 0,
         'validation_errors' => 0,
-        'duplicate_name' => 0,
+        'organization_not_found' => 0,
         'duplicate_email' => 0,
         'duplicate_phone' => 0,
         'duplicate_data' => 0,
@@ -44,16 +43,16 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         return $this->summaryCounts;
     }
 
-    public function __construct($owner)
+    public function __construct($owner, $customerCategory)
     {
         $this->owner = $owner;
+        $this->customerCategory = $customerCategory;
     }
 
     public function collection($rows)
     {
         $this->headingRowValidator($rows->first());
 
-        $nameMap = []; 
         $emailMap = []; 
         $phoneMap = []; 
         $rowMap = []; 
@@ -66,7 +65,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
             $errorMessages = [];
-            
+
             if ($this->isEmptyRow($row)) {
                 continue;
             }
@@ -81,16 +80,6 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             }
 
             // Cari duplikat menggunakan hash map
-            // Pengecekan nama perusahaan duplikat
-            if (!empty($rowArray['nama_perusahaan'])) {
-                if (isset($nameMap[$rowArray['nama_perusahaan']])) {
-                    $errorMessages[] = 'Nama perusahaan sudah digunakan dalam file (duplikat di baris ' . ($nameMap[$rowArray['nama_perusahaan']] + 1) . ')';
-                    $this->summaryCounts['duplicate_name']++;
-                } else {
-                    $nameMap[$rowArray['nama_perusahaan']] = $index;
-                }
-            }
-
             // Pengecekan email duplikat
             if (!empty($rowArray['email'])) {
                 if (isset($emailMap[$rowArray['email']])) {
@@ -104,7 +93,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             // Pengecekan nomor telepon duplikat
             if (!empty($rowArray['nomor_telepon'])) {
                 if (isset($phoneMap[$rowArray['nomor_telepon']])) {
-                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray['nomor_telepon']] + 1) . ')';
+                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray    ['nomor_telepon']] + 1) . ')';
                     $this->summaryCounts['duplicate_phone']++;
                 } else {
                     $phoneMap[$rowArray['nomor_telepon']] = $index;
@@ -113,7 +102,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
 
             // Cek jika baris secara keseluruhan duplikat
             $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
+            if (isset($rowMap[$rowKey])) {
                 $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
                 $this->summaryCounts['duplicate_data']++;
             } else {
@@ -125,13 +114,17 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 $this->invalidData[] = [
                     'row' => $index + 1,
                     'data' => [
-                        'name' => $row['nama_perusahaan'],
-                        'industry' => $row['jenis_industri'],
-                        'email' => $row['email'],
+                        'organization_name' => $row['nama_perusahaan'],
+                        'first_name' => $row['nama_depan'],
+                        'last_name' => $row['nama_belakang'],
+                        'customerCategory' => $this->customerCategory,
+                        'job' => $row['pekerjaan'],
+                        'description' => $row['deskripsi'],
                         'status' => $row['status'],
+                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
+                        'email' => $row['email'],
                         'phone' => $row['nomor_telepon'],
                         'owner' => $this->owner,
-                        'website' => $row['website'],
                         'address' => $row['alamat'],
                         'country' => $row['negara'],
                         'province' => $row['provinsi'],
@@ -147,12 +140,14 @@ class OrganizationImport implements ToCollection, WithHeadingRow
 
             // Validasi data menggunakan Validator
             $validator = Validator::make($row->toArray(), [
-                'nama_perusahaan' => 'required|unique:organizations,name|string|max:100',
-                'jenis_industri' => 'nullable|string|max:50',
+                'nama_depan' => 'required|string|max:50',
+                'nama_belakang' => 'nullable|string|max:50',
+                'pekerjaan' => 'nullable|string|max:100',
+                'deskripsi' => 'nullable|string',
                 'status' => 'required|in:hot,warm,cold',
-                'email' => 'nullable|email|unique:organizations,email|max:100',
-                'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
-                'website' => 'nullable|string|max:255',
+                'tanggal_lahir' => 'nullable|date',
+                'email' => 'nullable|email|unique:customers,email|max:100',
+                'nomor_telepon' => 'required|numeric|max_digits:15|unique:customers,phone',
                 'negara' => 'nullable|string|max:50',
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
@@ -161,24 +156,28 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'kode_pos' => 'nullable|max:5',
                 'alamat' => 'nullable|string|max:100',
             ], [
-                'nama_perusahaan.required' => 'Nama perusahaan wajib diisi.',
-                'nama_perusahaan.unique' => 'Nama perusahaan sudah terdaftar.',
-                'nama_perusahaan.string' => 'Nama perusahaan harus berupa teks.',
-                'nama_perusahaan.max' => 'Nama maksimal 100 karakter.',
-                'jenis_industri.string' => 'Jenis industri harus berupa teks.',
-                'jenis_industri.max' => 'Jenis industri maksimal 50 karakter.',
-                'status.required' => 'Status wajib diisi.',
-                'status.in' => 'Status harus pilih salah satu dari: hot, warm, cold.',
+                'nama_depan.required' => 'Nama depan wajib diisi',
+                'nama_depan.string' => 'Nama depan harus berupa teks',
+                'nama_depan.max' => 'Nama depan maksimal 50 karakter',
+                'nama_belakang.string' => 'Nama belakang harus berupa teks',
+                'nama_belakang.max' => 'Nama belakang maksimal 50 karakter',
+                'pekerjaan.string' => 'Pekerjaan harus berupa teks.',
+                'pekerjaan.max' => 'Pekerjaan maksimal 100 karakter.',
+                'deskripsi.string' => 'Pekerjaan maksimal 100 karakter.',
+                'status.required' => 'Status pelanggan wajib dipilih.',
+                'status.in' => 'Status harus berupa pilih salah satu: hot, warm, atau cold.',
+                'tanggal_lahir.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'email.max' => 'Email maksimal 100 karakter.',
+                'nomor_telepon.required' => 'Nomor telepon wajib diisi.',
                 'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka.',
                 'nomor_telepon.max_digits' => 'Nomor telepon maksimal 15 angka.',
                 'nomor_telepon.unique' => 'Nomor telepon sudah terdaftar.',
-                'website.string' => 'Website harus berupa teks.',
-                'website.max' => 'Website maksimal 255 karakter.',
                 'negara.string' => 'Asal negara harus berupa teks.',
                 'negara.max' => 'Asal negara maksimal 50 karakter.',
+                'provinsi.string' => 'Provinsi harus berupa teks.',
+                'provinsi.max' => 'Provinsi maksimal 100 karakter.',
                 'kota.string' => 'Kota harus berupa teks.',
                 'kota.max' => 'Kota maksimal 100 karakter.',
                 'kecamatan.string' => 'Kecamatan harus berupa teks.',
@@ -186,22 +185,25 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'kelurahan.string' => 'Desa/Kelurahan harus berupa teks.',
                 'kelurahan.max' => 'Desa/Kelurahan maksimal 100 karakter.',
                 'kode_pos.string' => 'Kode pos harus berupa teks.',
-                'kode_pos.max' => 'Kode pos maksimal 5 karakter.',
+                'kode_pos.max' => 'Kode pos maksimal 10 karakter.',
                 'alamat.string' => 'Alamat harus berupa teks.',
                 'alamat.max' => 'Alamat maksimal 100 karakter.',
             ]);
-
             if ($validator->fails()) {
                 $this->invalidData[] = [
                     'row' => $index + 1,
                     'data' => [
-                        'name' => $row['nama_perusahaan'],
-                        'industry' => $row['jenis_industri'],
-                        'email' => $row['email'],
+                        'organization_name' => $row['nama_perusahaan'],
+                        'first_name' => $row['nama_depan'],
+                        'last_name' => $row['nama_belakang'],
+                        'customerCategory' => $this->customerCategory,
+                        'job' => $row['pekerjaan'],
+                        'description' => $row['deskripsi'],
                         'status' => $row['status'],
+                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
+                        'email' => $row['email'],
                         'phone' => $row['nomor_telepon'],
                         'owner' => $this->owner,
-                        'website' => $row['website'],
                         'address' => $row['alamat'],
                         'country' => $row['negara'],
                         'province' => $row['provinsi'],
@@ -212,19 +214,52 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                     ],
                     'message' => $validator->errors()->all()
                 ];
-                $this->summaryCounts['validation_errors']++;
+                $this->summaryCounts['validation_errors']++; 
                 continue;
             }
 
-            // Simpan data valid
+            $organization = Organization::whereRaw('LOWER(name) = ?', [strtolower($row['nama_perusahaan'])])->first();
+            if (!$organization) {
+                $this->invalidData[] = [
+                    'row' => $index + 1,
+                    'data' => [
+                        'organization_name' => $row['nama_perusahaan'],
+                        'first_name' => $row['nama_depan'],
+                        'last_name' => $row['nama_belakang'],
+                        'customerCategory' => $this->customerCategory,
+                        'job' => $row['pekerjaan'],
+                        'description' => $row['deskripsi'],
+                        'status' => $row['status'],
+                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
+                        'email' => $row['email'],
+                        'phone' => $row['nomor_telepon'],
+                        'owner' => $this->owner,
+                        'address' => $row['alamat'],
+                        'country' => $row['negara'],
+                        'province' => $row['provinsi'],
+                        'city' => $row['kota'],
+                        'subdistrict' => $row['kecamatan'],
+                        'village' => $row['kelurahan'],
+                        'zip_code' => $row['kode_pos'],
+                    ],
+                    'message' => 'Organisasi tidak terdaftar'
+                ];
+                $this->summaryCounts['organization_not_found']++;
+                continue;
+            }
+
             $this->validData[] = [
-                'name' => $row['nama_perusahaan'],
-                'industry' => $row['jenis_industri'],
-                'email' => $row['email'],
+                'organization_name' => $row['nama_perusahaan'],
+                'first_name' => $row['nama_depan'],
+                'last_name' => $row['nama_belakang'],
+                'customerCategory' => $this->customerCategory,
+                'job' => $row['pekerjaan'],
+                'description' => $row['deskripsi'],
                 'status' => $row['status'],
+                'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
+                'email' => $row['email'],
                 'phone' => $row['nomor_telepon'],
                 'owner' => $this->owner,
-                'website' => $row['website'],
                 'address' => $row['alamat'],
                 'country' => $row['negara'],
                 'province' => $row['provinsi'],
@@ -233,7 +268,6 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'village' => $row['kelurahan'],
                 'zip_code' => $row['kode_pos'],
             ];
-
             $this->summaryCounts['valid_data']++;
         }
 
@@ -241,7 +275,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         return [
             'validData' => $this->validData,
             'invalidData' => $this->invalidData,
-            'summaryCounts' => $this->summaryCounts,
+            'summaryCounts' => $this->summaryCounts, 
         ];
     }
 
@@ -251,27 +285,29 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             return !is_null($value) && $value !== '';
         }));
     }
-    
+
     public function headingRowValidator($row)
     {
         $expectedHeadings = [
             'nama_perusahaan', 
-            'jenis_industri', 
-            'email', 
+            'nama_depan', 
+            'nama_belakang', 
+            'pekerjaan', 
+            'deskripsi', 
             'status', 
-            'nomor_telepon', 
-            'website', 
+            'tanggal_lahir', 
+            'email', 
+            'nomor_telepon',
             'alamat', 
             'negara', 
             'provinsi', 
-            'kota',
+            'kota', 
             'kecamatan', 
             'kelurahan', 
             'kode_pos'
         ];
         $fileHeadings = array_keys($row->toArray());
 
-        // Cek apakah semua heading sesuai dengan yang diharapkan
         if ($fileHeadings !== $expectedHeadings) {
             throw new \Exception('File tidak sesuai dengan template yang diberikan.');
         }

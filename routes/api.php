@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
@@ -15,6 +14,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\RoleMiddleware;
+use App\Models\Organization;
 
 Route::group(['middleware' => 'api'], function () {
     Route::group(['prefix' => 'auth'], function () {
@@ -44,6 +44,8 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
         Route::get('/activity/log', [ActivityLogController::class, 'index']);
+        Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
+        Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
         Route::post('/import/{type}', [ImportController::class, 'import']);
         Route::apiResource('/customers', CustomerController::class);
         Route::apiResource('/organizations', OrganizationController::class);

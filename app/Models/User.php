@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\ModelChangeLoggerHelper;
 use App\Traits\HasUuid;
-
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -32,7 +33,8 @@ class User extends Authenticatable implements JWTSubject
         'job_position',
         'role',
         'gender',
-        'photo',
+        'image_url',
+        'image_public_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -70,6 +72,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the customers associated with the user.
      * Get the deals associated with the user.
      * Get the activitylogs associated with the user.
+     * Get the invitation associated with the user.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers, deals, activitylogs.
      * 
@@ -89,6 +92,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ActivityLog::class, 'user_id', 'id');
     }
+
+    public function invitations()
+    {  
+        return $this->hasMany(UserInvitation::class, 'invited_by', 'email');
+    }
+
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -116,7 +125,7 @@ class User extends Authenticatable implements JWTSubject
      * @param string $email
      * @return User|null
      */
-    public static function findByEmail($email)
+    public static function findByEmail(string $email)
     {
         return self::where('email', $email)->first();
     }
@@ -131,6 +140,26 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->password = Hash::make($new_password);
         return $this->save();
+    }
+
+    /**
+     * Update the profile photo URL and public_id of the user.
+     *
+     * @param \Illuminate\Http\UploadedFile $photo
+     * @return array
+     */
+    public function updateProfilePhoto($photo)
+    {
+        $cloudinary = new Cloudinary();
+
+        $result = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
+            'folder' => 'users',
+        ]);
+
+        $this->update([
+            'image_url' => $result['secure_url'],
+            'image_public_id' => $result['public_id'],
+        ]);
     }
 
     /**

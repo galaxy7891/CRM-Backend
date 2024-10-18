@@ -41,7 +41,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:products,name ',
+            'name' => 'required|string|max:100|unique:products,name',
             'category' => 'required|string|max:100',
             'code' => 'required|string|max:100',
             'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
@@ -184,6 +184,7 @@ class ProductController extends Controller
                 null
             );
         }
+        
         try {
             $product = Product::updateProduct($request->all(), $id);
             return new ApiResponseResource(

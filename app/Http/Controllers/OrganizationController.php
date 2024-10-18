@@ -121,6 +121,7 @@ class OrganizationController extends Controller
             );
         }
     }
+    
     /**
      * Display the specified resource.
      */

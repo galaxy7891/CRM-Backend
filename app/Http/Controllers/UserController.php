@@ -9,7 +9,7 @@ use App\Models\Deal;
 use App\Models\Organization;
 use App\Models\PasswordResetToken;
 use App\Models\User;
-
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -97,7 +97,6 @@ class UserController extends Controller
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -107,7 +106,6 @@ class UserController extends Controller
         }
 
         try {
-
             $user = User::updateUser($request->all(), $id);
             return new ApiResponseResource(
                 true, 
@@ -116,13 +114,62 @@ class UserController extends Controller
             );
 
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
             );
         }
+    }
+
+    /**
+     * The attributes that should be cast to date instances.
+     * 
+     * @var array
+     */
+    protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+
+    /**
+     * Update photo profile in cloudinary.
+     */
+    public function updateProfilePhoto(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'photo.required' => 'Foto profil tidak boleh kosong.',
+            'photo.image' => 'Foto profil harus berupa gambar.',
+            'photo.mimes' => 'Foto profil tidak sesuai format.',
+            'photo.max' => 'Foto profil maksimal 2mb.',
+        ]);
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
+        }
+
+        try {
+            $user = auth()->user();
+
+            $photo = $request->file('photo');
+            $photoData = $user->updateProfilePhoto($photo); 
+
+            return new ApiResponseResource(
+                true,
+                'Foto profil berhasil diperbarui',
+                $photoData
+            );
+        
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
+        
     }
 
     /**
@@ -194,7 +241,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 false,
-                'Dapat mengirim ulang link reset password dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -220,11 +267,12 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                'Link Reset Password telah dikirim ke email anda.',
+                'Link reset kata sandi telah dikirim ke email anda.',
                 [
                     'email' => $email
                 ]
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -272,7 +320,7 @@ class UserController extends Controller
         if (!PasswordResetToken::findPasswordResetToken($request->only('email', 'token'))) {
             return new ApiResponseResource(
                 false,
-                'Token reset password tidak valid atau telah kadaluarsa.',
+                'Token reset kata sandi tidak valid atau telah kadaluarsa.',
                 null
             );
         }
@@ -280,12 +328,12 @@ class UserController extends Controller
         try {
 
             $user = User::findByEmail($request->email);
-            $user->updatePassword($request->new_password);
+            $user->updatePassword($request->password);
             PasswordResetToken::deletePasswordResetToken($request->email);
 
             return new ApiResponseResource(
                 true,
-                'Password berhasil diubah.',
+                'kata sandi berhasil diubah.',
                 null
             );
         } catch (\Exception $e) {

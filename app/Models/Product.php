@@ -45,12 +45,10 @@ class Product extends Model
     {
         $cloudinary = new Cloudinary();
 
-        // Upload the photo
         $result = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
-            'folder' => 'products', // optional: specify a folder in your Cloudinary account
+            'folder' => 'products',
         ]);
 
-        // Return the URL of the uploaded image
         return [
             'url' => $result['secure_url'],
             'public_id' => $result['public_id'],
@@ -61,8 +59,6 @@ class Product extends Model
     {
 
         if (isset($data['photo_product'])) {
-
-            // $photoUrl = self::uploadPhoto($data['photo_product']);
             $uploadResult = self::uploadPhoto($data['photo_product']);
             $photoUrl = $uploadResult['url'];
             $publicId = $uploadResult['public_id'];
@@ -80,8 +76,8 @@ class Product extends Model
             'unit' => $data['unit'],
             'price' => $data['price'],
             'description' => $data['description'] ?? null,
-            'image_url' => $photoUrl ?? null, // Store the Cloudinary URL
-            'image_public_id' => $publicId ?? null, // Store the Cloudinary URL
+            'image_url' => $photoUrl ?? null,
+            'image_public_id' => $publicId ?? null,
         ]);
     }
 

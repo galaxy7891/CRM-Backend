@@ -2,14 +2,13 @@
 
 namespace App\Imports;
 
-use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
-class ProductImport implements ToCollection, WithHeadingRow
+class ProductsImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 

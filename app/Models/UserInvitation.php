@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserInvitation extends Model
 {
-    use HasFactory;
 
     protected $primaryKey = 'email';
     /**
@@ -30,7 +29,11 @@ class UserInvitation extends Model
      * 
      * @var array
      */
-    protected $dates = ['expired_at', 'created_at', 'updated_at'];
+    protected $dates = [
+        'expired_at', 
+        'created_at', 
+        'updated_at'
+    ];
 
     /**
      * Get the inviter(email) that owns the token.
@@ -87,7 +90,7 @@ class UserInvitation extends Model
             'seconds' => $remainingTime->s,
         ];
     }
-
+    
     /**
      * Find the user's invitation for the given email.
      *

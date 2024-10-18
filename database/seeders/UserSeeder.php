@@ -26,7 +26,8 @@ class UserSeeder extends Seeder
             'job_position' => null,
             'role' => 'employee',
             'gender' => 'male',
-            'photo' => null,
+            'image_url' => null,
+            'image_public_id' => null,
         ]);
 
         User::create([
@@ -41,7 +42,8 @@ class UserSeeder extends Seeder
             'job_position' => null,
             'role' => 'employee',
             'gender' => 'male',
-            'photo' => null,
+            'image_url' => null,
+            'image_public_id' => null,
         ]);
 
         User::create([
@@ -56,7 +58,8 @@ class UserSeeder extends Seeder
             'job_position' => null,
             'role' => 'super_admin',
             'gender' => 'male',
-            'photo' => null,
+            'image_url' => null,
+            'image_public_id' => null,
         ]);
     }
 }
