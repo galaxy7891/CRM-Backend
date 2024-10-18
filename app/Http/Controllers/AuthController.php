@@ -74,7 +74,7 @@ class AuthController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|min:8',
-            'new_password' => 'required|min:8|same:password',
+            'password_confirmation' => 'required|min:8|same:password',
             'phone' => 'required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'required|max:50',
             'name' => 'required|max:100',
@@ -92,8 +92,8 @@ class AuthController extends Controller
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'password.required' => 'Password tidak boleh kosong',
             'password.mnin' => 'Password tidak boleh kosong',
-            'new_password.required' => 'Password tidak boleh kosong',
-            'new_password.required' => 'Password tidak boleh kosong',
+            'password_confirmation.required' => 'Kata sandi tidak boleh kosong',
+            'password_confirmation.same' => 'Kata sandi tidak sama',
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
@@ -103,7 +103,7 @@ class AuthController extends Controller
             'name' => 'Nama perusahaan tidak boleh kosong',
             'industry.required' => 'Jenis industri tidak boleh kosong',
             'industry.max' => 'Jenis industri maksimal 50 karakter',
-           'photo.url' => 'URL photo tidak valid',
+            'photo.url' => 'URL photo tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -133,7 +133,6 @@ class AuthController extends Controller
             }
 
             return $this->respondWithToken($token);
-            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -172,7 +171,7 @@ class AuthController extends Controller
             return new ApiResponseResource(
                 true,
                 'Data User Google',
-                [   
+                [
                     'email' => $googleUser->email,
                     'first_name' => $nameParts['first_name'],
                     'last_name' => $nameParts['last_name'],
@@ -181,7 +180,6 @@ class AuthController extends Controller
                     'google_id' => $googleUser->id,
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

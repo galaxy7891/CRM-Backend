@@ -34,21 +34,21 @@ class UserInvitationController extends Controller
 
         if ($validator->fails()) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $validator->errors(),
                 null
             );
         }
-        
+
         $recentInvitation = UserInvitation::getRecentInvitation($request->email);
 
-        if ($recentInvitation){
+        if ($recentInvitation) {
             $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
 
             return new ApiResponseResource(
                 false,
-                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' . 
-                "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
+                    "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -61,7 +61,7 @@ class UserInvitationController extends Controller
             $nama = explode('@', $email)[0];
 
             $dataUser = [
-                'email' => $email, 
+                'email' => $email,
                 'token' => $token,
                 'expired_at' => $expired_at,
                 'status' => 'pending',
@@ -81,7 +81,6 @@ class UserInvitationController extends Controller
                     'nama' => $nama
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -103,7 +102,7 @@ class UserInvitationController extends Controller
             'email' => 'required|email|unique:users, email|max:100',
             'token' => 'required',
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'password' => 'required|string|min:8',
         ], [
             'email.required' => 'Email tidak boleh kosong',
@@ -114,7 +113,11 @@ class UserInvitationController extends Controller
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50  karakter',
+<<<<<<< HEAD
+
+=======
             'last_name.required' => 'Nama belakang tidak boleh kosong',
+>>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
         ]);
@@ -126,7 +129,7 @@ class UserInvitationController extends Controller
                 null
             );
         }
-        
+
         if (!$invitation = UserInvitation::findInvitation($request->only('email', 'token'))) {
             return new ApiResponseResource(
                 false,
@@ -151,14 +154,12 @@ class UserInvitationController extends Controller
                 'Akun berhasil dibuat.',
                 $user,
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
         }
     }
-
 }

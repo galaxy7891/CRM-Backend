@@ -35,7 +35,6 @@ class CustomerController extends Controller
                 'Daftar Customer',
                 $customers
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 true,
@@ -123,10 +122,9 @@ class CustomerController extends Controller
                 "Data Customer {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -144,7 +142,7 @@ class CustomerController extends Controller
                 return new ApiResponseResource(
                     false,
                     'Data Customer Tidak Ditemukan!',
-                    null 
+                    null
                 );
             }
 
@@ -164,7 +162,7 @@ class CustomerController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -190,7 +188,7 @@ class CustomerController extends Controller
         $user = auth()->user();
         if ($user->role == 'employee' && $customer->owner !== $user->id) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Anda tidak memiliki akses untuk mengubah data customer ini!',
                 null
             );
@@ -255,7 +253,7 @@ class CustomerController extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $validator->errors(),
                 null
             );
@@ -268,7 +266,6 @@ class CustomerController extends Controller
                 'Data Customer Berhasil Diubah!',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -311,11 +308,10 @@ class CustomerController extends Controller
 
             // Return response with first and last name
             return new ApiResponseResource(
-                true, 
+                true,
                 "Customer {$customer->first_name} {$customer->last_name} Berhasil Dihapus!",
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -324,7 +320,4 @@ class CustomerController extends Controller
             );
         }
     }
-
-    
-
 }
