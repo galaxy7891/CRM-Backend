@@ -131,7 +131,7 @@ class UserController extends Controller
             );
         }
 
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->only('photo'), [
             'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'photo.required' => 'Foto profil tidak boleh kosong.',
@@ -149,7 +149,7 @@ class UserController extends Controller
 
         try {
             
-            $photoData = $user->updateProfilePhoto($request->file('photo')); 
+            $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id); 
 
             return new ApiResponseResource(
                 true,

@@ -67,7 +67,8 @@ class Product extends Model
     public static function createProduct(array $data): self
     {
         if (isset($data['photo_product'])) {
-            $uploadResult = self::uploadPhoto($data['photo_product']);
+            $product = new Product();
+            $uploadResult = $product->uploadPhoto($data['photo_product']);
             $photoUrl = $uploadResult['image_url'];
             $publicId = $uploadResult['image_public_id'];
         } else {

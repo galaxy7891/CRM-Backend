@@ -17,7 +17,6 @@ class CompanySeeder extends Seeder
             'id' => '123e4567-e89b-12d3-a456-426614174000',
             'name' => 'PT Jaya Abadi',
             'industry' => 'Tekstil',
-            'logo' => null,
             'email' => null,
             'phone' => null,
             'website' => null,

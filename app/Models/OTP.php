@@ -13,7 +13,7 @@ class Otp extends Model
     use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'email';
-    
+
     /**
      * The attributes that are mass assignable.
      * 
@@ -43,7 +43,7 @@ class Otp extends Model
      * @return OTP|null
      */
     public static function getRecentOTP(string $email): ?self
-    {    
+    {
         return self::where('email', $email)
             ->where('created_at', '>=', now()->subMinutes(1))
             ->first();
@@ -106,10 +106,10 @@ class Otp extends Model
         return self::updateOrCreate(
             ['email' => $dataOtp['email']],
             [
-            'code' => $dataOtp['code'],
-            'expired_at' => now()->addMinutes(1),
-            'is_used' => false,
-            'created_at' => now()
+                'code' => $dataOtp['code'],
+                'expired_at' => now()->addMinutes(1),
+                'is_used' => false,
+                'created_at' => now()
             ]
         );
     }
