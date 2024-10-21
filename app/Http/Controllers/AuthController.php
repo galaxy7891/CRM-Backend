@@ -115,8 +115,7 @@ class AuthController extends Controller
         }
 
         try {
-
-            $company = Company::registerCompany($request->all());
+            $company = Company::createCompany($request->only(['name', 'industry']));
             User::createUser($request->all(), $company->id);
 
             $credentials = [
@@ -131,8 +130,8 @@ class AuthController extends Controller
                     null,
                 );
             }
-
             return $this->respondWithToken($token);
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -170,7 +169,7 @@ class AuthController extends Controller
 
             return new ApiResponseResource(
                 true,
-                'Data User Google',
+                'Data user google',
                 [
                     'email' => $googleUser->email,
                     'first_name' => $nameParts['first_name'],
@@ -180,6 +179,7 @@ class AuthController extends Controller
                     'google_id' => $googleUser->id,
                 ]
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

@@ -77,15 +77,7 @@ class EmployeeController extends Controller
             );
         }
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        
-    }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -96,7 +88,7 @@ class EmployeeController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Data karyawan tidak ditemukan',
                 null
             );
         }
@@ -145,7 +137,7 @@ class EmployeeController extends Controller
             $user = User::updateUser($request->all(), $id);
             return new ApiResponseResource(
                 true, 
-                "Data User {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
+                "Data karyawan {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $user
             );
 
@@ -170,7 +162,7 @@ class EmployeeController extends Controller
             if (!$user) {
                 return new ApiResponseResource(
                     false,
-                    'User tidak ditemukan',
+                    'Karyawan tidak ditemukan',
                     null
                 );
             }
@@ -181,11 +173,11 @@ class EmployeeController extends Controller
 
             return new ApiResponseResource(
                 true,
-                "User {$first_name} {$last_name} Berhasil Dihapus!",
+                "Karyawan {$first_name} {$last_name} Berhasil Dihapus!",
                 null
             );
-        } catch (\Exception $e) {
 
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),

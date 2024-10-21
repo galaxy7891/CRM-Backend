@@ -8,63 +8,78 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
-class CustomerImport implements ToCollection, WithHeadingRow
+class CustomersImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
     protected $owner;
-    protected $invalidData = [];
+    protected $customerCategory;
+    protected $failedData = [];
     protected $validData = [];
-    protected $summaryCounts = [
+    protected $summaryData = [
+        'total_data' => 0, 
         'valid_data' => 0,
-        'validation_errors' => 0,
-        'organization_not_found' => 0,
-        'duplicate_email' => 0,
-        'duplicate_phone' => 0,
-        'duplicate_data' => 0,
+        'invalid_data' => 0,
     ];
 
-    // Getter untuk valid data
+    // Getter for valid data
     public function getValidData()
     {
         return $this->validData;
     }
 
-    // Getter untuk invalid data
-    public function getInvalidData()
+    // Getter for invalid data
+    public function getFailedData()
     {
-        return $this->invalidData;
+        return $this->failedData;
     }
 
-    // Getter untuk error counts
-    public function getsummaryCounts()
+    // Getter for summary data
+    public function getSummaryData()
     {
-        return $this->summaryCounts;
+        return $this->summaryData;
     }
 
-    public function __construct($owner)
+    public function __construct($owner, $customerCategory)
     {
         $this->owner = $owner;
+        $this->customerCategory = $customerCategory;
     }
 
     public function collection($rows)
     {
         $this->headingRowValidator($rows->first());
 
-        $emailMap = []; 
-        $phoneMap = []; 
-        $rowMap = []; 
+        $emailMap = [];
+        $phoneMap = [];
+        $rowMap = [];
         $statusMapping = [
             'tinggi' => 'hot',
             'sedang' => 'warm',
             'rendah' => 'cold',
         ];
-        $categoryMapping = [
-            'kontak' => 'contact'
+        $propertyMapping = [
+            'nama_perusahaan' => 'Nama Perusahaan', 
+            'nama_depan' => 'Nama Depan', 
+            'nama_belakang' => 'Nama Belakang', 
+            'pekerjaan' => 'Pekerjaan', 
+            'deskripsi' => 'Deskripsi', 
+            'status' => 'Status', 
+            'tanggal_lahir' => 'Tanggal Lahir', 
+            'email' => 'Email', 
+            'nomor_telepon' => 'Nomor Telepon',
+            'alamat' => 'Alamat', 
+            'negara' => 'Negara', 
+            'provinsi' => 'Provinsi', 
+            'kota' => 'Kota', 
+            'kecamatan' => 'Kecamatan', 
+            'kelurahan' => 'Kelurahan', 
+            'kode_pos' => 'Kode Pos',
         ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
+            $property = [];
             $errorMessages = [];
 
             if ($this->isEmptyRow($row)) {
@@ -80,21 +95,28 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            if (!empty($rowArray['kategori_pelanggan'])) {
-                if (isset($row['kategori_pelanggan'])) {
-                    $lowerCategory = strtolower($row['kategori_pelanggan']);
-                    if (array_key_exists($lowerCategory, $categoryMapping)) {
-                        $row['kategori_pelanggan'] = $categoryMapping[$lowerCategory];
-                    }
-                }
+            // Cari duplikat menggunakan hash map
+            // Cek jika baris secara keseluruhan duplikat
+            $rowKey = json_encode($rowArray); 
+            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
+                $this->failedData[] = [
+                    'row' => $index + 2,
+                    'data' => [
+                        'property' => 'Semua Properti',
+                        'fail' => 'Semua properti pada data duplikat dengan baris ke-' . ($rowMap[$rowKey] + 2),
+                    ],
+                ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
+            } else {
+                $rowMap[$rowKey] = $index;
             }
 
-            // Cari duplikat menggunakan hash map
             // Pengecekan email duplikat
             if (!empty($rowArray['email'])) {
                 if (isset($emailMap[$rowArray['email']])) {
-                    $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
-                    $this->summaryCounts['duplicate_email']++;
+                    $property[] = 'Email';
+                    $errorMessages[] = 'Email sudah digunakan dalam file di baris ke-' . ($emailMap[$rowArray['email']] + 2);
                 } else {
                     $emailMap[$rowArray['email']] = $index;
                 }
@@ -103,59 +125,34 @@ class CustomerImport implements ToCollection, WithHeadingRow
             // Pengecekan nomor telepon duplikat
             if (!empty($rowArray['nomor_telepon'])) {
                 if (isset($phoneMap[$rowArray['nomor_telepon']])) {
-                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray    ['nomor_telepon']] + 1) . ')';
-                    $this->summaryCounts['duplicate_phone']++;
+                    $property[] = 'Nomor Telepon';
+                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file di baris ke-' . ($phoneMap[$rowArray    ['nomor_telepon']] + 2);
                 } else {
                     $phoneMap[$rowArray['nomor_telepon']] = $index;
                 }
             }
 
-            // Cek jika baris secara keseluruhan duplikat
-            $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey])) {
-                $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
-                $this->summaryCounts['duplicate_data']++;
-            } else {
-                $rowMap[$rowKey] = $index;
-            }
-
             // Jika ada error
             if (!empty($errorMessages)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'organization_name' => $row['nama_perusahaan'],
-                        'first_name' => $row['nama_depan'],
-                        'last_name' => $row['nama_belakang'],
-                        'customerCategory' => $row['kategori_pelanggan'],
-                        'job' => $row['pekerjaan'],
-                        'description' => $row['deskripsi'],
-                        'status' => $row['status'],
-                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
-                        'email' => $row['email'],
-                        'phone' => $row['nomor_telepon'],
-                        'owner' => $this->owner,
-                        'address' => $row['alamat'],
-                        'country' => $row['negara'],
-                        'province' => $row['provinsi'],
-                        'city' => $row['kota'],
-                        'subdistrict' => $row['kecamatan'],
-                        'village' => $row['kelurahan'],
-                        'zip_code' => $row['kode_pos'],
+                        'property' => $property,
+                        'fail' => $errorMessages,
                     ],
-                    'message' => $errorMessages
                 ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
             // Validasi data menggunakan Validator
-            $validator = Validator::make($row->toArray(), [
+            $validator = Validator::make($rowArray, [
                 'nama_depan' => 'required|string|max:50',
                 'nama_belakang' => 'nullable|string|max:50',
-                'kategori_pelanggan' => 'required|in:leads,contact',
                 'pekerjaan' => 'nullable|string|max:100',
                 'deskripsi' => 'nullable|string',
-                'status' => 'required|in:hot,warm,cold',
+                'status' => 'required|in:tinggi,sedang,rendah',
                 'tanggal_lahir' => 'nullable|date',
                 'email' => 'nullable|email|unique:customers,email|max:100',
                 'nomor_telepon' => 'required|numeric|max_digits:15|unique:customers,phone',
@@ -167,23 +164,21 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'kode_pos' => 'nullable|max:5',
                 'alamat' => 'nullable|string|max:100',
             ], [
-                'nama_depan.required' => 'Nama depan wajib diisi',
+                'nama_depan.required' => 'Nama depan tidak boleh kosong.',
                 'nama_depan.string' => 'Nama depan harus berupa teks',
                 'nama_depan.max' => 'Nama depan maksimal 50 karakter',
                 'nama_belakang.string' => 'Nama belakang harus berupa teks',
                 'nama_belakang.max' => 'Nama belakang maksimal 50 karakter',
-                'kategori_pelanggan.required' => 'Kategori pelanggan wajib diisi salah satu: leads atau contact.',
-                'kategori_pelanggan.in' => 'Kategori pelanggan harus pilih salah satu: leads atau contact.',
                 'pekerjaan.string' => 'Pekerjaan harus berupa teks.',
                 'pekerjaan.max' => 'Pekerjaan maksimal 100 karakter.',
                 'deskripsi.string' => 'Pekerjaan maksimal 100 karakter.',
-                'status.required' => 'Status pelanggan wajib dipilih.',
-                'status.in' => 'Status harus berupa pilih salah satu: hot, warm, atau cold.',
+                'status.required' => 'Status tidak boleh kosong.',
+                'status.in' => 'Status harus berupa salah satu: tinggi, sedang, atau rendah.',
                 'tanggal_lahir.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'email.max' => 'Email maksimal 100 karakter.',
-                'nomor_telepon.required' => 'Nomor telepon wajib diisi.',
+                'nomor_telepon.required' => 'Nomor telepon tidak boleh kosong.',
                 'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka.',
                 'nomor_telepon.max_digits' => 'Nomor telepon maksimal 15 angka.',
                 'nomor_telepon.unique' => 'Nomor telepon sudah terdaftar.',
@@ -203,61 +198,36 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'alamat.max' => 'Alamat maksimal 100 karakter.',
             ]);
             if ($validator->fails()) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $failedRules = $validator->failed();
+                foreach ($failedRules as $key => $failures) {
+                    $property[] = $propertyMapping[$key] ?? $key;
+                }
+
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'organization_name' => $row['nama_perusahaan'],
-                        'first_name' => $row['nama_depan'],
-                        'last_name' => $row['nama_belakang'],
-                        'customerCategory' => $row['kategori_pelanggan'],
-                        'job' => $row['pekerjaan'],
-                        'description' => $row['deskripsi'],
-                        'status' => $row['status'],
-                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
-                        'email' => $row['email'],
-                        'phone' => $row['nomor_telepon'],
-                        'owner' => $this->owner,
-                        'address' => $row['alamat'],
-                        'country' => $row['negara'],
-                        'province' => $row['provinsi'],
-                        'city' => $row['kota'],
-                        'subdistrict' => $row['kecamatan'],
-                        'village' => $row['kelurahan'],
-                        'zip_code' => $row['kode_pos'],
+                        'property' => $property,
+                        'fail' => $validator->errors()->all(),
                     ],
-                    'message' => $validator->errors()->all()
                 ];
-                $this->summaryCounts['validation_errors']++; 
+
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
             $organization = Organization::whereRaw('LOWER(name) = ?', [strtolower($row['nama_perusahaan'])])->first();
             if (!$organization) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'organization_name' => $row['nama_perusahaan'],
-                        'first_name' => $row['nama_depan'],
-                        'last_name' => $row['nama_belakang'],
-                        'customerCategory' => $row['kategori_pelanggan'],
-                        'job' => $row['pekerjaan'],
-                        'description' => $row['deskripsi'],
-                        'status' => $row['status'],
-                        'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
-                        'email' => $row['email'],
-                        'phone' => $row['nomor_telepon'],
-                        'owner' => $this->owner,
-                        'address' => $row['alamat'],
-                        'country' => $row['negara'],
-                        'province' => $row['provinsi'],
-                        'city' => $row['kota'],
-                        'subdistrict' => $row['kecamatan'],
-                        'village' => $row['kelurahan'],
-                        'zip_code' => $row['kode_pos'],
+                        'property' => 'Nama Perusahaan',
+                        'fail' => 'Perusahaan belum terdaftar',
                     ],
-                    'message' => 'Organisasi tidak terdaftar'
                 ];
-                $this->summaryCounts['organization_not_found']++;
+
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
@@ -265,7 +235,7 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'organization_name' => $row['nama_perusahaan'],
                 'first_name' => $row['nama_depan'],
                 'last_name' => $row['nama_belakang'],
-                'customerCategory' => $row['kategori_pelanggan'],
+                'customerCategory' => $this->customerCategory,
                 'job' => $row['pekerjaan'],
                 'description' => $row['deskripsi'],
                 'status' => $row['status'],
@@ -281,14 +251,15 @@ class CustomerImport implements ToCollection, WithHeadingRow
                 'village' => $row['kelurahan'],
                 'zip_code' => $row['kode_pos'],
             ];
-            $this->summaryCounts['valid_data']++;
+            
+            $this->summaryData['total_data']++;
+            $this->summaryData['valid_data']++;
         }
 
-        // Feedback response to the user
         return [
             'validData' => $this->validData,
-            'invalidData' => $this->invalidData,
-            'summaryCounts' => $this->summaryCounts, 
+            'failedData' => $this->failedData,
+            'summaryData' => $this->summaryData,
         ];
     }
 
@@ -305,7 +276,6 @@ class CustomerImport implements ToCollection, WithHeadingRow
             'nama_perusahaan', 
             'nama_depan', 
             'nama_belakang', 
-            'kategori_pelanggan', 
             'pekerjaan', 
             'deskripsi', 
             'status', 

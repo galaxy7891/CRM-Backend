@@ -99,12 +99,14 @@ class UserInvitationController extends Controller
     public function createUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users, email|max:100',
+            'email' => 'required|email|unique:users,email|max:100',
             'token' => 'required',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|string|min:8',
+            'new_password' => 'required|string|min:8',
         ], [
+            'invited_by.required' => 'Email pengundang tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
@@ -113,11 +115,7 @@ class UserInvitationController extends Controller
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50  karakter',
-<<<<<<< HEAD
-
-=======
             'last_name.required' => 'Nama belakang tidak boleh kosong',
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
         ]);
@@ -139,20 +137,24 @@ class UserInvitationController extends Controller
         }
 
         try {
+            $inviter = $invitation->inviter;
+            $company_id = $inviter?->company_id;
+
             $dataUser = [
+                'company_id' => $company_id,
                 'email' => $request->email,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'password' => $request->password,
             ];
 
-            $user = User::createUser($dataUser, null);
+            $user = User::createUser($dataUser, $company_id);
             $invitation->updateStatus('accepted');
 
             return new ApiResponseResource(
                 true,
                 'Akun berhasil dibuat.',
-                $user,
+                $user
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(

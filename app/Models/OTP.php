@@ -37,7 +37,7 @@ class Otp extends Model
     protected $dates = ['expired_at', 'created_at', 'updated_at', 'deleted_at'];
 
     /**
-     * Get the invitation has been sent to email within 5 minutes.
+     * Get the invitation has been sent to email within 1 minutes.
      *
      * @param string $email
      * @return OTP|null
@@ -59,7 +59,6 @@ class Otp extends Model
     {
         $nextOtpTime = $otp->created_at;
         $remainingTime = $nextOtpTime->diff(now()->subMinutes(1));
-
 
         return [
             'minutes' => $remainingTime->i,

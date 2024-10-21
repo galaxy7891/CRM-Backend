@@ -67,45 +67,44 @@ class Organization extends Model
             ->count();
     }
 
-    public static function createOrganization(array $data): self
+    public static function createOrganization(array $dataOrganization): self
     {
         return self::create([
-            'name' => $data['name'],
-            'industry' => $data['industry'] ?? null,
-            'status' => $data['status'],
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'owner' => $data['owner'],
-            'website' => $data['website'] ?? null,
-            'address' => $data['address'] ?? null,
-            'country' => $data['country'] ?? null,
-            'city' => $data['city'] ?? null,
-            'subdistrict' => $data['subdistrict'] ?? null,
-            'village' => $data['village'] ?? null,
-            'zip_code' => $data['zip_code'] ?? null
+            'name' => $dataOrganization['name'],
+            'industry' => $dataOrganization['industry'] ?? null,
+            'status' => $dataOrganization['status'],
+            'email' => $dataOrganization['email'] ?? null,
+            'phone' => $dataOrganization['phone'] ?? null,
+            'owner' => $dataOrganization['owner'],
+            'website' => $dataOrganization['website'] ?? null,
+            'address' => $dataOrganization['address'] ?? null,
+            'country' => $dataOrganization['country'] ?? null,
+            'city' => $dataOrganization['city'] ?? null,
+            'subdistrict' => $dataOrganization['subdistrict'] ?? null,
+            'village' => $dataOrganization['village'] ?? null,
+            'zip_code' => $dataOrganization['zip_code'] ?? null
         ]);
     }
 
-    public static function updateOrganization(array $data, $id): self
+    public static function updateOrganization(array $dataOrganization, string $organizationId): self
     {
-        $organization = self::findOrFail($id);
-        $organization->fill([
-            'name' => $data['name'],
-            'industry' => $data['industry'] ?? null,
-            'status' => $data['status'],
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'owner' => $data['owner'],
-            'website' => $data['website'] ?? null,
-            'address' => $data['address'] ?? null,
-            'country' => $data['country'] ?? null,
-            'city' => $data['city'] ?? null,
-            'subdistrict' => $data['subdistrict'] ?? null,
-            'village' => $data['village'] ?? null,
-            'zip_code' => $data['zip_code'] ?? null,
+        $organization = self::findOrFail($organizationId);
+        $organization->update([
+            'name' => $dataOrganization['name'] ?? $organization->name,
+            'industry' => $dataOrganization['industry'] ?? $organization->industry,
+            'status' => $dataOrganization['status'] ?? $organization->status,
+            'email' => $dataOrganization['email'] ?? $organization->email,
+            'phone' => $dataOrganization['phone'] ?? $organization->phone,
+            'owner' => $dataOrganization['owner'] ?? $organization->owner,
+            'website' => $dataOrganization['website'] ?? $organization->website,
+            'address' => $dataOrganization['address'] ?? $organization->address,
+            'country' => $dataOrganization['country'] ?? $organization->country,
+            'city' => $dataOrganization['city'] ?? $organization->city,
+            'subdistrict' => $dataOrganization['subdistrict'] ?? $organization->subdistrict,
+            'village' => $dataOrganization['village'] ?? $organization->village,
+            'zip_code' => $dataOrganization['zip_code'] ?? $organization->zip_code,
         ]);
 
-        $organization->save();
         return $organization;
     }
 }

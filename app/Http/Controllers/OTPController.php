@@ -47,9 +47,8 @@ class OtpController extends Controller
 
             return new ApiResponseResource(
                 false,
-                // "OTP akan dikirim dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik."
-                "Tunggu beberapa saat untuk mengirimkan OTP kembali",
-                $remainingTime['minutes'] . ':' . $remainingTime['seconds']
+                "OTP dapat dikirim kembali dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik.",
+                $remainingTime['minutes'] .':'. $remainingTime['second'],
             );
         }
 
@@ -67,6 +66,7 @@ class OtpController extends Controller
                     'email' => $email,
                 ]
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

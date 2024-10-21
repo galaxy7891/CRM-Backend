@@ -4,16 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-use App\Imports\CustomerImport;
-use App\Imports\OrganizationImport;
-use App\Imports\ProductImport;
-use App\Models\Customer;
-use App\Models\Organization;
-use App\Models\Product;
+use App\Imports\CustomersImport;
+use App\Imports\OrganizationsImport;
+use App\Imports\ProductsImport;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
-use Tymon\JWTAuth\Claims\Custom;
 
 class ImportController extends Controller
 {
@@ -30,18 +26,23 @@ class ImportController extends Controller
             ]);
 
             switch ($type) {
-                case 'customer':
-                    $model = Customer::class;
-                    $import = new CustomerImport($user->email);
+                case 'leads':
+                    $model = 'customer';
+                    $import = new CustomersImport($user->email, 'leads');
+                    break;
+                
+                case 'contacts':
+                    $model = 'customer';
+                    $import = new CustomersImport($user->email, 'contact');
                     break;
 
-                case 'organization':
-                    $import = new OrganizationImport($user->email);
+                case 'organizations':
+                    $import = new OrganizationsImport($user->email);
                     $model = 'organization';
                     break;
 
-                case 'product':
-                    $import = new ProductImport($user->email);
+                case 'products':
+                    $import = new ProductsImport($user->email);
                     $model = 'product';
                     break;
 
@@ -56,8 +57,8 @@ class ImportController extends Controller
             Excel::import($import, $request->file('file'));
 
             $validData = $import->getValidData();
-            $invalidData = $import->getInvalidData();
-            $summaryCounts = $import->getsummaryCounts();
+            $failedData = $import->getFailedData();
+            $summaryData = $import->getSummaryData();
 
             $perPage = 25;
             $page = LengthAwarePaginator::resolveCurrentPage();
@@ -68,37 +69,34 @@ class ImportController extends Controller
                 $page, 
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
-            $invalidDataPaginated = new LengthAwarePaginator(
-                array_slice($invalidData, ($page - 1) * $perPage, $perPage), 
-                count($invalidData), 
+            $failedDataPaginated = new LengthAwarePaginator(
+                array_slice($failedData, ($page - 1) * $perPage, $perPage), 
+                count($failedData), 
                 $perPage, 
                 $page, 
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
 
-            $data = [
-                'model' => $model,
-                'validData' => $validDataPaginated,
-                'invalidData' => $invalidDataPaginated,
-                'summaryCounts' => $summaryCounts,
-            ];
-
-            if (empty($invalidData)) {
-                foreach($validData as $row){
-                    $model::create($row);
-                }
-
+            if (empty($failedData)) {
                 return new ApiResponseResource(
                     true,
-                    'Data aman dan tidak ditemukan data rusak.',
-                    $data
+                    'Tidak ditemukan adanya data rusak.',
+                    [
+                        'data_type' => $model,
+                        'summaryData' => $summaryData,
+                        'validData' => $validDataPaginated,
+                    ]
                 );
             }
 
             return new ApiResponseResource(
                 false,
                 'Terdapat data yang rusak',
-                $data
+                [
+                    'data_type' => $model,
+                    'summaryData' => $summaryData,
+                    'failedData' => $failedDataPaginated,
+                ]
             );
 
         } catch(\Exception $e){

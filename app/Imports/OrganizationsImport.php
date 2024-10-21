@@ -2,21 +2,23 @@
 
 namespace App\Imports;
 
-use App\Models\Organization;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
-use function PHPUnit\Framework\isEmpty;
-
-class OrganizationImport implements ToCollection, WithHeadingRow
+class OrganizationsImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
     protected $owner;
-    protected $invalidData = [];
     protected $validData = [];
+    protected $failedData = [];
+    protected $summaryData = [
+        'total_data' => 0, 
+        'valid_data' => 0,
+        'invalid_data' => 0,
+    ];
     protected $summaryCounts = [
         'valid_data' => 0,
         'validation_errors' => 0,
@@ -26,22 +28,22 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         'duplicate_data' => 0,
     ];
 
-    // Getter untuk valid data
+    // Getter for valid data
     public function getValidData()
     {
         return $this->validData;
     }
 
-    // Getter untuk invalid data
-    public function getInvalidData()
+    // Getter for invalid data
+    public function getFailedData()
     {
-        return $this->invalidData;
+        return $this->failedData;
     }
 
-    // Getter untuk error counts
-    public function getsummaryCounts()
+    // Getter for summary data
+    public function getSummaryData()
     {
-        return $this->summaryCounts;
+        return $this->summaryData;
     }
 
     public function __construct($owner)
@@ -56,15 +58,32 @@ class OrganizationImport implements ToCollection, WithHeadingRow
         $nameMap = []; 
         $emailMap = []; 
         $phoneMap = []; 
+        $websiteMap = []; 
         $rowMap = []; 
         $statusMapping = [
             'tinggi' => 'hot',
             'sedang' => 'warm',
             'rendah' => 'cold',
         ];
+        $propertyMapping = [
+            'nama_perusahaan' => 'Nama Perusahaan', 
+            'jenis_industri' => 'Jenis Industri', 
+            'email' => 'Email', 
+            'status' => 'Status', 
+            'nomor_telepon' => 'Nomor Telepon', 
+            'website' => 'Website', 
+            'alamat' => 'Alamat', 
+            'negara' => 'Negara', 
+            'provinsi' => 'Provinsi', 
+            'kota' => 'Kota',
+            'kecamatan' => 'Kecamatan', 
+            'kelurahan' => 'Kelurahan', 
+            'kode_pos' => 'Kode Pos'
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
+            $property = [];
             $errorMessages = [];
             
             if ($this->isEmptyRow($row)) {
@@ -81,11 +100,28 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             }
 
             // Cari duplikat menggunakan hash map
+            // Cek jika baris secara keseluruhan duplikat
+            $rowKey = json_encode($rowArray); 
+            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
+                $this->failedData[] = [
+                    'row' => $index + 2,
+                    'data' => [
+                        'property' => 'Semua Properti',
+                        'fail' => 'Semua properti pada data duplikat dengan baris ke-' . ($rowMap[$rowKey] + 2),
+                    ],
+                ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
+                continue;
+            } else {
+                $rowMap[$rowKey] = $index;
+            }
+
             // Pengecekan nama perusahaan duplikat
             if (!empty($rowArray['nama_perusahaan'])) {
                 if (isset($nameMap[$rowArray['nama_perusahaan']])) {
-                    $errorMessages[] = 'Nama perusahaan sudah digunakan dalam file (duplikat di baris ' . ($nameMap[$rowArray['nama_perusahaan']] + 1) . ')';
-                    $this->summaryCounts['duplicate_name']++;
+                    $property[] = 'Nama Perusahaan';
+                    $errorMessages[] = 'Nama perusahaan sudah digunakan dalam file di baris ke-' . ($nameMap[$rowArray['nama_perusahaan']] + 2);
                 } else {
                     $nameMap[$rowArray['nama_perusahaan']] = $index;
                 }
@@ -94,8 +130,8 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             // Pengecekan email duplikat
             if (!empty($rowArray['email'])) {
                 if (isset($emailMap[$rowArray['email']])) {
-                    $errorMessages[] = 'Email sudah digunakan dalam file (duplikat di baris ' . ($emailMap[$rowArray['email']] + 1) . ')';
-                    $this->summaryCounts['duplicate_email']++;
+                    $property[] = 'Email';
+                    $errorMessages[] = 'Email sudah digunakan dalam file di baris ke-' . ($emailMap[$rowArray['email']] + 2);
                 } else {
                     $emailMap[$rowArray['email']] = $index;
                 }
@@ -104,44 +140,34 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             // Pengecekan nomor telepon duplikat
             if (!empty($rowArray['nomor_telepon'])) {
                 if (isset($phoneMap[$rowArray['nomor_telepon']])) {
-                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file (duplikat di baris ' . ($phoneMap[$rowArray['nomor_telepon']] + 1) . ')';
-                    $this->summaryCounts['duplicate_phone']++;
+                    $property[] = 'Nomor Telepon';
+                    $errorMessages[] = 'Nomor telepon sudah digunakan dalam file di baris ke-' . ($phoneMap[$rowArray['nomor_telepon']] + 2);
                 } else {
                     $phoneMap[$rowArray['nomor_telepon']] = $index;
                 }
             }
-
-            // Cek jika baris secara keseluruhan duplikat
-            $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
-                $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
-                $this->summaryCounts['duplicate_data']++;
-            } else {
-                $rowMap[$rowKey] = $index;
+            
+            // Pengecekan website duplikat
+            if (!empty($rowArray['website'])) {
+                if (isset($websiteMap[$rowArray['website']])) {
+                    $property[] = 'Website';
+                    $errorMessages[] = 'Website sudah digunakan dalam file di baris ke-' . ($websiteMap[$rowArray['website']] + 2);
+                } else {
+                    $websiteMap[$rowArray['website']] = $index;
+                }
             }
 
             // Jika ada error
             if (!empty($errorMessages)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'name' => $row['nama_perusahaan'],
-                        'industry' => $row['jenis_industri'],
-                        'email' => $row['email'],
-                        'status' => $row['status'],
-                        'phone' => $row['nomor_telepon'],
-                        'owner' => $this->owner,
-                        'website' => $row['website'],
-                        'address' => $row['alamat'],
-                        'country' => $row['negara'],
-                        'province' => $row['provinsi'],
-                        'city' => $row['kota'],
-                        'subdistrict' => $row['kecamatan'],
-                        'village' => $row['kelurahan'],
-                        'zip_code' => $row['kode_pos'],
+                        'property' => $property,
+                        'fail' => $errorMessages,
                     ],
-                    'message' => $errorMessages
                 ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
@@ -152,7 +178,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'status' => 'required|in:hot,warm,cold',
                 'email' => 'nullable|email|unique:organizations,email|max:100',
                 'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
-                'website' => 'nullable|string|max:255',
+                'website' => 'nullable|unique:organizations,website|string|max:255',
                 'negara' => 'nullable|string|max:50',
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
@@ -175,6 +201,7 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka.',
                 'nomor_telepon.max_digits' => 'Nomor telepon maksimal 15 angka.',
                 'nomor_telepon.unique' => 'Nomor telepon sudah terdaftar.',
+                'website.unique' => 'Website sudah terdaftar.',
                 'website.string' => 'Website harus berupa teks.',
                 'website.max' => 'Website maksimal 255 karakter.',
                 'negara.string' => 'Asal negara harus berupa teks.',
@@ -192,27 +219,21 @@ class OrganizationImport implements ToCollection, WithHeadingRow
             ]);
 
             if ($validator->fails()) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $failedRules = $validator->failed();
+                foreach ($failedRules as $key => $failures) {
+                    $property[] = $propertyMapping[$key] ?? $key;
+                }
+
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'name' => $row['nama_perusahaan'],
-                        'industry' => $row['jenis_industri'],
-                        'email' => $row['email'],
-                        'status' => $row['status'],
-                        'phone' => $row['nomor_telepon'],
-                        'owner' => $this->owner,
-                        'website' => $row['website'],
-                        'address' => $row['alamat'],
-                        'country' => $row['negara'],
-                        'province' => $row['provinsi'],
-                        'city' => $row['kota'],
-                        'subdistrict' => $row['kecamatan'],
-                        'village' => $row['kelurahan'],
-                        'zip_code' => $row['kode_pos'],
+                        'property' => $property,
+                        'fail' => $validator->errors()->all(),
                     ],
-                    'message' => $validator->errors()->all()
                 ];
-                $this->summaryCounts['validation_errors']++;
+
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
@@ -234,14 +255,15 @@ class OrganizationImport implements ToCollection, WithHeadingRow
                 'zip_code' => $row['kode_pos'],
             ];
 
-            $this->summaryCounts['valid_data']++;
+            $this->summaryData['total_data']++;
+            $this->summaryData['valid_data']++;
         }
 
         // Feedback response to the user
         return [
             'validData' => $this->validData,
-            'invalidData' => $this->invalidData,
-            'summaryCounts' => $this->summaryCounts,
+            'failedData' => $this->failedData,
+            'summaryData' => $this->summaryData,
         ];
     }
 

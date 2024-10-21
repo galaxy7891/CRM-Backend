@@ -13,14 +13,14 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        // $changes = ModelChangeLoggerHelper::getModelChanges($user);
+        $changes = ModelChangeLoggerHelper::getModelChanges($user);
 
-        // ActivityLog::create([
-        //     'user_id' => auth()->id(),
-        //     'model_name' => 'users',
-        //     'action' => 'CREATE',
-        //     'changes' => $changes ? json_encode($changes) : null,
-        // ]);
+        ActivityLog::create([
+            'user_id' => auth()->id() ? auth()->id() : $user->id,
+            'model_name' => 'users',
+            'action' => 'CREATE',
+            'changes' => $changes ? json_encode($changes) : null,
+        ]);
     }
 
     /**
@@ -31,7 +31,7 @@ class UserObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($user);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : $user->id,
             'model_name' => 'users',
             'action' => 'UPDATE',
             'changes' => $changes ? json_encode($changes) : null,
@@ -46,7 +46,7 @@ class UserObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($user);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : $user->id,
             'model_name' => 'users',
             'action' => 'DELETE',
             'changes' => $changes ? json_encode($changes) : null,

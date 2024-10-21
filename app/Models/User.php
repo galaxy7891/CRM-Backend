@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -32,7 +32,8 @@ class User extends Authenticatable implements JWTSubject
         'job_position',
         'role',
         'gender',
-        'photo',
+        'image_url',
+        'image_public_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -70,6 +71,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the customers associated with the user.
      * Get the deals associated with the user.
      * Get the activitylogs associated with the user.
+     * Get the invitation associated with the user.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers, deals, activitylogs.
      * 
@@ -89,6 +91,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ActivityLog::class, 'user_id', 'id');
     }
+
+    public function invitations()
+    {  
+        return $this->hasMany(UserInvitation::class, 'invited_by', 'email');
+    }
+
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -116,64 +124,110 @@ class User extends Authenticatable implements JWTSubject
      * @param string $email
      * @return User|null
      */
-    public static function findByEmail($email)
+    public static function findByEmail(string $email)
     {
         return self::where('email', $email)->first();
-    }
-
-    /**
-     * Update password user.
-     *
-     * @param string $new_password
-     * @return User
-     */
-    public function updatePassword(string $new_password)
-    {
-        $this->password = Hash::make($new_password);
-        return $this->save();
-    }
-
-    /**
-     * Create or update a user based on Google OAuth data.
-     * 
-     * This method is used for authenticating users through their Google account.
-     * It will either create a new user or update the existing user's details.
-     * 
-     * @param object $googleUser The user object returned from Google OAuth
-     * @return \App\Models\User The created or updated user model
-     */
-    public static function createOrUpdateGoogleUser($googleUser, $nameParts)
-    {
-
-        return self::updateOrCreate(
-            ['email' => $googleUser->email],
-            [
-                'first_name' => $nameParts['first_name'],
-                'last_name' => $nameParts['last_name'],
-                'role' => 'super_admin',
-                'photo' => $googleUser->avatar,
-                'google_id' => $googleUser->id,
-            ]
-        );
     }
 
     /**
      * Create a new user instance after a valid registration.
      *
      * @param array $dataUser
-     * @param string $company_id 
+     * @param string $companyId 
      * @return User
      */
-    public static function createUser(array $dataUser, ?string $company_id): self
+    public static function createUser(array $dataUser, ?string $companyId): self
     {
         return self::create([
-            'company_id' => $company_id ?? null,
+            'google_id' => $dataUser['google_id'] ?? null,
+            'company_id' => $companyId ?? null,
             'email' => $dataUser['email'],
             'first_name' => $dataUser['first_name'],
-            'last_name' => $dataUser['last_name'],
+            'last_name' => $dataUser['last_name'] ?? null,
             'password' => Hash::make($dataUser['password']) ?? null,
-            'phone' => $dataUser['phone'] ?? null,
+            'phone' => $dataUser['phone'],
             'job_position' => $dataUser['job_position'] ?? null,
+            'image_url' => $dataUser['photo'] ?? null,
         ]);
+    }
+
+    /**
+     * Update user
+     *
+     * @param array $dataUser
+     * @param string $userId 
+     * @return User
+     */
+    public static function updateUser(array $dataUser, string $userId): self
+    {
+        $user = self::findOrFail($userId);
+
+        $user->update([
+            'company_id' => $dataUser['company_id'] ?? $user->company_id,
+            'email' => $dataUser['email'] ?? $user->email,
+            'first_name' => $dataUser['first_name'] ?? $user->first_name,
+            'last_name' => $dataUser['last_name'] ?? $user->last_name,
+            'phone' => $dataUser['phone'] ?? $user->phone,
+            'job_position' => $dataUser['job_position'] ?? $user->job_position,
+            'role' => $dataUser['role'] ?? $user->role,
+            'gender' => $dataUser['gender'] ?? $user->gender,
+        ]);
+
+        return $user; 
+    }
+
+    /**
+     * Update password user.
+     *
+     * @param string $newPassword
+     * @return User
+     */
+    public function updatePassword(string $newPassword)
+    {
+        $this->password = Hash::make($newPassword);
+        return $this->save();
+    }
+
+    /**
+     * Update the profile photo URL and public_id of the user.
+     *
+     * @param \Illuminate\Http\UploadedFile $photo
+     * @param string $userId 
+     * @return array 
+     */
+    public function updateProfilePhoto($photo, string $userId)
+    {
+        $user = self::findOrFail($userId);
+
+        $cloudinary = new Cloudinary();
+        if ($user->image_public_id) {
+            $cloudinary->uploadApi()->destroy($user->image_public_id);
+        }
+
+        $uploadResult = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
+            'folder' => 'users',
+        ]);
+        $user->update([
+            'image_url' => $uploadResult['secure_url'],
+            'image_public_id' => $uploadResult['public_id'],
+        ]);
+
+        return [
+            'image_url' => $uploadResult['secure_url'],
+            'image_public_id' => $uploadResult['public_id'],
+        ];
+    }
+
+    public static function deleteUser($id): self
+    {
+        $user = self::find($id);
+        $cloudinary = new Cloudinary();
+
+        if ($user->image_public_id) {
+            $cloudinary->uploadApi()->destroy($user->image_public_id);
+        }
+
+        $user->delete();
+        return $user;
     }
 }

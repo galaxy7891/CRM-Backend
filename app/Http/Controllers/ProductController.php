@@ -7,8 +7,6 @@ use App\Models\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
 
 class ProductController extends Controller
 {
@@ -19,10 +17,10 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $product = Product::latest()->paginate(10);
+            $product = Product::latest()->paginate(25);
             return new ApiResponseResource(
                 true,
-                'Daftar Product',
+                'Daftar data produk',
                 $product
             );
 
@@ -41,14 +39,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:products,name ',
+            'name' => 'required|string|max:100|unique:products,name',
             'category' => 'required|string|max:100',
             'code' => 'required|string|max:100',
             'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
             'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
-            'photo_product' => 'nullable|max:2048',
+            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -72,6 +70,8 @@ class ProductController extends Controller
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
             'description.string' => 'Harga maksimal 20 digit.',
+            'photo_product.image' => 'Foto produk harus berupa gambar.',
+            'photo_product.max' => 'Foto produk tidak sesuai format.',
             'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
         if ($validator->fails()) {
@@ -86,7 +86,7 @@ class ProductController extends Controller
             $product = Product::createProduct($request->all());
             return new ApiResponseResource(
                 true,
-                'Product berhasil ditambahkan',
+                "Data produk {$request->name} berhasil ditambahkan",
                 $product
             );
 
@@ -104,19 +104,19 @@ class ProductController extends Controller
      */
     public function show($id)
     {
+        $product = Product::find($id);
+        if (!$product) {
+            return new ApiResponseResource(
+                false, 
+                'Data produk tidak ditemukan.',
+                null
+            );
+        }
+        
         try {
-            $product = Product::find($id);
-            if (!$product) {
-                return new ApiResponseResource(
-                    false, 
-                    'Data Product Tidak Ditemukan!', 
-                    null
-                );
-            }
-
             return new ApiResponseResource(
                 true,
-                'Data Product Ditemukan!',
+                "Data produk {$product->name}",
                 $product
             );
 
@@ -134,24 +134,23 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $product = product::find($id);
+        $product = Product::find($id);
         if (!$product) {
             return new ApiResponseResource(
                 false, 
-                'Product Tidak Ditemukan',
+                'Data produk tidak ditemukan.',
                 null
             );
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:products,name ',
-            'category' => 'required|string|max:100',
-            'code' => 'required|string|max:100',
-            'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
-            'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
-            'price' => 'required|numeric|min:0|max_digits:20',
+            'name' => 'sometimes|required|string|max:100|unique:products,name',
+            'category' => 'sometimes|required|string|max:100',
+            'code' => 'sometimes|required|string|max:100',
+            'quantity' => 'sometimes|required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
+            'unit' => 'sometimes|required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
+            'price' => 'sometimes|required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
-            'photo_product' => 'nullable|max:2048',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -175,7 +174,6 @@ class ProductController extends Controller
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
             'description.string' => 'Harga maksimal 20 digit.',
-            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -184,12 +182,13 @@ class ProductController extends Controller
                 null
             );
         }
+        
         try {
-            $product = Product::updateProduct($request->all(), $id);
+            $updatedProduct = Product::updateProduct($request->all(), $id);
             return new ApiResponseResource(
                 true,
-                'Data Product Berhasil Diubah',
-                $product
+                "Data produk {$updatedProduct->name} berhasil diubah",
+                $updatedProduct
             );
 
         } catch (\Exception $e) {
@@ -202,27 +201,75 @@ class ProductController extends Controller
     }
 
     /**
+     * Update photo profile in cloudinary.
+     */
+    public function updatePhotoProduct(Request $request, $id)
+    {
+        $product = Product::find($id);
+        if (!$product) {
+            return new ApiResponseResource(
+                false, 
+                'Data produk tidak ditemukan',
+                null
+            );
+        }
+
+        $validator = Validator::make($request->all(), [
+            'photo_product' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'photo_product.required' => 'Foto produk tidak boleh kosong.',
+            'photo_product.image' => 'Foto produk harus berupa gambar.',
+            'photo_product.mimes' => 'Foto produk tidak sesuai format.',
+            'photo_product.max' => 'Foto produk maksimal 2mb.',
+        ]);
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
+        }
+
+        try {
+            $photoData = $product->updatePhotoProduct($request->file('photo'), $id); 
+
+            return new ApiResponseResource(
+                true,
+                "Foto produk {$product->name} berhasil diperbarui",
+                $photoData
+            );
+        
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        try {
-            $product = Product::find($id);
-            if (!$product) {
-                return new ApiResponseResource(
-                    false, 
-                    'Product Tidak Ditemukan',
-                    null
-                );
-            }
+        $product = Product::find($id);
+        if (!$product) {
+            return new ApiResponseResource(
+                false, 
+                'Data  produk tidak ditemukan',
+                null
+            );
+        }
 
-            // Delete the product
+        try {
+            $name = $product->name;
             $product = Product::deleteProduct($id);
 
             // Return response with first and last name 
             return new ApiResponseResource(
                 true,
-                "Produk {$product->name} Berhasil Dihapus!",
+                "Data produk {$name} berhasil dihapus",
                 null
             );
 

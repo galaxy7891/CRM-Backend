@@ -18,18 +18,27 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display the specified resource.
      */
-    public function index()
+    public function show()
     {
-        try {
-            $user = auth()->user();
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Data user tidak ditemukan',
+                null
+            );
+        }
 
-            return $user->load('company');
+        try {
+            return new ApiResponseResource(
+                true,
+                "Data user {$user->first_name} " . strtolower($user->last_name),
+                $user->load('company'),
+            );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -40,22 +49,11 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        try {
-        } catch (\Exception $e) {
-        }
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $user = User::find($id);
-
+        $user = auth()->user();
         if (!$user) {
             return new ApiResponseResource(
                 false,
@@ -65,14 +63,14 @@ class UserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'company_id' => 'nullable|uuid',
-            'email' => 'required|email|unique:users,email',
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
-            'job_position' => 'required|max:50',
-            'role' => 'required|in:super_admin,admin,employee',
-            'gender' => 'nullable|in:male,female,other',
+            'company_id' => 'sometimes|nullable|uuid',
+            'email' => 'sometimes|required|email|unique:users,email',
+            'first_name' => 'sometimes|required|string|max:50',
+            'last_name' => 'sometimes|nullable|string|max:50',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique:users,phone',
+            'job_position' => 'sometimes|required|max:50',
+            'role' => 'sometimes|required|in:super_admin,admin,employee',
+            'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
             'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
@@ -93,7 +91,6 @@ class UserController extends Controller
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -103,15 +100,15 @@ class UserController extends Controller
         }
 
         try {
+            $updatedUser = User::updateUser($request->all(), $user->id);
 
-            $user = User::updateUser($request->all(), $id);
             return new ApiResponseResource(
                 true,
-                "Data User {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
-                $user
+                "Data user {$updatedUser->first_name} " . strtolower($updatedUser->last_name) . " berhasil diubah",
+                $updatedUser
             );
+            
         } catch (\Exception $e) {
-
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -121,30 +118,80 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Update photo profile in cloudinary.
      */
-    public function destroy($id)
+    public function updateProfilePhoto(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Data user tidak ditemukan',
+                null
+            );
+        }
+
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'photo.required' => 'Foto profil tidak boleh kosong.',
+            'photo.image' => 'Foto profil harus berupa gambar.',
+            'photo.mimes' => 'Foto profil tidak sesuai format.',
+            'photo.max' => 'Foto profil maksimal 2mb.',
+        ]);
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
+        }
+
         try {
-
-            $user = User::find($id);
-            if (!$user) {
-                return new ApiResponseResource(
-                    false,
-                    'User tidak ditemukan',
-                    null
-                );
-            }
-
-            $first_name = $user->first_name;
-            $last_name = $user->last_name;
-            $user->delete();
+            
+            $photoData = $user->updateProfilePhoto($request->file('photo')); 
 
             return new ApiResponseResource(
                 true,
-                "User {$first_name} {$last_name} Berhasil Dihapus!",
+                "Foto profil user {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
+                $photoData
+            );
+        
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
                 null
             );
+        }
+        
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Data user tidak ditemukan',
+                null
+            );
+        }
+
+        try {
+            $first_name = $user->first_name;
+            $last_name = $user->last_name;
+            $user = User::deleteUser($user->id);
+
+            return new ApiResponseResource(
+                true,
+                "Data user {$first_name} " . strtolower($last_name) . "berhasil dihapus",
+                null
+            );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -188,7 +235,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 false,
-                'Dapat mengirim ulang link reset password dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
                 null
             );
         }
@@ -214,11 +261,12 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                'Link Reset Password telah dikirim ke email anda.',
+                'Link reset kata sandi telah dikirim ke email anda.',
                 [
                     'email' => $email
                 ]
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -266,22 +314,22 @@ class UserController extends Controller
         if (!PasswordResetToken::findPasswordResetToken($request->only('email', 'token'))) {
             return new ApiResponseResource(
                 false,
-                'Token reset password tidak valid atau telah kadaluarsa.',
+                'Token reset kata sandi tidak valid atau telah kadaluarsa.',
                 null
             );
         }
 
         try {
-
             $user = User::findByEmail($request->email);
             $user->updatePassword($request->new_password);
             PasswordResetToken::deletePasswordResetToken($request->email);
 
             return new ApiResponseResource(
                 true,
-                'Password berhasil diubah.',
+                'kata sandi berhasil diubah.',
                 null
             );
+
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -302,7 +350,7 @@ class UserController extends Controller
         $user = auth()->user();
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
-        $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting() . ', ' . $nama;
+        $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
 
         $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
         $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
@@ -321,9 +369,10 @@ class UserController extends Controller
 
         return new ApiResponseResource(
             true,
-            $greetingMessage,
+            'Dashboard user',
             [
                 'user' => $nama,
+                'greeting' => $greetingMessage,
                 'date' => $formattedDate,
                 'activities' => [
                     'leads' => $leadsCount,
