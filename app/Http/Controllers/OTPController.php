@@ -40,17 +40,18 @@ class OtpController extends Controller
             );
         }
 
-        // $recentOTP = Otp::getRecentOTP($request->email);
+        $recentOTP = Otp::getRecentOTP($request->email);
 
-        // if ($recentOTP) {
-        //     $remainingTime = Otp::getRemainingTime($recentOTP);
+        if ($recentOTP) {
+            $remainingTime = Otp::getRemainingTime($recentOTP);
 
-        //     return new ApiResponseResource(
-        //         false,
-        //         "OTP akan dikirim dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik.",
-        //         null
-        //     );
-        // }
+            return new ApiResponseResource(
+                false,
+                // "OTP akan dikirim dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik."
+                "Tunggu beberapa saat untuk mengirimkan OTP kembali",
+                $remainingTime['minutes'] . ':' . $remainingTime['seconds']
+            );
+        }
 
         try {
 
