@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
@@ -14,7 +15,6 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\RoleMiddleware;
-use App\Models\Organization;
 
 Route::group(['middleware' => 'api'], function () {
     Route::group(['prefix' => 'auth'], function () {
@@ -44,18 +44,31 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
         Route::get('/activity/log', [ActivityLogController::class, 'index']);
-        Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
-        Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
         Route::post('/import/{type}', [ImportController::class, 'import']);
+        
+        Route::get('/user', [UserController::class, 'show']);
+        Route::post('/user', [UserController::class, 'update']);
+        Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
+        Route::delete('/user', [UserController::class, 'destroy']);
+
+        Route::apiResource('/companies', CompaniesController::class);
+        Route::post('/companies/logo/{company}', [CompaniesController::class, 'updateLogo']);
+        
         Route::apiResource('/customers', CustomerController::class);
+        
         Route::apiResource('/organizations', OrganizationController::class);
+        Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
+        
         Route::apiResource('/products', ProductController::class);
+        Route::post('/product/photo/{product}', [ProductController::class, 'updatePhotoProduct']);
+
         Route::apiResource('/deals', DealController::class);
-        Route::get('/user', [UserController::class, 'index']);
+        
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
             Route::put('/employee/{id}', [EmployeeController::class, 'update']);
             Route::delete('/employee/{id}', [EmployeeController::class, 'destroy']);
         });
+
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin, admin'], function () {
             Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
             Route::get('/employee', [EmployeeController::class, 'index']);

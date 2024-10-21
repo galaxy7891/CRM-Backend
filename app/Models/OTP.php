@@ -37,7 +37,7 @@ class Otp extends Model
     protected $dates = ['expired_at', 'created_at', 'updated_at', 'deleted_at'];
 
     /**
-     * Get the invitation has been sent to email within 5 minutes.
+     * Get the invitation has been sent to email within 1 minutes.
      *
      * @param string $email
      * @return OTP|null
@@ -45,7 +45,7 @@ class Otp extends Model
     public static function getRecentOTP(string $email): ?self
     {    
         return self::where('email', $email)
-            ->where('created_at', '>=', now()->subMinutes(5))
+            ->where('created_at', '>=', now()->subMinutes(1))
             ->first();
     }
 
@@ -58,8 +58,7 @@ class Otp extends Model
     public static function getRemainingTime(self $otp): array
     {
         $nextOtpTime = $otp->created_at;
-        $remainingTime = $nextOtpTime->diff(now()->subMinutes(5));
-
+        $remainingTime = $nextOtpTime->diff(now()->subMinutes(1));
 
         return [
             'minutes' => $remainingTime->i,

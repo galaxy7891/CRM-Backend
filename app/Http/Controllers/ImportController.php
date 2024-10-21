@@ -31,17 +31,17 @@ class ImportController extends Controller
                     $import = new CustomersImport($user->email, 'leads');
                     break;
                 
-                case 'contact':
+                case 'contacts':
                     $model = 'customer';
                     $import = new CustomersImport($user->email, 'contact');
                     break;
 
-                case 'organization':
+                case 'organizations':
                     $import = new OrganizationsImport($user->email);
                     $model = 'organization';
                     break;
 
-                case 'product':
+                case 'products':
                     $import = new ProductsImport($user->email);
                     $model = 'product';
                     break;
@@ -57,8 +57,8 @@ class ImportController extends Controller
             Excel::import($import, $request->file('file'));
 
             $validData = $import->getValidData();
-            $invalidData = $import->getInvalidData();
-            $summaryCounts = $import->getsummaryCounts();
+            $failedData = $import->getFailedData();
+            $summaryData = $import->getSummaryData();
 
             $perPage = 25;
             $page = LengthAwarePaginator::resolveCurrentPage();
@@ -69,33 +69,34 @@ class ImportController extends Controller
                 $page, 
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
-            $invalidDataPaginated = new LengthAwarePaginator(
-                array_slice($invalidData, ($page - 1) * $perPage, $perPage), 
-                count($invalidData), 
+            $failedDataPaginated = new LengthAwarePaginator(
+                array_slice($failedData, ($page - 1) * $perPage, $perPage), 
+                count($failedData), 
                 $perPage, 
                 $page, 
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
 
-            $data = [
-                'model' => $model,
-                'validData' => $validDataPaginated,
-                'invalidData' => $invalidDataPaginated,
-                'summaryCounts' => $summaryCounts,
-            ];
-
-            if (empty($invalidData)) {
+            if (empty($failedData)) {
                 return new ApiResponseResource(
                     true,
-                    'Data aman dan tidak ditemukan data rusak.',
-                    $data
+                    'Tidak ditemukan adanya data rusak.',
+                    [
+                        'data_type' => $model,
+                        'summaryData' => $summaryData,
+                        'validData' => $validDataPaginated,
+                    ]
                 );
             }
 
             return new ApiResponseResource(
                 false,
                 'Terdapat data yang rusak',
-                $data
+                [
+                    'data_type' => $model,
+                    'summaryData' => $summaryData,
+                    'failedData' => $failedDataPaginated,
+                ]
             );
 
         } catch(\Exception $e){

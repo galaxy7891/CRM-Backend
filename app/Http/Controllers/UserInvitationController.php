@@ -115,11 +115,7 @@ class UserInvitationController extends Controller
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50  karakter',
-<<<<<<< HEAD
-
-=======
             'last_name.required' => 'Nama belakang tidak boleh kosong',
->>>>>>> 12443a49c79e545eed90b5c520d9142589ed0a78
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
         ]);

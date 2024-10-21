@@ -13,32 +13,30 @@ class ProductsImport implements ToCollection, WithHeadingRow
     use Importable;
 
     protected $owner;
-    protected $invalidData = [];
     protected $validData = [];
-    protected $summaryCounts = [
+    protected $failedData = [];
+    protected $summaryData = [
+        'total_data' => 0, 
         'valid_data' => 0,
-        'validation_errors' => 0,
-        'duplicate_name' => 0,
-        'duplicate_code' => 0,
-        'duplicate_data' => 0,
+        'invalid_data' => 0,
     ];
 
-    // Getter untuk valid data
+    // Getter for valid data
     public function getValidData()
     {
         return $this->validData;
     }
 
-    // Getter untuk invalid data
-    public function getInvalidData()
+    // Getter for invalid data
+    public function getFailedData()
     {
-        return $this->invalidData;
+        return $this->failedData;
     }
 
-    // Getter untuk error counts
-    public function getsummaryCounts()
+    // Getter for summary data
+    public function getSummaryData()
     {
-        return $this->summaryCounts;
+        return $this->summaryData;
     }
 
     public function __construct($owner)
@@ -50,16 +48,26 @@ class ProductsImport implements ToCollection, WithHeadingRow
     {
         $this->headingRowValidator($rows->first());
 
-        $namaMap = []; 
+        $nameMap = []; 
         $codeMap = []; 
         $rowMap = []; 
         $categoryMapping = [
             'barang' => 'stuff',
             'jasa' => 'service',
         ];
+        $propertyMapping = [
+            'nama_produk' => 'Nama Produk',
+            'kode_produk' => 'Kode Produk',
+            'kategori_produk' => 'Kategori Produk',
+            'jumlah_produk' => 'Jumlah Produk',
+            'satuan_produk' => 'Satuan Produk',
+            'harga_produk' => 'Harga Produk',
+            'deskripsi' => 'Deskripsi',
+        ];
 
         foreach ($rows as $index => $row) {
             $rowArray = $row->toArray();
+            $property = [];
             $errorMessages = [];
             
             if ($this->isEmptyRow($row)) {
@@ -76,50 +84,54 @@ class ProductsImport implements ToCollection, WithHeadingRow
             }
 
             // Cari duplikat menggunakan hash map
+            // Cek jika baris secara keseluruhan duplikat
+            $rowKey = json_encode($rowArray); 
+            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
+                $this->failedData[] = [
+                    'row' => $index + 2,
+                    'data' => [
+                        'property' => 'Semua Properti',
+                        'fail' => 'Semua properti pada data duplikat dengan baris ke-' . ($rowMap[$rowKey] + 2),
+                    ],
+                ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
+                continue;
+            } else {
+                $rowMap[$rowKey] = $index;
+            }
+            
             // Pengecekan nama duplikat
             if (!empty($rowArray['nama_produk'])) {
-                if (isset($namaMap[$rowArray['nama_produk']])) {
-                    $errorMessages[] = 'Nama produk sudah digunakan dalam file (duplikat di baris ' . ($namaMap[$rowArray['nama_produk']] + 1) . ')';
-                    $this->summaryCounts['duplicate_name']++;
+                if (isset($nameMap[$rowArray['nama_produk']])) {
+                    $property[] = 'Nama Produk';
+                    $errorMessages[] = 'Nama produk sudah digunakan dalam file pada baris ke-' . ($nameMap[$rowArray['nama_produk']] + 2);
                 } else {
-                    $namaMap[$rowArray['nama_produk']] = $index;
+                    $nameMap[$rowArray['nama_produk']] = $index;
                 }
             }
 
             // Pengecekan kode produk duplikat
             if (!empty($rowArray['kode_produk'])) {
                 if (isset($codeMap[$rowArray['kode_produk']])) {
-                    $errorMessages[] = 'Kode produk sudah digunakan dalam file (duplikat di baris ' . ($codeMap[$rowArray['kode_produk']] + 1) . ')';
-                    $this->summaryCounts['duplicate_code']++;
+                    $property[] = 'Kode Produk';
+                    $errorMessages[] = 'Kode produk sudah digunakan dalam file di baris ke-' . ($codeMap[$rowArray['kode_produk']] + 2);
                 } else {
                     $codeMap[$rowArray['kode_produk']] = $index;
                 }
             }
 
-            // Cek jika baris secara keseluruhan duplikat
-            $rowKey = json_encode($rowArray); 
-            if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
-                $errorMessages[] = 'Data duplikat ditemukan (duplikat di baris ' . ($rowMap[$rowKey] + 1) . ')';
-                $this->summaryCounts['duplicate_data']++;
-            } else {
-                $rowMap[$rowKey] = $index;
-            }
-
             // Jika ada error
             if (!empty($errorMessages)) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'name' => $row['nama_produk'],
-                        'category' => $row['kategori_produk'],
-                        'code' => $row['kode_produk'],
-                        'quantity' => $row['jumlah_produk'],
-                        'unit' => $row['satuan_produk'],
-                        'price' => $row['harga_produk'],
-                        'description' => $row['deskripsi'],
+                        'property' => $property,
+                        'fail' => $errorMessages,
                     ],
-                    'message' => $errorMessages
                 ];
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
@@ -127,49 +139,50 @@ class ProductsImport implements ToCollection, WithHeadingRow
             $validator = Validator::make($rowArray, [
                 'nama_produk' => 'required|string|max:100|unique:products,name',
                 'kode_produk' => 'required|string|max:100',
-                'kategori_produk' => 'nullable|in:stuff,services',
-                'jumlah_produk' => 'required_if:kategori_produk,stuff|numeric|min:0|prohibited_if:kategori_produk,services',
-                'satuan_produk' => 'required_if:kategori_produk,stuff|in:box,pcs,unit|prohibited_if:kategori_produk,services',
+                'kategori_produk' => 'nullable|in:barang,jasa',
+                'jumlah_produk' => 'required_if:kategori_produk,barang|numeric|min:0|prohibited_if:kategori_produk,jasa',
+                'satuan_produk' => 'required_if:kategori_produk,barang|in:box,pcs,unit|prohibited_if:kategori_produk,jasa',
                 'harga_produk' => 'required|numeric|min:0|max_digits:20',
                 'deskripsi' => 'required|string',
             ], [
-                'nama_produk.required' => 'Nama produk wajib diisi.',
+                'nama_produk.required' => 'Nama produk tidak boleh kosong.',
                 'nama_produk.string' => 'Nama produk harus berupa teks.',
                 'nama_produk.max' => 'Nama produk maksimal 100 karakter.',
                 'nama_produk.unique' => 'Nama produk sudah terdaftar.',
-                'kode_produk.required' => 'Kode wajib diisi.',
-                'kode_produk.string' => 'Kode harus berupa string.',
+                'kode_produk.required' => 'Kode produk tidak boleh kosong.',
+                'kode_produk.string' => 'Kode produk harus berupa string.',
                 'kode_produk.max' => 'Kode terlalu panjang.',
-                'kategori_produk.required' => 'Kategori produk wajib diisi salah satu: stuff atau services.',
-                'kategori_produk.in' => 'Kategori produk harus pilih salah satu : stuff atau services.',
-                'jumlah_produk.required_if' => 'Jumlah produk wajib diisi.',
+                'kategori_produk.required' => 'Kategori produk tidak boleh kosong.',
+                'kategori_produk.in' => 'Kategori produk harus berupa salah satu: barang atau jasa.',
+                'jumlah_produk.required_if' => 'Jumlah produk tidak boleh kosong.',
                 'jumlah_produk.numeric' => 'Jumlah produk harus berupa angka.',
                 'jumlah_produk.min' => 'Jumlah produk harus lebih dari 0.',
-                'jumlah_produk.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
-                'satuan_produk.required_if' => 'Satuan produk wajib diisi.',
-                'satuan_produk.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-                'satuan_produk.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
-                'harga_produk.required' => 'Harga wajib diisi.',
+                'jumlah_produk.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
+                'satuan_produk.required_if' => 'Satuan produk tidak boleh kosong.',
+                'satuan_produk.in' => 'Satuan produk harus berupa salah satu: box, pcs, unit.',
+                'satuan_produk.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+                'harga_produk.required' => 'Harga tidak boleh kosong.',
                 'harga_produk.numeric' => 'Harga harus berupa angka.',
                 'harga_produk.min' => 'Harga harus lebih dari 0.',
                 'harga_produk.max_digits' => 'Harga maksimal 20 digit.',
                 'deskripsi.string' => 'Deskripsi harus berupa teks.',
             ]);
             if ($validator->fails()) {
-                $this->invalidData[] = [
-                    'row' => $index + 1,
+                $failedRules = $validator->failed();
+                foreach ($failedRules as $key => $failures) {
+                    $property[] = $propertyMapping[$key] ?? $key;
+                }
+
+                $this->failedData[] = [
+                    'row' => $index + 2,
                     'data' => [
-                        'name' => $row['nama_produk'],
-                        'category' => $row['kategori_produk'],
-                        'code' => $row['kode_produk'],
-                        'quantity' => $row['jumlah_produk'],
-                        'unit' => $row['satuan_produk'],
-                        'price' => $row['harga_produk'],
-                        'description' => $row['deskripsi'],
+                        'property' => $property,
+                        'fail' => $validator->errors()->all(),
                     ],
-                    'message' => $validator->errors()->all()
                 ];
-                $this->summaryCounts['validation_errors']++;
+
+                $this->summaryData['total_data']++;
+                $this->summaryData['invalid_data']++;
                 continue;
             }
 
@@ -184,14 +197,14 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 'description' => $row['deskripsi'],
             ];
 
-            $this->summaryCounts['valid_data']++;
+            $this->summaryData['total_data']++;
+            $this->summaryData['valid_data']++;
         }
 
-        // Feedback response to the user
         return [
             'validData' => $this->validData,
-            'invalidData' => $this->invalidData,
-            'summaryCounts' => $this->summaryCounts,
+            'failedData' => $this->failedData,
+            'summaryData' => $this->summaryData,
         ];
     }
 
@@ -220,5 +233,4 @@ class ProductsImport implements ToCollection, WithHeadingRow
             throw new \Exception('File tidak sesuai dengan template yang diberikan.');
         }
     }
-
 }

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\ModelChangeLoggerHelper;
 use App\Traits\HasUuid;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -131,14 +130,61 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Update password user.
+     * Create a new user instance after a valid registration.
      *
-     * @param string $new_password
+     * @param array $dataUser
+     * @param string $companyId 
      * @return User
      */
-    public function updatePassword(string $new_password)
+    public static function createUser(array $dataUser, ?string $companyId): self
     {
-        $this->password = Hash::make($new_password);
+        return self::create([
+            'google_id' => $dataUser['google_id'] ?? null,
+            'company_id' => $companyId ?? null,
+            'email' => $dataUser['email'],
+            'first_name' => $dataUser['first_name'],
+            'last_name' => $dataUser['last_name'] ?? null,
+            'password' => Hash::make($dataUser['password']) ?? null,
+            'phone' => $dataUser['phone'],
+            'job_position' => $dataUser['job_position'] ?? null,
+            'image_url' => $dataUser['photo'] ?? null,
+        ]);
+    }
+
+    /**
+     * Update user
+     *
+     * @param array $dataUser
+     * @param string $userId 
+     * @return User
+     */
+    public static function updateUser(array $dataUser, string $userId): self
+    {
+        $user = self::findOrFail($userId);
+
+        $user->update([
+            'company_id' => $dataUser['company_id'] ?? $user->company_id,
+            'email' => $dataUser['email'] ?? $user->email,
+            'first_name' => $dataUser['first_name'] ?? $user->first_name,
+            'last_name' => $dataUser['last_name'] ?? $user->last_name,
+            'phone' => $dataUser['phone'] ?? $user->phone,
+            'job_position' => $dataUser['job_position'] ?? $user->job_position,
+            'role' => $dataUser['role'] ?? $user->role,
+            'gender' => $dataUser['gender'] ?? $user->gender,
+        ]);
+
+        return $user; 
+    }
+
+    /**
+     * Update password user.
+     *
+     * @param string $newPassword
+     * @return User
+     */
+    public function updatePassword(string $newPassword)
+    {
+        $this->password = Hash::make($newPassword);
         return $this->save();
     }
 
@@ -146,63 +192,42 @@ class User extends Authenticatable implements JWTSubject
      * Update the profile photo URL and public_id of the user.
      *
      * @param \Illuminate\Http\UploadedFile $photo
-     * @return array
+     * @param string $userId 
+     * @return array 
      */
-    public function updateProfilePhoto($photo)
+    public function updateProfilePhoto($photo, string $userId)
     {
-        $cloudinary = new Cloudinary();
+        $user = self::findOrFail($userId);
 
-        $result = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
+        $cloudinary = new Cloudinary();
+        if ($user->image_public_id) {
+            $cloudinary->uploadApi()->destroy($user->image_public_id);
+        }
+
+        $uploadResult = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
             'folder' => 'users',
         ]);
-
-        $this->update([
-            'image_url' => $result['secure_url'],
-            'image_public_id' => $result['public_id'],
+        $user->update([
+            'image_url' => $uploadResult['secure_url'],
+            'image_public_id' => $uploadResult['public_id'],
         ]);
+
+        return [
+            'image_url' => $uploadResult['secure_url'],
+            'image_public_id' => $uploadResult['public_id'],
+        ];
     }
 
-    /**
-     * Create or update a user based on Google OAuth data.
-     * 
-     * This method is used for authenticating users through their Google account.
-     * It will either create a new user or update the existing user's details.
-     * 
-     * @param object $googleUser The user object returned from Google OAuth
-     * @return \App\Models\User The created or updated user model
-     */
-    public static function createOrUpdateGoogleUser($googleUser, $nameParts)
+    public static function deleteUser($id): self
     {
+        $user = self::find($id);
+        $cloudinary = new Cloudinary();
 
-        return self::updateOrCreate(
-            ['email' => $googleUser->email],
-            [
-                'first_name' => $nameParts['first_name'],
-                'last_name' => $nameParts['last_name'],
-                'role' => 'super_admin',
-                'photo' => $googleUser->avatar,
-                'google_id' => $googleUser->id,
-            ]
-        );
-    }
+        if ($user->image_public_id) {
+            $cloudinary->uploadApi()->destroy($user->image_public_id);
+        }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param array $dataUser
-     * @param string $company_id 
-     * @return User
-     */
-    public static function createUser(array $dataUser, ?string $company_id): self
-    {
-        return self::create([
-            'company_id' => $company_id ?? null,
-            'email' => $dataUser['email'],
-            'first_name' => $dataUser['first_name'],
-            'last_name' => $dataUser['last_name'],
-            'password' => Hash::make($dataUser['password']) ?? null,
-            'phone' => $dataUser['phone'] ?? null,
-            'job_position' => $dataUser['job_position'] ?? null,
-        ]);
+        $user->delete();
+        return $user;
     }
 }

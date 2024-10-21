@@ -91,53 +91,53 @@ class Customer extends Model
             ->count();
     }
 
-    public static function createCustomer(array $data): self
+    public static function createCustomer(array $dataCustomer): self
     {
         return self::create([
-            'organization_id' => $data['organization_id'] ?? null,
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'] ?? null,
-            'customerCategory' => $data['customerCategory'],
-            'job' => $data['job'] ?? null,
-            'description' => $data['description'] ?? null,
-            'status' => $data['status'],
-            'birthdate' => $data['birthdate'] ?? null,
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'],
-            'owner' => $data['owner'],
-            'address' => $data['address'] ?? null,
-            'country' => $data['country'] ?? null,
-            'city' => $data['city'] ?? null,
-            'subdistrict' => $data['subdistrict'] ?? null,
-            'village' => $data['village'] ?? null,
-            'zip_code' => $data['zip_code'] ?? null,
+            'organization_id' => $dataCustomer['organization_id'] ?? null,
+            'first_name' => $dataCustomer['first_name'],
+            'last_name' => $dataCustomer['last_name'] ?? null,
+            'customerCategory' => $dataCustomer['customerCategory'],
+            'job' => $dataCustomer['job'] ?? null,
+            'description' => $dataCustomer['description'] ?? null,
+            'status' => $dataCustomer['status'],
+            'birthdate' => $dataCustomer['birthdate'] ?? null,
+            'email' => $dataCustomer['email'] ?? null,
+            'phone' => $dataCustomer['phone'],
+            'owner' => $dataCustomer['owner'],
+            'address' => $dataCustomer['address'] ?? null,
+            'country' => $dataCustomer['country'] ?? null,
+            'city' => $dataCustomer['city'] ?? null,
+            'subdistrict' => $dataCustomer['subdistrict'] ?? null,
+            'village' => $dataCustomer['village'] ?? null,
+            'zip_code' => $dataCustomer['zip_code'] ?? null,
         ]);
     }
 
-    public static function updateCustomer(array $data, $id): self
+    public static function updateCustomer(array $dataCustomer, string $customerId): self
     {
-        $customer = self::findOrFail($id);
-        $customer->fill([
-            'organization_id' => $data['organization_id'] ?? null,
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'] ?? null,
-            'customerCategory' => $data['customerCategory'],
-            'job' => $data['job'] ?? null,
-            'description' => $data['description'] ?? null,
-            'status' => $data['status'],
-            'birthdate' => $data['birthdate'] ?? null,
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'],
-            'owner' => $data['owner'] ?? null,
-            'address' => $data['address'] ?? null,
-            'country' => $data['country'] ?? null,
-            'city' => $data['city'] ?? null,
-            'subdistrict' => $data['subdistrict'] ?? null,
-            'village' => $data['village'] ?? null,
-            'zip_code' => $data['zip_code'] ?? null,
+        $customer = self::findOrFail($customerId);
+        
+        $customer->update([
+            'organization_id' => $dataCustomer['organization_id'] ?? $customer->organization_id,
+            'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
+            'last_name' => $dataCustomer['last_name'] ?? $customer->last_name,
+            'customerCategory' => $dataCustomer['customerCategory'] ?? $customer->customerCategory,
+            'job' => $dataCustomer['job'] ?? $customer->job,
+            'description' => $dataCustomer['description'] ?? $customer->description,
+            'status' => $dataCustomer['status'] ?? $customer->status,
+            'birthdate' => $dataCustomer['birthdate'] ?? $customer->birthdate,
+            'email' => $dataCustomer['email'] ?? $customer->email,
+            'phone' => $dataCustomer['phone'] ?? $customer->phone,
+            'owner' => $dataCustomer['owner'] ?? $customer->owner,
+            'address' => $dataCustomer['address'] ?? $customer->address,
+            'country' => $dataCustomer['country'] ?? $customer->country,
+            'city' => $dataCustomer['city'] ?? $customer->city,
+            'subdistrict' => $dataCustomer['subdistrict'] ?? $customer->subdistrict,
+            'village' => $dataCustomer['village'] ?? $customer->village,
+            'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
         ]);
 
-        $customer->save();
         return $customer;
     }
 }

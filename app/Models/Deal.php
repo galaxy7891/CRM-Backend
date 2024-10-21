@@ -111,44 +111,44 @@ class Deal extends Model
         ];
     }
 
-    public static function createDeal(array $data): self
+    public static function createDeal(array $dataDeal): self
     {
         return self::create([
-            'customer_id' => $data['customer_id'],
-            'name' => $data['name'],
-            'deals_customer' => $data['deals_customer'],
-            'description' => $data['description'] ?? null,
-            'tag' => $data['tag'] ?? null,
-            'stage' => $data['stage'],
-            'open_date' => $data['open_date'],
-            'close_date' => $data['close_date'] ?? null,
-            'expected_close_date' => $data['expected_close_date'],
-            'value_estimated' => $data['value_estimated'] ?? null,
-            'payment_category' => $data['payment_category'],
-            'payment_duration' => $data['payment_duration'] ?? null,
-            'owner' => $data['owner'],
+            'customer_id' => $dataDeal['customer_id'],
+            'name' => $dataDeal['name'],
+            'deals_customer' => $dataDeal['deals_customer'],
+            'description' => $dataDeal['description'] ?? null,
+            'tag' => $dataDeal['tag'] ?? null,
+            'stage' => $dataDeal['stage'],
+            'open_date' => $dataDeal['open_date'],
+            'close_date' => $dataDeal['close_date'] ?? null,
+            'expected_close_date' => $dataDeal['expected_close_date'],
+            'value_estimated' => $dataDeal['value_estimated'] ?? null,
+            'payment_category' => $dataDeal['payment_category'],
+            'payment_duration' => $dataDeal['payment_duration'] ?? null,
+            'owner' => $dataDeal['owner'],
         ]);
     }
 
-    public static function updateDeal(array $data, $id): self
+    public static function updateDeal(array $dataDeal, string $dealId): self
     {
-        $deal = self::findOrFail($id);
-        $deal->fill([
-            'customer_id' => $data['customer_id'],
-            'name' => $data['name'],
-            'deals_customer' => $data['deals_customer'],
-            'description' => $data['description']  ?? null,
-            'tag' => $data['tag'],
-            'stage' => $data['stage'],
-            'open_date' => $data['open_date'],
-            'close_date' => $data['close_date']  ?? null,
-            'expected_close_date' => $data['expected_close_date'],
-            'payment_expected' => $data['payment_expected'] ?? null,
-            'payment_category' => $data['payment_category'],
-            'payment_duration' => $data['payment_duration'] ?? null,
-            'owner' => $data['owner'],
+        $deal = self::findOrFail($dealId);
+        $deal->update([
+            'customer_id' => $dataDeal['customer_id'] ?? $deal->customer_id,
+            'name' => $dataDeal['name'] ?? $deal->name,
+            'deals_customer' => $dataDeal['deals_customer'] ?? $deal->deals_customer,
+            'description' => $dataDeal['description'] ?? $deal->description,
+            'tag' => $dataDeal['tag'] ?? $deal->tag,
+            'stage' => $dataDeal['stage'] ?? $deal->stage,
+            'open_date' => $dataDeal['open_date'] ?? $deal->open_date,
+            'close_date' => $dataDeal['close_date'] ?? $deal->close_date,
+            'expected_close_date' => $dataDeal['expected_close_date'] ?? $deal->expected_close_date,
+            'value_estimated' => $dataDeal['value_estimated'] ?? $deal->value_estimated,
+            'payment_category' => $dataDeal['payment_category'] ?? $deal->payment_category,
+            'payment_duration' => $dataDeal['payment_duration'] ?? $deal->payment_duration,
+            'owner' => $dataDeal['owner'] ?? $deal->owner,
         ]);
-        $deal->save();
+
         return $deal;
     }
 }
