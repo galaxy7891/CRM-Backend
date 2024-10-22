@@ -9,7 +9,7 @@ class ActivityLogService
 {
     public function getFormattedLogs()
     {
-        $groupedLogsData = ActivityLog::getLogsGroupedByMonth();    
+        $groupedLogsData = ActivityLog::getLogsGroupedByMonth();
         $paginatedLogs = $groupedLogsData['paginatedLogs'];
         $logs = $groupedLogsData['logs'];
 
@@ -42,7 +42,7 @@ class ActivityLogService
 
         return [
             array_merge(
-                $paginatedLogs->toArray(), 
+                $paginatedLogs->toArray(),
                 ['data' => $result]
             )
         ];
