@@ -14,7 +14,7 @@ class CustomerController extends Controller
      * Display a listing of the resource.
      *  
      * @return \Illuminate\Http\Response
-     */ 
+     */
 
     public function index()
     {
@@ -118,7 +118,7 @@ class CustomerController extends Controller
         try {
             $customer = Customer::createCustomer($request->all());
             return new ApiResponseResource(
-                true, 
+                true,
                 "Data Customer {$customer->first_name} {$customer->last_name} Berhasil Ditambahkan!",
                 $customer
             );
@@ -178,7 +178,7 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
         if (!$customer) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Data Customer tidak ditemukan',
                 null
             );
