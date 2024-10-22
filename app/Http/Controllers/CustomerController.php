@@ -22,7 +22,7 @@ class CustomerController extends Controller
             $user = auth()->user();
 
             if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->id)
+                $customers = Customer::where('owner', $user->email)
                     ->latest()
                     ->paginate(25);
             } else {
@@ -147,7 +147,7 @@ class CustomerController extends Controller
             }
 
             $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->id) {
+            if ($user->role == 'employee' && $customer->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
                     'Anda tidak memiliki akses untuk menampilkan data customer ini!',
@@ -186,7 +186,7 @@ class CustomerController extends Controller
 
         // Is employee accessing his own customer data?
         $user = auth()->user();
-        if ($user->role == 'employee' && $customer->owner !== $user->id) {
+        if ($user->role == 'employee' && $customer->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
                 'Anda tidak memiliki akses untuk mengubah data customer ini!',
@@ -295,7 +295,7 @@ class CustomerController extends Controller
 
             // Is employee accessing his own customer data?
             $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->id) {
+            if ($user->role == 'employee' && $customer->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
                     'Anda tidak memiliki akses untuk menghapus data customer ini!',

@@ -295,7 +295,7 @@ class OrganizationsImport implements ToCollection, WithHeadingRow
 
         // Cek apakah semua heading sesuai dengan yang diharapkan
         if ($fileHeadings !== $expectedHeadings) {
-            throw new \Exception('File tidak sesuai dengan template yang diberikan.');
+            throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
         }
     }
 }
