@@ -16,7 +16,7 @@ class OrganizationObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($organization);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'organizations',
             'action' => 'CREATE',
             'changes' => $changes ? json_encode($changes) : null,
@@ -31,7 +31,7 @@ class OrganizationObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($organization);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'organizations',
             'action' => 'UPDATE',
             'changes' => $changes ? json_encode($changes) : null,
@@ -46,7 +46,7 @@ class OrganizationObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($organization);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'organizations',
             'action' => 'DELETE',
             'changes' => $changes ? json_encode($changes) : null,

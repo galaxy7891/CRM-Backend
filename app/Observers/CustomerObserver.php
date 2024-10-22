@@ -18,7 +18,7 @@ class CustomerObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($customer);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'customers',
             'action' => 'CREATE',
             'changes' => $changes ? json_encode($changes) : null,
@@ -33,7 +33,7 @@ class CustomerObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($customer);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'customers',
             'action' => 'UPDATE',
             'changes' => $changes ? json_encode($changes) : null,
@@ -48,7 +48,7 @@ class CustomerObserver
         $changes = ModelChangeLoggerHelper::getModelChanges($customer);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'customers',
             'action' => 'DELETE',
             'changes' => $changes ? json_encode($changes) : null,
