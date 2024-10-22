@@ -21,7 +21,9 @@ class ActivityLogService
                 $actionDesc = ActionMapperHelper::mapActionDesc($log->action);
                 $modelName = ActionMapperHelper::mapModels($log->model_name);
 
-                $nameChange = $changes['name']['new'] ?? $changes['first_name']['new'] ?? null;
+                $nameChange = $changes['name']['new'] 
+                    ?? trim(($changes['first_name']['new'] ?? '') . ' ' . ($changes['last_name']['new'] ?? '')) 
+                    ?: null;
                 $description = "{$log->user->first_name} {$log->user->last_name} {$actionDesc} data {$modelName}";
                 if ($nameChange) {
                     $description .= " {$nameChange}";
