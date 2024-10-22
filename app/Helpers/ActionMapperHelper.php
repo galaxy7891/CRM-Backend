@@ -26,4 +26,20 @@ class ActionMapperHelper
         return $actionMapping[$action] ?? $action;
     }
 
+    public static function mapModels(string $modelName): string
+    {
+        $modelsMapping = [
+            'users' => 'pengguna',
+            'companies' => 'perusahaan pengguna',
+            'products' => 'produk',
+            'organizations' => 'perusahaan pelanggan',
+            'user_invitations' => 'pengguna',
+            'customers' => 'pelanggan',
+            'otps' => 'OTP',
+        ];
+
+        return $modelsMapping[$modelName] ?? $modelName;
+    }
+
+
 }
