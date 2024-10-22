@@ -29,7 +29,7 @@ class PasswordResetToken extends Model
     protected $dates = ['created_at', 'updated_at'];
 
     /**
-     * Get the reset password token has been sent to email within 5 minutes period.
+     * Get the reset password token has been sent to email within 1 minutes period.
      *
      * @param string $email
      * @return PasswordResetToken|null
@@ -37,7 +37,7 @@ class PasswordResetToken extends Model
     public static function getRecentResetPasswordToken(string $email): ?self
     {
         return self::where('email', $email)
-            ->where('created_at', '>=', now()->subMinutes(5))
+            ->where('created_at', '>=', now()->subMinutes(1))
             ->first();
     }
 
@@ -50,7 +50,7 @@ class PasswordResetToken extends Model
     public static function getRemainingTime(self $resetPassword): array
     {
         $nextResetPasswordTime = $resetPassword->created_at;
-        $remainingTime = $nextResetPasswordTime->diff(now()->subminutes(5));
+        $remainingTime = $nextResetPasswordTime->diff(now()->subminutes(1));
 
         return [
             'minutes' => $remainingTime->i,

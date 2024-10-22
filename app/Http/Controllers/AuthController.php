@@ -105,7 +105,6 @@ class AuthController extends Controller
             'industry.max' => 'Jenis industri maksimal 50 karakter',
             'photo.url' => 'URL photo tidak valid',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,

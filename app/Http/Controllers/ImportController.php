@@ -7,6 +7,7 @@ use App\Http\Resources\ApiResponseResource;
 use App\Imports\CustomersImport;
 use App\Imports\OrganizationsImport;
 use App\Imports\ProductsImport;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,9 +21,9 @@ class ImportController extends Controller
             $request->validate([
                 'file' => 'required|mimes:xlsx,csv|max:2048',
             ], [
-                'file.required' => 'File tidak boleh kosong.',
-                'file.mimes' => 'File harus sesuai format.',
-                'file.max' => 'Ukuran file maksimal 2mb.',
+                'file.required' => 'Dokumen tidak boleh kosong.',
+                'file.mimes' => 'Dokumen harus sesuai format.',
+                'file.max' => 'Ukuran Dokumen maksimal 2mb.',
             ]);
 
             switch ($type) {
@@ -54,6 +55,7 @@ class ImportController extends Controller
                     );
             }
 
+            $originalFileName =$request->file('file')->getClientOriginalName();
             Excel::import($import, $request->file('file'));
 
             $validData = $import->getValidData();
@@ -77,12 +79,17 @@ class ImportController extends Controller
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
 
+            Carbon::setLocale('id');
+            $formattedDate = now()->translatedFormat('l, d F Y');
+
             if (empty($failedData)) {
                 return new ApiResponseResource(
                     true,
                     'Tidak ditemukan adanya data rusak.',
                     [
+                        'file' => $originalFileName,
                         'data_type' => $model,
+                        'date' => $formattedDate,
                         'summaryData' => $summaryData,
                         'validData' => $validDataPaginated,
                     ]
@@ -93,7 +100,9 @@ class ImportController extends Controller
                 false,
                 'Terdapat data yang rusak',
                 [
+                    'file' => $originalFileName,
                     'data_type' => $model,
+                    'date' => $formattedDate,
                     'summaryData' => $summaryData,
                     'failedData' => $failedDataPaginated,
                 ]

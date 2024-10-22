@@ -293,7 +293,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
         $fileHeadings = array_keys($row->toArray());
 
         if ($fileHeadings !== $expectedHeadings) {
-            throw new \Exception('File tidak sesuai dengan template yang diberikan.');
+            throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
         }
     }
 }

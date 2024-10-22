@@ -27,15 +27,17 @@
         }
 
         .header {
-            height: 80px;
-            background-color: #FFBD39;
+            height: 100px;
             padding: 20px;
             text-align: center;
             border-radius: 10px 10px 0 0;
         }
-
+ 
         .header img {
-            max-width: 80px;
+            height: 60px;
+            max-width: 60%;
+            margin: 0 auto;
+            display: block;
         }
 
         .content {
@@ -96,17 +98,20 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <img src="" alt="Logo" class="logo">
+            <img src="https://res.cloudinary.com/dg8iiqd5p/image/upload/v1729498415/logo_crm_ethh7i.png" alt="logo">
         </div>
+        <hr>
 
         <!-- Content -->
         <div class="content">
             <h3>Permintaan Atur Ulang Kata Sandi Akun</h3>
             <p>Halo {{ $nama }},</p>
+            {{-- <p>Halo Hernan Sandi Laksono,</p> --}}
             <p>Anda telah mengajukan permintaan untuk mengatur ulang kata sandi akun LoyalCust Anda. Klik tombol di bawah ini untuk melanjutkan.</p>
 
             <div class="link">
                 <a href="{{ $url }}">Atur Ulang</a>
+                {{-- <a href="">Atur Ulang</a> --}}
             </div>
 
             <p>Apabila bukan anda yang mengirim permintaan, anda dapat mengabaikan Email ini.</p>

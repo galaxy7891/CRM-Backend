@@ -27,15 +27,17 @@
         }
 
         .header {
-            background-color: #FFBD39;
+            height: 100px;
             padding: 20px;
             text-align: center;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            border-radius: 10px 10px 0 0;
         }
-
+ 
         .header img {
-            max-width: 100px;
+            height: 60px;
+            max-width: 60%;
+            margin: 0 auto;
+            display: block;
         }
 
         .content {
@@ -94,8 +96,9 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <img src="" alt="Logo" class="logo">
+            <img src="https://res.cloudinary.com/dg8iiqd5p/image/upload/v1729498415/logo_crm_ethh7i.png" alt="logo">
         </div>
+        <hr>
 
         <!-- Content -->
         <div class="content">

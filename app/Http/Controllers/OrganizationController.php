@@ -22,7 +22,7 @@ class OrganizationController extends Controller
             // Is employee accessing his own organization data?
             $user = auth()->user();
             if ($user->role == 'employee') {
-                $organizations = Organization::where('owner', $user->id)->latest()->paginate(25);
+                $organizations = Organization::where('owner', $user->email)->latest()->paginate(25);
             } else {
                 $organizations = Organization::latest()->paginate(25);
             }
@@ -141,7 +141,7 @@ class OrganizationController extends Controller
 
             // Is employee accessing his own organization data?
             $user = auth()->user();
-            if ($user->role == 'employee' && $organization->owner !== $user->id) {
+            if ($user->role == 'employee' && $organization->owner !== $user->email) {
                 return new ApiResponseResource(
                     false, 
                     'Anda tidak memiliki akses untuk menampilkan data organisasi ini!',
@@ -182,7 +182,7 @@ class OrganizationController extends Controller
 
         // Is employee accessing his own customer data?
         $user = auth()->auth();
-        if ($user == 'employee' && $organization->owner !== $user->id) {
+        if ($user == 'employee' && $organization->owner !== $user->email) {
             return new ApiResponseResource(
                 false, 
                 'Anda tidak memiliki akses untuk mengubah data organisasi ini!',
@@ -282,7 +282,7 @@ class OrganizationController extends Controller
             }
 
             $user = auth()->auth();
-            if ($user == 'employee' && $organization->owner !== $user->id) {
+            if ($user == 'employee' && $organization->owner !== $user->email) {
                 return new ApiResponseResource(
                     false, 
                     'Anda tidak memiliki akses untuk menghapus data organisasi ini!',

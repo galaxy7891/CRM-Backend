@@ -163,8 +163,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 null
             );
-        }
-        
+        } 
     }
 
     /**
@@ -210,22 +209,30 @@ class UserController extends Controller
      */
     public function sendResetLink(Request $request)
     {
+        if (auth()->check()) {
+            $user = auth()->user();
+            $email = $user->email;
+            $frontendPath = '/change-password?email=';
 
-        $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|exists:users,email|max:100'
-        ], [
-            'email.required' => 'Email tidak boleh kosong',
-            'email.email' => 'Email harus valid',
-            'email.exists' => 'Email belum terdaftar',
-            'email.max' => 'Email maksimal 100 karakter',
-        ]);
-
-        if ($validator->fails()) {
-            return new ApiResponseResource(
-                false,
-                $validator->errors(),
-                null
-            );
+        } else {
+            $validator = Validator::make($request->only('email'), [
+                'email' => 'required|email|exists:users,email|max:100'
+            ], [
+                'email.required' => 'Email tidak boleh kosong',
+                'email.email' => 'Email harus valid',
+                'email.exists' => 'Email belum terdaftar',
+                'email.max' => 'Email maksimal 100 karakter',
+            ]);
+            if ($validator->fails()) {
+                return new ApiResponseResource(
+                    false,
+                    $validator->errors(),
+                    null
+                );
+            }
+    
+            $email = $request->email;
+            $frontendPath = '/reset-password?email=';
         }
 
         $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($request->email);
@@ -236,13 +243,11 @@ class UserController extends Controller
             return new ApiResponseResource(
                 false,
                 'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                null
+                $remainingTime['minutes'] .':'. $remainingTime['seconds'],
             );
         }
 
         try {
-
-            $email = $request->email;
             $token = Str::uuid()->toString();
 
             $user = User::findByEmail($email);
@@ -254,7 +259,7 @@ class UserController extends Controller
             ];
 
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-            $url = $frontendUrl . '/reset-password?email=' . urlencode($email) . '&token=' . $token;
+            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token;
             Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama));
 
             PasswordResetToken::createPasswordResetToken($dataUser);
@@ -302,7 +307,6 @@ class UserController extends Controller
             'confirm_new_password.min' => 'Konfirmasi kata sandi baru minimal 8 digit',
             'confirm_new_password.same' => 'Kata sandi tidak sama'
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
