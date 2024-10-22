@@ -12,8 +12,8 @@ class CreateCompaniesTable extends Migration
             $table->uuid('id')->primary();
             $table->string('name', 100);
             $table->string('industry', 50);
-            $table->string('logo', 255)->nullable();
-            $table->string('logo', 255)->nullable();
+            $table->string('image_url', 255)->nullable();
+            $table->string('image_public_id', 255)->nullable();
             $table->string('email', 100)->nullable();
             $table->string('phone', 15)->nullable();
             $table->string('website', 255)->nullable();
