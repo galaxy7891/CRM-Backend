@@ -12,6 +12,7 @@ use App\Models\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -109,6 +110,63 @@ class UserController extends Controller
             );
             
         } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
+    }
+
+    /**
+     * Update the authenticated user's password.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|min:8',
+            'new_password' => 'required|min:8',
+            'confirm_new_password' => 'required|min:8|same:new_password',
+        ], [
+            'password.required' => 'Kata sandi tidak boleh kosong',
+            'password.min' => 'Kata sandi minimal 8 digit',
+            'new_password.required' => 'Kata sandi baru tidak boleh kosong',
+            'new_password.min' => 'Kata sandi baru minimal 8 digit',
+            'confirm_new_password.required' => 'Konfirmasi kata sandi tidak boleh kosong',
+            'confirm_new_password.min' => 'Konfirmasi kata sandi minimal 8 digit',
+            'confirm_new_password.same' => 'Konfirmasi kata sandi tidak sama'
+        ]);
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
+        }
+
+        $user = auth()->user();
+        
+        try {
+            if (!Hash::check($request->password, $user->password)) {
+                return new ApiResponseResource(
+                    true,
+                    'Password tidak sesuai',
+                    null
+                );
+            }
+    
+            $user->updatePassword($request->new_password);
+    
+            return new ApiResponseResource(
+                true,
+                'Password berhasil diubah',
+                null
+            );
+
+        } catch (\Exception $e){
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -303,9 +361,9 @@ class UserController extends Controller
             'token.required' => 'Token harus diisi',
             'new_password.required' => 'Kata sandi baru tidak boleh kosong',
             'new_password.min' => 'Kata sandi baru minimal 8 digit',
-            'confirm_new_password.required' => 'Kata sandi baru tidak boleh kosong',
+            'confirm_new_password.required' => 'Konfirmasi kata sandi baru tidak boleh kosong',
             'confirm_new_password.min' => 'Konfirmasi kata sandi baru minimal 8 digit',
-            'confirm_new_password.same' => 'Kata sandi tidak sama'
+            'confirm_new_password.same' => 'Konfirmasi kata sandi tidak sama'
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

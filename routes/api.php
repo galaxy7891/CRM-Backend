@@ -29,6 +29,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::group(['prefix' => 'password'], function () {
             Route::post('/forgot', [UserController::class, 'sendResetLink']);
             Route::post('/reset', [UserController::class, 'reset'])->name('password.reset');
+            Route::post('/change', [UserController::class, 'changePassword']);
         });
     });
 
@@ -44,6 +45,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
         Route::get('/activity/log', [ActivityLogController::class, 'index']);
+        Route::get('/activity/log/detail', [ActivityLogController::class, 'detail']);
         Route::post('/import/{type}', [ImportController::class, 'import']);
         
         Route::get('/user', [UserController::class, 'show']);
@@ -54,7 +56,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('/companies', CompaniesController::class);
         Route::post('/companies/logo/{company}', [CompaniesController::class, 'updateLogo']);
         
-        Route::apiResource('/customers', CustomerController::class);
+        Route::apiResource('/lead', CustomerController::class);
         
         Route::apiResource('/organizations', OrganizationController::class);
         Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
