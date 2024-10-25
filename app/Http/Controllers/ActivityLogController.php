@@ -21,7 +21,7 @@ class ActivityLogController extends Controller
     
             return new ApiResponseResource(
                 true,
-                'Daftar Aktivitas',
+                'Daftar aktivitas',
                 $result
             );
         }
@@ -36,50 +36,26 @@ class ActivityLogController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a detail listing of the resource.
      */
-    public function create()
+    public function detail(ActivityLogService $activityLogService)
     {
-        //
-    }
+        try {
+            $result = $activityLogService->getDetailLogs();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+            return new ApiResponseResource(
+                true,
+                'Daftar detail aktivitas',
+                $result
+            );
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ActivityLog $activityLog)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.   
-     */
-    public function edit(ActivityLog $activityLog)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ActivityLog $activityLog)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ActivityLog $activityLog)
-    {
-        //
+        catch (\Exception $e){
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
     }
 }

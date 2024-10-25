@@ -29,6 +29,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::group(['prefix' => 'password'], function () {
             Route::post('/forgot', [UserController::class, 'sendResetLink']);
             Route::post('/reset', [UserController::class, 'reset'])->name('password.reset');
+            Route::post('/change', [UserController::class, 'changePassword']);
         });
     });
 
@@ -44,6 +45,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
         Route::get('/activity/log', [ActivityLogController::class, 'index']);
+        Route::get('/activity/log/detail', [ActivityLogController::class, 'detail']);
         Route::post('/import/{type}', [ImportController::class, 'import']);
         
         Route::get('/user', [UserController::class, 'show']);
@@ -54,8 +56,19 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('/companies', CompaniesController::class);
         Route::post('/companies/logo/{company}', [CompaniesController::class, 'updateLogo']);
         
-        Route::apiResource('/customers', CustomerController::class);
-        
+        Route::get('/leads', [CustomerController::class, 'indexLeads']);
+        Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
+        Route::post('/leads', [CustomerController::class, 'storeLeads']);
+        Route::put('/leads/{leads}', [CustomerController::class, 'updateLeads']);
+        Route::put('/leads/convert/{leads}', [CustomerController::class, 'convert']);
+        Route::delete('/leads/{leads}', [CustomerController::class, 'destroyLeads']);
+
+        Route::get('/contact', [CustomerController::class, 'indexContact']);
+        Route::get('/contact/{contact}', [CustomerController::class, 'showContact']);
+        Route::post('/contact', [CustomerController::class, 'storeContact']);
+        Route::put('/contact/{contact}', [CustomerController::class, 'updateContact']);
+        Route::delete('/contact/{contact}', [CustomerController::class, 'destroyContact']);
+
         Route::apiResource('/organizations', OrganizationController::class);
         Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
         

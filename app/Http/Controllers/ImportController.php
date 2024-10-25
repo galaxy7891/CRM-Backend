@@ -32,7 +32,7 @@ class ImportController extends Controller
                     $import = new CustomersImport($user->email, 'leads');
                     break;
                 
-                case 'contacts':
+                case 'contact':
                     $model = 'customer';
                     $import = new CustomersImport($user->email, 'contact');
                     break;
@@ -50,8 +50,8 @@ class ImportController extends Controller
                 default:
                     return new ApiResponseResource(
                         false, 
-                        'Invalid import type.', 
-                        []
+                        "Invalid request '../{$type}'",
+                        null
                     );
             }
 

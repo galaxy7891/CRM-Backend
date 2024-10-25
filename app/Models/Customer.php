@@ -140,4 +140,31 @@ class Customer extends Model
 
         return $customer;
     }
+
+    public static function convert(array $dataCustomer, string $customerId): self
+    {
+        $customer = self::findOrFail($customerId);
+        
+        $customer->update([
+            'organization_id' => $dataCustomer['organization_id'] ?? $customer->organization_id,
+            'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
+            'last_name' => $dataCustomer['last_name'] ?? $customer->last_name,
+            'customerCategory' => 'contact',
+            'job' => $dataCustomer['job'] ?? $customer->job,
+            'description' => $dataCustomer['description'] ?? $customer->description,
+            'status' => $dataCustomer['status'] ?? $customer->status,
+            'birthdate' => $dataCustomer['birthdate'] ?? $customer->birthdate,
+            'email' => $dataCustomer['email'] ?? $customer->email,
+            'phone' => $dataCustomer['phone'] ?? $customer->phone,
+            'owner' => $dataCustomer['owner'] ?? $customer->owner,
+            'address' => $dataCustomer['address'] ?? $customer->address,
+            'country' => $dataCustomer['country'] ?? $customer->country,
+            'city' => $dataCustomer['city'] ?? $customer->city,
+            'subdistrict' => $dataCustomer['subdistrict'] ?? $customer->subdistrict,
+            'village' => $dataCustomer['village'] ?? $customer->village,
+            'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
+        ]);
+
+        return $customer;
+    }
 }
