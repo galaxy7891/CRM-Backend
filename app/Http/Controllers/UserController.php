@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ApiResponseResource;
-use App\Mail\TemplateForgetPassword;
-use App\Models\Customer;
 use App\Models\Deal;
-use App\Models\Organization;
-use App\Models\PasswordResetToken;
 use App\Models\User;
-
+use App\Models\Customer;
+use Illuminate\Support\Str;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+
+use Illuminate\Validation\Rule;
+use App\Models\PasswordResetToken;
+use App\Mail\TemplateForgetPassword;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ApiResponseResource;
 
 class UserController extends Controller
 {
@@ -38,7 +39,6 @@ class UserController extends Controller
                 "Data user {$user->first_name} " . strtolower($user->last_name),
                 $user->load('company'),
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -64,12 +64,12 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'company_id' => 'sometimes|nullable|uuid',
-            'email' => 'sometimes|required|email|unique:users,email',
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique:users,phone',
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
+            'phone' => ['sometimes', 'required', 'numeric', 'max_digits:15', Rule::unique('users', 'phone')->ignore($user)],
+            'email' => ['sometimes', 'required', 'email', Rule::unique('users', 'email')->ignore($user)],
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
             'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
@@ -107,7 +107,6 @@ class UserController extends Controller
                 "Data user {$updatedUser->first_name} " . strtolower($updatedUser->last_name) . " berhasil diubah",
                 $updatedUser
             );
-            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -148,22 +147,21 @@ class UserController extends Controller
         }
 
         try {
-            
-            $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id); 
+
+            $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id);
 
             return new ApiResponseResource(
                 true,
                 "Foto profil user {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $photoData
             );
-        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
                 null
             );
-        } 
+        }
     }
 
     /**
@@ -190,7 +188,6 @@ class UserController extends Controller
                 "Data user {$first_name} " . strtolower($last_name) . "berhasil dihapus",
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -213,7 +210,6 @@ class UserController extends Controller
             $user = auth()->user();
             $email = $user->email;
             $frontendPath = '/change-password?email=';
-
         } else {
             $validator = Validator::make($request->only('email'), [
                 'email' => 'required|email|exists:users,email|max:100'
@@ -230,7 +226,7 @@ class UserController extends Controller
                     null
                 );
             }
-    
+
             $email = $request->email;
             $frontendPath = '/reset-password?email=';
         }
@@ -243,7 +239,7 @@ class UserController extends Controller
             return new ApiResponseResource(
                 false,
                 'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                $remainingTime['minutes'] .':'. $remainingTime['seconds'],
+                $remainingTime['minutes'] . ':' . $remainingTime['seconds'],
             );
         }
 
@@ -271,7 +267,6 @@ class UserController extends Controller
                     'email' => $email
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -333,7 +328,6 @@ class UserController extends Controller
                 'kata sandi berhasil diubah.',
                 null
             );
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(

@@ -130,7 +130,7 @@ class CustomerController extends Controller
             );
         }
     }
-    
+
     /**
      * Display the specified resource.
      */
@@ -203,7 +203,7 @@ class CustomerController extends Controller
             'description' => 'sometimes|nullable|string',
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
-            'email' => 'sometimes|nullable|email|unique:customers,email|max:100',
+            'email' => 'sometimes|nullable|email|max:100|unique:customers,email',
             'phone' => 'sometimes|nullable|numeric|max_digits:15|unique:customers,phone',
             'owner' => 'sometimes|required|email|max:100',
             'country' => 'sometimes|nullable|string|max:50',
