@@ -4,19 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Deal;
-
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class DealController extends Controller
 {
+    use Filter;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $deals = Deal::latest()->paginate(25);
+            $query = Deal::query();
+            
+            $query = $this->applyFilters($request, $query);
+
+            $deals = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar Deal',

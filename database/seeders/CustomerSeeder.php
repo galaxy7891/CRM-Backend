@@ -24,7 +24,7 @@ class CustomerSeeder extends Seeder
             'description' => 'Lorem ipsum dolor sit amet.',
             'status' => 'hot',
             'email' => 'tejowijaya1@gmail.com',
-            'phone' => '08578900123',
+            'phone' => '085789001231',
             'owner' => 'user_admin@gmail.com',
             'address' => 'Jl Kemayoran Baru',
             'country' => 'Indonesia',

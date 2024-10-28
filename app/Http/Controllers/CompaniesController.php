@@ -4,18 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Company;
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CompaniesController extends Controller
 {
+    use Filter;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $company = Company::latest()->paginate(25);
+            $query = Company::query();
+
+            $query = $this->applyFilters($request, $query);
+
+            $company = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar data perusahaan',
@@ -46,10 +53,10 @@ class CompaniesController extends Controller
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100|unique:company,name',
+            'name' => "sometimes|required|string|max:100|unique:company,name,$companyId",
             'industry' => 'sometimes|required|string|max:50',
-            'email' => 'sometimes|nullable|email|unique:company,email',
-            'phone' => 'sometimes|nullable|numeric|max_digits:15|unique:company,phone',
+            'email' => "sometimes|nullable|email|unique:company,email,$companyId",
+            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:company,phone,$companyId",
             'website' => 'sometimes|nullable|string|max:255',
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',

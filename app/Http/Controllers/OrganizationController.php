@@ -125,12 +125,12 @@ class OrganizationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($organizationId)
     {
         try {
 
             // Check if organization exists
-            $organization = Organization::find($id);
+            $organization = Organization::find($organizationId);
             if (is_null($organization)) {
                 return new ApiResponseResource(
                     false, 
@@ -167,10 +167,10 @@ class OrganizationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $organizationId)
     {
         // Check if organization exists
-        $organization = Organization::find($id);
+        $organization = Organization::find($organizationId);
 
         if (!$organization) {
             return new ApiResponseResource(
@@ -191,20 +191,20 @@ class OrganizationController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:organizations,name|string|max:100',
-            'industry' => 'nullable|string|max:50',
-            'status' => 'required|in:hot,warm,cold',
-            'email' => 'nullable|email|unique:organizations,email|max:100',
-            'phone' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
-            'website' => 'nullable|string|max:255',
-            'owner' => 'required|email|max:100',
-            'country' => 'nullable|string|max:50',
-            'province' => 'nullable|string|max:100',
-            'city' => 'nullable|string|max:100',
-            'subdistrict' => 'nullable|string|max:100',
-            'village' => 'nullable|string|max:100',
-            'zip_code' => 'nullable|string|max:5',
-            'address' => 'nullable|string|max:100',
+            'name' => 'sometimes|required|unique:organizations,name|string|max:100',
+            'industry' => 'sometimes|nullable|string|max:50',
+            'status' => 'sometimes|required|in:hot,warm,cold',
+            'email' => "sometimes|nullable|email|unique:organizations,email,$organizationId|max:100",
+            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:organizations,phone,$organizationId",
+            'website' => 'sometimes|nullable|string|max:255',
+            'owner' => 'sometimes|required|email|max:100',
+            'country' => 'sometimes|nullable|string|max:50',
+            'province' => 'sometimes|nullable|string|max:100',
+            'city' => 'sometimes|nullable|string|max:100',
+            'subdistrict' => 'sometimes|nullable|string|max:100',
+            'village' => 'sometimes|nullable|string|max:100',
+            'zip_code' => 'sometimes|nullable|string|max:5',
+            'address' => 'sometimes|nullable|string|max:100',
         ], [
             'name.required' => 'Nama organisasi tidak boleh kosong.',
             'name.unique' => 'Nama organisasi sudah terdaftar.',
@@ -249,7 +249,7 @@ class OrganizationController extends Controller
         }
 
         try {
-            $organization = Organization::updateOrganization($request->all(), $id);
+            $organization = Organization::updateOrganization($request->all(), $organizationId);
             return new ApiResponseResource(
                 true, 
                 'Data Organization Berhasil Diubah!',
@@ -268,11 +268,11 @@ class OrganizationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($organizationId)
     {
         try {
 
-            $organization = Organization::find($id);
+            $organization = Organization::find($organizationId);
             if (!$organization) {
                 return new ApiResponseResource(
                     false, 

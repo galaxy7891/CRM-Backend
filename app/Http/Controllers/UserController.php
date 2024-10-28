@@ -270,8 +270,9 @@ class UserController extends Controller
         // Cek apakah pengguna terautentikasi
         if (auth()->check()) {
             $user = auth()->user();
-            $email = $user->email; // Ambil email dari pengguna yang terautentikasi
-            $frontendPath = '/change-password-email?email='; // Path untuk pengguna terautentikasi
+            $email = $user->email;
+            $frontendPath = '/change-password-email?email=';
+        
         } else {
             // Validasi email jika pengguna tidak terautentikasi
             $validator = Validator::make($request->only('email'), [
@@ -297,8 +298,8 @@ class UserController extends Controller
             $frontendPath = '/reset-password?email='; // Path untuk pengguna tidak terautentikasi
         }
 
-        // Cek apakah ada token reset password yang belum expired
         $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($email);
+
         if ($recentResetPassword) {
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
             return new ApiResponseResource(

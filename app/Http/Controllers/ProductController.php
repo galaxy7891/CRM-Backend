@@ -4,20 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
-
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
+    use Filter;
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $product = Product::latest()->paginate(25);
+            $query = Product::query();
+            
+            $query = $this->applyFilters($request, $query);
+
+            $product = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar data produk',
@@ -102,9 +107,9 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($productId)
     {
-        $product = Product::find($id);
+        $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
                 false, 
@@ -132,9 +137,9 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $productId)
     {
-        $product = Product::find($id);
+        $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
                 false, 
@@ -144,7 +149,7 @@ class ProductController extends Controller
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100|unique:products,name',
+            'name' => "sometimes|required|string|max:100|unique:products,name,$productId",
             'category' => 'sometimes|required|string|max:100',
             'code' => 'sometimes|required|string|max:100',
             'quantity' => 'sometimes|required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
@@ -184,7 +189,7 @@ class ProductController extends Controller
         }
         
         try {
-            $updatedProduct = Product::updateProduct($request->all(), $id);
+            $updatedProduct = Product::updateProduct($request->all(), $productId);
             return new ApiResponseResource(
                 true,
                 "Data produk {$updatedProduct->name} berhasil diubah",
@@ -203,9 +208,9 @@ class ProductController extends Controller
     /**
      * Update photo profile in cloudinary.
      */
-    public function updatePhotoProduct(Request $request, $id)
+    public function updatePhotoProduct(Request $request, $productId)
     {
-        $product = Product::find($id);
+        $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
                 false, 
@@ -231,7 +236,7 @@ class ProductController extends Controller
         }
 
         try {
-            $photoData = $product->updatePhotoProduct($request->file('photo'), $id); 
+            $photoData = $product->updatePhotoProduct($request->file('photo'), $productId); 
 
             return new ApiResponseResource(
                 true,
@@ -251,9 +256,9 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($productId)
     {
-        $product = Product::find($id);
+        $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
                 false, 
@@ -264,7 +269,7 @@ class ProductController extends Controller
 
         try {
             $name = $product->name;
-            $product = Product::deleteProduct($id);
+            $product = Product::deleteProduct($productId);
 
             // Return response with first and last name 
             return new ApiResponseResource(

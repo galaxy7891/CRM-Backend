@@ -13,7 +13,7 @@ class CompaniesObserver
      */
     public function created(Company $company): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($company);
+        $changes = ModelChangeLoggerHelper::getModelChanges($company, 'companies');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -28,7 +28,7 @@ class CompaniesObserver
      */
     public function updated(Company $company): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($company);
+        $changes = ModelChangeLoggerHelper::getModelChanges($company, null);
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -43,7 +43,7 @@ class CompaniesObserver
      */
     public function deleted(Company $company): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($company);
+        $changes = ModelChangeLoggerHelper::getModelChanges($company, 'companies');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
