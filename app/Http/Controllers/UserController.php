@@ -54,6 +54,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
+        $id = $user->id;
         if (!$user) {
             return new ApiResponseResource(
                 false,
@@ -68,8 +69,8 @@ class UserController extends Controller
             'last_name' => 'sometimes|nullable|string|max:50',
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
-            'phone' => ['sometimes', 'required', 'numeric', 'max_digits:15', Rule::unique('users', 'phone')->ignore($user)],
-            'email' => ['sometimes', 'required', 'email', Rule::unique('users', 'email')->ignore($user)],
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
+            'email' => "sometimes|required|email|unique:users,email,$id",
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
             'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
@@ -146,7 +147,7 @@ class UserController extends Controller
         }
 
         $user = auth()->user();
-        
+
         try {
             if (!Hash::check($request->password, $user->password)) {
                 return new ApiResponseResource(
@@ -155,16 +156,15 @@ class UserController extends Controller
                     null
                 );
             }
-    
+
             $user->updatePassword($request->new_password);
-    
+
             return new ApiResponseResource(
                 true,
                 'Password berhasil diubah',
                 null
             );
-
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -263,11 +263,17 @@ class UserController extends Controller
      */
     public function sendResetLink(Request $request)
     {
+        // Inisialisasi variabel
+        $email = '';
+        $frontendPath = '';
+
+        // Cek apakah pengguna terautentikasi
         if (auth()->check()) {
             $user = auth()->user();
-            $email = $user->email;
-            $frontendPath = '/change-password?email=';
+            $email = $user->email; // Ambil email dari pengguna yang terautentikasi
+            $frontendPath = '/change-password-email?email='; // Path untuk pengguna terautentikasi
         } else {
+            // Validasi email jika pengguna tidak terautentikasi
             $validator = Validator::make($request->only('email'), [
                 'email' => 'required|email|exists:users,email|max:100'
             ], [
@@ -276,6 +282,8 @@ class UserController extends Controller
                 'email.exists' => 'Email belum terdaftar',
                 'email.max' => 'Email maksimal 100 karakter',
             ]);
+
+            // Jika validasi gagal
             if ($validator->fails()) {
                 return new ApiResponseResource(
                     false,
@@ -284,15 +292,15 @@ class UserController extends Controller
                 );
             }
 
+            // Ambil email dari permintaan
             $email = $request->email;
-            $frontendPath = '/reset-password?email=';
+            $frontendPath = '/reset-password?email='; // Path untuk pengguna tidak terautentikasi
         }
 
-        $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($request->email);
-
+        // Cek apakah ada token reset password yang belum expired
+        $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($email);
         if ($recentResetPassword) {
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
-
             return new ApiResponseResource(
                 false,
                 'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
@@ -300,11 +308,11 @@ class UserController extends Controller
             );
         }
 
+        // Jika tidak ada token yang masih valid, lanjutkan dengan pembuatan token baru
         try {
-            $token = Str::uuid()->toString();
-
-            $user = User::findByEmail($email);
-            $nama = $user->first_name . ' ' . $user->last_name;
+            $token = Str::uuid()->toString(); // Buat token baru
+            $user = User::findByEmail($email); // Cari pengguna berdasarkan email
+            $nama = $user->first_name . ' ' . $user->last_name; // Ambil nama pengguna
 
             $dataUser = [
                 'email' => $email,
@@ -312,10 +320,10 @@ class UserController extends Controller
             ];
 
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token;
-            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama));
+            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token; // URL untuk reset password
+            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama)); // Kirim email reset password
 
-            PasswordResetToken::createPasswordResetToken($dataUser);
+            PasswordResetToken::createPasswordResetToken($dataUser); // Simpan token reset password
 
             return new ApiResponseResource(
                 true,
