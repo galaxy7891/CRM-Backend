@@ -15,7 +15,7 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -30,7 +30,7 @@ class CustomerObserver
      */
     public function updated(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -45,7 +45,7 @@ class CustomerObserver
      */
     public function deleted(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer);
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',

@@ -5,32 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
+    use Filter;
+
     /** 
      * Display a listing of the resource.
      *  
      * @return \Illuminate\Http\Response
      */
 
-    public function indexLeads()
+    public function indexLeads(Request $request)
     {
         try {
             $user = auth()->user();
+            $query = Customer::where('customerCategory', 'leads');
 
             if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->email)
-                    ->where('customerCategory', 'leads')
-                    ->latest()
-                    ->paginate(25);
-            } else {
-                $customers = Customer::latest()
-                    ->where('customerCategory', 'leads')
-                    ->paginate(25);
+                $query->where('owner', $user->email);
             }
+
+            $query = $this->applyFilters($request, $query);
+
+            $customers = $query->paginate(25);
 
             return new ApiResponseResource(
                 true,
@@ -53,21 +54,19 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function indexContact()
+    public function indexContact(Request $request)
     {
         try {
             $user = auth()->user();
+            $query = Customer::where('customerCategory', 'leads');
 
             if ($user->role == 'employee') {
-                $customers = Customer::where('owner', $user->email)
-                    ->where('customerCategory', 'contact')
-                    ->latest()
-                    ->paginate(25);
-            } else {
-                $customers = Customer::latest()
-                    ->where('customerCategory', 'contact')
-                    ->paginate(25);
+                $query->where('owner', $user->email);
             }
+
+            $query = $this->applyFilters($request, $query);
+
+            $customers = $query->paginate(25);
 
             return new ApiResponseResource(
                 true,
@@ -257,12 +256,10 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showLeads($id)
+    public function showLeads($leadsId)
     {
         try {
-            $customer = Customer::where('id', $id)
-                ->where('customerCategory', 'leads')
-                ->first();
+            $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
             
             if (!$customer) {
                 return new ApiResponseResource(
@@ -299,12 +296,10 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function showContact($id)
+    public function showContact($contactId)
     {
         try {
-            $customer = Customer::where('id', $id)
-                ->where('customerCategory', 'contact')
-                ->first();
+            $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
             
             if (!$customer) {
                 return new ApiResponseResource(
@@ -341,11 +336,9 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updateLeads(Request $request, $id)
+    public function updateLeads(Request $request, $leadsId)
     {
-        $customer = Customer::where('id', $id)
-            ->where('customerCategory', 'leads')
-            ->first();
+        $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
         
         if (!$customer) {
             return new ApiResponseResource(
@@ -367,8 +360,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique:customers,phone',
-            'email' => 'sometimes|nullable|email|unique:customers,email|max:100',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$leadsId",
+            'email' => "sometimes|nullable|email|unique:customers,email,$leadsId|max:100",
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -425,7 +418,7 @@ class CustomerController extends Controller
         }
 
         try {
-            $customer = Customer::updateCustomer($request->all(), $id);
+            $customer = Customer::updateCustomer($request->all(), $leadsId);
             return new ApiResponseResource(
                 true,
                 'Data leads berhasil diubah!',
@@ -444,11 +437,9 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updateContact(Request $request, $id)
+    public function updateContact(Request $request, $contactId)
     {
-        $customer = Customer::where('id', $id)
-            ->where('customerCategory', 'contact')
-            ->first();
+        $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
         
         if (!$customer) {
             return new ApiResponseResource(
@@ -470,8 +461,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique:customers,phone',
-            'email' => 'sometimes|nullable|email|unique:customers,email|max:100',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$contactId",
+            'email' => "sometimes|nullable|email|unique:customers,email,$contactId|max:100",
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -528,7 +519,7 @@ class CustomerController extends Controller
         }
 
         try {
-            $customer = Customer::updateCustomer($request->all(), $id);
+            $customer = Customer::updateCustomer($request->all(), $contactId);
             return new ApiResponseResource(
                 true,
                 'Data contact berhasil diubah!',
@@ -547,11 +538,9 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function convert(Request $request, $id)
+    public function convert(Request $request, $leadsId)
     {
-        $customer = Customer::where('id', $id)
-            ->where('customerCategory', 'leads')
-            ->first();
+        $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
         
         if (!$customer) {
             return new ApiResponseResource(
@@ -560,7 +549,7 @@ class CustomerController extends Controller
                 null
             );
         }
-  
+
         $user = auth()->user();
         if ($user->role == 'employee' && $customer->owner !== $user->email) {
             return new ApiResponseResource(
@@ -573,8 +562,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique:customers,phone',
-            'email' => 'sometimes|nullable|email|unique:customers,email|max:100',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$leadsId",
+            'email' => "sometimes|nullable|email|unique:customers,email,$leadsId|max:100",
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -629,9 +618,9 @@ class CustomerController extends Controller
                 null
             );
         }
-
+        
         try {
-            $customer = Customer::convert($request->all(), $id);
+            $customer = Customer::convert($request->all(), $leadsId);
             return new ApiResponseResource(
                 true,
                 'Data leads berhasil di konversi ke kontak',
@@ -650,12 +639,10 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroyLeads($id)
+    public function destroyLeads($leadsId)
     {
         try {
-            $customer = Customer::where('id', $id)
-                ->where('customerCategory', 'leads')
-                ->first();
+            $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
 
             if (!$customer) {
                 return new ApiResponseResource(
@@ -696,12 +683,10 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroyContact($id)
+    public function destroyContact($contactId)
     {
         try {
-            $customer = Customer::where('id', $id)
-                ->where('customerCategory', 'contact')
-                ->first();
+            $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
 
             if (!$customer) {
                 return new ApiResponseResource(

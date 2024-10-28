@@ -44,41 +44,52 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
-        Route::get('/activity/log', [ActivityLogController::class, 'index']);
-        Route::get('/activity/log/detail', [ActivityLogController::class, 'detail']);
+        
         Route::post('/import/{type}', [ImportController::class, 'import']);
+        
+        // Route::get('/activity/log', [ActivityLogController::class, 'indexUser']);
+        Route::get('/activity/log/{type}', [ActivityLogController::class, 'indexUser']);
+        Route::get('/activity/log/detail', [ActivityLogController::class, 'detail']);
         
         Route::get('/user', [UserController::class, 'show']);
         Route::post('/user', [UserController::class, 'update']);
         Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
         Route::delete('/user', [UserController::class, 'destroy']);
 
-        Route::apiResource('/companies', CompaniesController::class);
-        Route::post('/companies/logo/{company}', [CompaniesController::class, 'updateLogo']);
+        Route::get('/companies', [CompaniesController::class, 'index']);
+        Route::post('/companies/{companyId}', [CompaniesController::class, 'update']);
+        Route::post('/companies/logo/{companyId}', [CompaniesController::class, 'updateLogo']);
         
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
         Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
         Route::post('/leads', [CustomerController::class, 'storeLeads']);
-        Route::put('/leads/{leads}', [CustomerController::class, 'updateLeads']);
-        Route::put('/leads/convert/{leads}', [CustomerController::class, 'convert']);
-        Route::delete('/leads/{leads}', [CustomerController::class, 'destroyLeads']);
-
-        Route::get('/contact', [CustomerController::class, 'indexContact']);
-        Route::get('/contact/{contact}', [CustomerController::class, 'showContact']);
-        Route::post('/contact', [CustomerController::class, 'storeContact']);
-        Route::put('/contact/{contact}', [CustomerController::class, 'updateContact']);
-        Route::delete('/contact/{contact}', [CustomerController::class, 'destroyContact']);
-
-        Route::apiResource('/organizations', OrganizationController::class);
-        Route::post('/organization/logo', [OrganizationController::class, 'updateLogo']);
+        Route::post('/leads/{leadsId}', [CustomerController::class, 'updateLeads']);
+        Route::post('/leads/convert/{leadsId}', [CustomerController::class, 'convert']);
+        Route::delete('/leads/{leadsId}', [CustomerController::class, 'destroyLeads']);
         
-        Route::apiResource('/products', ProductController::class);
-        Route::post('/product/photo/{product}', [ProductController::class, 'updatePhotoProduct']);
+        Route::get('/contact', [CustomerController::class, 'indexContact']);
+        Route::get('/contact/{contactId}', [CustomerController::class, 'showContact']);
+        Route::post('/contact', [CustomerController::class, 'storeContact']);
+        Route::post('/contact/{contactId}', [CustomerController::class, 'updateContact']);
+        Route::delete('/contact/{contactId}', [CustomerController::class, 'destroyContact']);
+        
+        Route::get('/organization', [OrganizationController::class, 'index']);
+        Route::get('/organization/{organizationId}', [OrganizationController::class, 'show']);
+        Route::post('/organization', [OrganizationController::class, 'store']);
+        Route::post('/organization/{organizationId}', [OrganizationController::class, 'update']);
+        Route::delete('/organization/{organizationId}', [OrganizationController::class, 'destroy']);
+        
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::get('/products/{productId}', [ProductController::class, 'show']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::post('/products/{productsId}', [ProductController::class, 'update']);
+        Route::delete('/products/{productsId}', [ProductController::class, 'destroy']);
+        Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']);
 
         Route::apiResource('/deals', DealController::class);
         
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
-            Route::put('/employee/{id}', [EmployeeController::class, 'update']);
+            Route::post('/employee/{employeeId}', [EmployeeController::class, 'update']);
             Route::delete('/employee/{id}', [EmployeeController::class, 'destroy']);
         });
 

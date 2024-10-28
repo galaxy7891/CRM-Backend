@@ -76,6 +76,13 @@ class Customer extends Model
     {
         return $this->hasMany(Deal::class, 'customer_id', 'id');
     }
+    
+    public static function findCustomerByIdCategory(string $id, string $customerCategory)
+    {
+        return self::where('id', $id)
+            ->where('customerCategory', $customerCategory)
+            ->first();
+    }
 
     /**
      * Count Customer User by Category

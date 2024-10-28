@@ -13,7 +13,7 @@ class OrganizationObserver
      */
     public function created(Organization $organization): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($organization);
+        $changes = ModelChangeLoggerHelper::getModelChanges($organization, 'organizations');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -28,7 +28,7 @@ class OrganizationObserver
      */
     public function updated(Organization $organization): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($organization);
+        $changes = ModelChangeLoggerHelper::getModelChanges($organization, 'organizations');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -43,7 +43,7 @@ class OrganizationObserver
      */
     public function deleted(Organization $organization): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($organization);
+        $changes = ModelChangeLoggerHelper::getModelChanges($organization, 'organizations');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',

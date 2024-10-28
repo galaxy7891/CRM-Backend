@@ -65,5 +65,37 @@ class ActivityLog extends Model
             'logs' => $logs
         ];
     }
+
+    public static function getPaginatedLogsForModel(string $modelName = null, string $id = null)
+    {
+        $query = self::with('user:id,first_name,last_name,email')
+            ->orderByDesc('updated_at');
+
+        if ($modelName) {
+            $query->where('model_name', $modelName);
+        }
+
+        if ($modelName === 'users' && $id) {
+            $query->where('user_id', $id);
+        } elseif ($modelName && $id) {
+            $query->whereJsonContains('changes->id->new', $id);
+        }
+
+        return $query->paginate(10);
+    }
+
+    public static function getLogsGroupedByMonthForModel(?string $modelName, string $id = null): array
+    {
+        $paginatedLogs = self::getPaginatedLogsForModel($modelName, $id);
+        $groupedLogs = $paginatedLogs->getCollection()->groupBy(
+            fn ($log) => Carbon::parse($log->updated_at)->format('F Y')
+        );
+
+        return [
+            'paginatedLogs' => $paginatedLogs,
+            'logs' => $groupedLogs,
+        ];
+    }
+
 }
 

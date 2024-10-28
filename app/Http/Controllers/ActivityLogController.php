@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
-use App\Models\ActivityLog;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
@@ -14,10 +13,12 @@ class ActivityLogController extends Controller
      * 
      * @param ActivityLogService $activityLogService
      */
-    public function index(ActivityLogService $activityLogService)
+    public function indexUser(ActivityLogService $activityLogService, $modelName, Request $request)
     {
         try {
-            $result = $activityLogService->getFormattedLogs();
+            // $result = $activityLogService->getFormattedLogs();
+            $id = $request->query('id');
+            return $activityLogService->getFormattedLogsTest($modelName, $id);
     
             return new ApiResponseResource(
                 true,

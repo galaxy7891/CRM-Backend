@@ -4,24 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\User;
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class EmployeeController extends Controller
 {
+    use Filter;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $users = User::latest()->paginate(25);
+            $query = User::query();
 
+            $query = $this->applyFilters($request, $query);
+
+            $users = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar Karyawan',
                 $users
             );
+            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -81,9 +88,9 @@ class EmployeeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $employeeId)
     {
-        $user = User::find($id);
+        $user = User::find($employeeId);
 
         if (!$user) {
             return new ApiResponseResource(
@@ -94,16 +101,15 @@ class EmployeeController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'company_id' => 'nullable|uuid',
-            'email' => 'required|email|unique:users,email',
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:users, phone',
-            'job_position' => 'required|max:50',
-            'role' => 'required|in:super_admin,admin,employee',
-            'gender' => 'nullable|in:male,female,other',
+            'first_name' => 'sometimes|required|string|max:50',
+            'last_name' => 'sometimes|nullable|string|max:50',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users, phone,$employeeId",
+            'email' => "sometimes|required|email|unique:users,email,$employeeId",
+            'job_position' => 'sometimes|required|max:50',
+            'company_id' => 'sometimes|nullable|uuid',
+            'role' => 'sometimes|required|in:super_admin,admin,employee',
+            'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
-            'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
@@ -119,6 +125,7 @@ class EmployeeController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
+            'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
@@ -134,7 +141,7 @@ class EmployeeController extends Controller
 
         try {
 
-            $user = User::updateUser($request->all(), $id);
+            $user = User::updateUser($request->all(), $employeeId);
             return new ApiResponseResource(
                 true, 
                 "Data karyawan {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
@@ -154,11 +161,11 @@ class EmployeeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($employeeId)
     {
         try {
 
-            $user = User::find($id);
+            $user = User::find($employeeId);
             if (!$user) {
                 return new ApiResponseResource(
                     false,

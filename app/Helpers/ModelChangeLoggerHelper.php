@@ -9,8 +9,9 @@ class ModelChangeLoggerHelper
     /**
      * Get change attribute of model
      */
-    public static function getModelChanges(Model $model): array
+    public static function getModelChanges(Model $model, ?string $modelName): array
     {
+
         $originalAttributes = $model->getOriginal();
         $changedAttributes = $model->getDirty();
 
@@ -23,6 +24,20 @@ class ModelChangeLoggerHelper
                     'new' => $newValue,
                 ];
             }
+        }
+
+        if (isset($originalAttributes['id'])) {
+            $changes['id'] = [
+                'old' => $originalAttributes['id'],  
+                'new' => $model->getKey(),
+            ];
+        }
+
+        if ($modelName === 'customers' && isset($originalAttributes['customerCategory'])) {
+            $changes['customerCategory'] = [
+                'old' => $originalAttributes['customerCategory'],
+                'new' => $model->customerCategory,
+            ];
         }
 
         return $changes;

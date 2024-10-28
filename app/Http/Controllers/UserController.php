@@ -270,8 +270,8 @@ class UserController extends Controller
         if (auth()->check()) {
             $user = auth()->user();
             $email = $user->email;
-            $frontendPath = '/change-password?email=';
-
+            $frontendPath = '/change-password-email?email=';
+        
         } else {
             $validator = Validator::make($request->only('email'), [
                 'email' => 'required|email|exists:users,email|max:100'
@@ -293,7 +293,7 @@ class UserController extends Controller
             $frontendPath = '/reset-password?email=';
         }
 
-        $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($request->email);
+        $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($email);
 
         if ($recentResetPassword) {
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
