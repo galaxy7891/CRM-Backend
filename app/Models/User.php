@@ -130,6 +130,21 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Get the user's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getUserNameById($id)
+    {
+        $user = self::select('first_name', 'last_name')
+            ->where('id', $id)
+            ->first();
+
+        return $user ? trim($user->first_name . ' ' . $user->last_name) : null;
+    }
+
+    /**
      * Create a new user instance after a valid registration.
      *
      * @param array $dataUser

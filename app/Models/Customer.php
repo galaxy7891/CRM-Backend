@@ -30,7 +30,7 @@ class Customer extends Model
         'phone',
         'owner',
         'address',
-        'country',
+        'province',
         'city',
         'subdistrict',
         'village',
@@ -76,6 +76,21 @@ class Customer extends Model
     {
         return $this->hasMany(Deal::class, 'customer_id', 'id');
     }
+
+    /**
+     * Get the customer's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getCustomerNameById($id)
+    {
+        $customer = self::select('first_name', 'last_name')
+            ->where('id', $id)
+            ->first();
+
+        return $customer ? trim($customer->first_name . ' ' . $customer->last_name) : null;
+    }
     
     public static function findCustomerByIdCategory(string $id, string $customerCategory)
     {
@@ -98,6 +113,7 @@ class Customer extends Model
             ->count();
     }
 
+
     public static function createCustomer(array $dataCustomer): self
     {
         return self::create([
@@ -113,7 +129,7 @@ class Customer extends Model
             'phone' => $dataCustomer['phone'],
             'owner' => $dataCustomer['owner'],
             'address' => $dataCustomer['address'] ?? null,
-            'country' => $dataCustomer['country'] ?? null,
+            'province' => $dataCustomer['province'] ?? null,
             'city' => $dataCustomer['city'] ?? null,
             'subdistrict' => $dataCustomer['subdistrict'] ?? null,
             'village' => $dataCustomer['village'] ?? null,
@@ -138,7 +154,7 @@ class Customer extends Model
             'phone' => $dataCustomer['phone'] ?? $customer->phone,
             'owner' => $dataCustomer['owner'] ?? $customer->owner,
             'address' => $dataCustomer['address'] ?? $customer->address,
-            'country' => $dataCustomer['country'] ?? $customer->country,
+            'province' => $dataCustomer['province'] ?? $customer->province,
             'city' => $dataCustomer['city'] ?? $customer->city,
             'subdistrict' => $dataCustomer['subdistrict'] ?? $customer->subdistrict,
             'village' => $dataCustomer['village'] ?? $customer->village,
@@ -165,7 +181,7 @@ class Customer extends Model
             'phone' => $dataCustomer['phone'] ?? $customer->phone,
             'owner' => $dataCustomer['owner'] ?? $customer->owner,
             'address' => $dataCustomer['address'] ?? $customer->address,
-            'country' => $dataCustomer['country'] ?? $customer->country,
+            'province' => $dataCustomer['province'] ?? $customer->province,
             'city' => $dataCustomer['city'] ?? $customer->city,
             'subdistrict' => $dataCustomer['subdistrict'] ?? $customer->subdistrict,
             'village' => $dataCustomer['village'] ?? $customer->village,

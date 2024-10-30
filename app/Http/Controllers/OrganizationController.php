@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Organization;
+use App\Traits\Filter;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,22 +12,24 @@ use Illuminate\Support\Facades\Validator;
 class OrganizationController extends Controller
 {
 
+    use Filter;
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Is employee accessing his own organization data?
             $user = auth()->user();
-            if ($user->role == 'employee') {
-                $organizations = Organization::where('owner', $user->email)->latest()->paginate(25);
-            } else {
-                $organizations = Organization::latest()->paginate(25);
+
+            $query = Organization::query();
+            if ($user->role === 'employee') {
+                $query->where('owner', $user->email);
             }
 
+            $organizations = $this->applyFilters($request, $query);
             return new ApiResponseResource(
                 true,
                 'Daftar Organization',
@@ -55,7 +58,6 @@ class OrganizationController extends Controller
             'phone' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
             'website' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100',
-            'country' => 'nullable|string|max:50',
             'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'subdistrict' => 'nullable|string|max:100',
@@ -82,8 +84,6 @@ class OrganizationController extends Controller
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
-            'country.string' => 'Asal negara harus berupa teks.',
-            'country.max' => 'Asal negara maksimal 50 karakter.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
@@ -128,8 +128,6 @@ class OrganizationController extends Controller
     public function show($organizationId)
     {
         try {
-
-            // Check if organization exists
             $organization = Organization::find($organizationId);
             if (is_null($organization)) {
                 return new ApiResponseResource(
@@ -139,7 +137,6 @@ class OrganizationController extends Controller
                 );
             }
 
-            // Is employee accessing his own organization data?
             $user = auth()->user();
             if ($user->role == 'employee' && $organization->owner !== $user->email) {
                 return new ApiResponseResource(
@@ -169,7 +166,6 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $organizationId)
     {
-        // Check if organization exists
         $organization = Organization::find($organizationId);
 
         if (!$organization) {
@@ -180,7 +176,6 @@ class OrganizationController extends Controller
             );
         }
 
-        // Is employee accessing his own customer data?
         $user = auth()->auth();
         if ($user == 'employee' && $organization->owner !== $user->email) {
             return new ApiResponseResource(
@@ -198,7 +193,6 @@ class OrganizationController extends Controller
             'phone' => "sometimes|nullable|numeric|max_digits:15|unique:organizations,phone,$organizationId",
             'website' => 'sometimes|nullable|string|max:255',
             'owner' => 'sometimes|required|email|max:100',
-            'country' => 'sometimes|nullable|string|max:50',
             'province' => 'sometimes|nullable|string|max:100',
             'city' => 'sometimes|nullable|string|max:100',
             'subdistrict' => 'sometimes|nullable|string|max:100',
@@ -225,8 +219,6 @@ class OrganizationController extends Controller
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
-            'country.string' => 'Asal negara harus berupa teks.',
-            'country.max' => 'Asal negara maksimal 50 karakter.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',

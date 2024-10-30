@@ -65,8 +65,10 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'company_id' => 'sometimes|nullable|uuid',
+            'email' => "sometimes|required|email|unique:users,email,$id",
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
             'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
@@ -272,7 +274,6 @@ class UserController extends Controller
             $user = auth()->user();
             $email = $user->email;
             $frontendPath = '/change-password-email?email=';
-        
         } else {
             // Validasi email jika pengguna tidak terautentikasi
             $validator = Validator::make($request->only('email'), [

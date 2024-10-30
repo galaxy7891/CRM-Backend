@@ -13,7 +13,7 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users');
+        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users', 'CREATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : $user->id,
@@ -28,7 +28,7 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users');
+        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users', 'UPDATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : $user->id,
@@ -43,7 +43,7 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users');
+        $changes = ModelChangeLoggerHelper::getModelChanges($user, 'users', 'DELETE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : $user->id,
@@ -51,21 +51,5 @@ class UserObserver
             'action' => 'DELETE',
             'changes' => $changes ? json_encode($changes) : null,
         ]);
-    }
-
-    /**
-     * Handle the User "restored" event.
-     */
-    public function restored(User $user): void
-    {
-        //
-    }
-
-    /**
-     * Handle the User "force deleted" event.
-     */
-    public function forceDeleted(User $user): void
-    {
-        //
     }
 }

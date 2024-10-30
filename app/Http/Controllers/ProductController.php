@@ -20,9 +20,8 @@ class ProductController extends Controller
         try {
             $query = Product::query();
             
-            $query = $this->applyFilters($request, $query);
+            $product = $this->applyFilters($request, $query);
 
-            $product = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar data produk',

@@ -7,6 +7,9 @@ use App\Http\Resources\ApiResponseResource;
 use App\Imports\CustomersImport;
 use App\Imports\OrganizationsImport;
 use App\Imports\ProductsImport;
+use App\Models\Customer;
+use App\Models\Organization;
+use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,13 +31,13 @@ class ImportController extends Controller
 
             switch ($type) {
                 case 'leads':
-                    $model = 'customer';
                     $import = new CustomersImport($user->email, 'leads');
+                    $model = 'customer';
                     break;
                 
                 case 'contact':
-                    $model = 'customer';
                     $import = new CustomersImport($user->email, 'contact');
+                    $model = 'customer';
                     break;
 
                 case 'organizations':
@@ -83,6 +86,20 @@ class ImportController extends Controller
             $formattedDate = now()->translatedFormat('l, d F Y');
 
             if (empty($failedData)) {
+                foreach ($validData as $data) {
+                    switch ($model) {
+                        case 'customer':
+                            Customer::createCustomer($data);
+                            break;
+                        case 'organization':
+                            Organization::createOrganization($data);
+                            break;
+                        case 'product':
+                            Product::createProduct($data);
+                            break;
+                    }
+                }
+
                 return new ApiResponseResource(
                     true,
                     'Tidak ditemukan adanya data rusak.',

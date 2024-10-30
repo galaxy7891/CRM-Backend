@@ -20,9 +20,8 @@ class EmployeeController extends Controller
         try {
             $query = User::query();
 
-            $query = $this->applyFilters($request, $query);
+            $users = $this->applyFilters($request, $query);
 
-            $users = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar Karyawan',

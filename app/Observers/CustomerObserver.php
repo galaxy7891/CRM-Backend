@@ -15,7 +15,7 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'CREATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -30,7 +30,7 @@ class CustomerObserver
      */
     public function updated(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'UPDATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -45,7 +45,7 @@ class CustomerObserver
      */
     public function deleted(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers');
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'DELETE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -53,21 +53,5 @@ class CustomerObserver
             'action' => 'DELETE',
             'changes' => $changes ? json_encode($changes) : null,
         ]);
-    }
-
-    /**
-     * Handle the Customer "restored" event.
-     */
-    public function restored(Customer $customer): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Customer "force deleted" event.
-     */
-    public function forceDeleted(Customer $customer): void
-    {
-        //
     }
 }

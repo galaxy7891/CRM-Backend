@@ -31,7 +31,9 @@ trait Filter
             $query->orderBy('updated_at', 'desc');
         }
 
-        return $query;
+        $perPage = $request->input('per_page', 10);
+
+        return $query->paginate($perPage);
     }
 
 }

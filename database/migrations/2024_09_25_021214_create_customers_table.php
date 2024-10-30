@@ -22,7 +22,6 @@ class CreateCustomersTable extends Migration
             $table->string('phone', 15);
             $table->string('owner', 100);
             $table->string('address', 100)->nullable();
-            $table->string('country', 50)->nullable();
             $table->string('province', 100)->nullable();
             $table->string('city', 100)->nullable();
             $table->string('subdistrict', 100)->nullable();

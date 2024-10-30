@@ -29,14 +29,12 @@ class CustomerController extends Controller
                 $query->where('owner', $user->email);
             }
 
-            $query = $this->applyFilters($request, $query);
-
-            $customers = $query->paginate(25);
+            $leads = $this->applyFilters($request, $query);
 
             return new ApiResponseResource(
                 true,
                 'Daftar leads',
-                $customers
+                $leads
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
@@ -63,15 +61,14 @@ class CustomerController extends Controller
                 $query->where('owner', $user->email);
             }
 
-            $query = $this->applyFilters($request, $query);
-
-            $customers = $query->paginate(25);
+            $contact = $this->applyFilters($request, $query);
 
             return new ApiResponseResource(
                 true,
                 'Daftar contact',
-                $customers
+                $contact
             );
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 true,

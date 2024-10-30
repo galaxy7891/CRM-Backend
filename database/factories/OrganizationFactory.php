@@ -22,7 +22,6 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => Str::uuid(),
             'name' => $this->faker->company(),
             'industry' => $this->faker->randomElement(['Education', 'Shipping', 'Human Development']),
             'email' => $this->faker->unique()->safeEmail(),
@@ -31,7 +30,6 @@ class OrganizationFactory extends Factory
             'owner' => User::factory(),
             'website' => $this->faker->domainName(),
             'address' => $this->faker->address(),
-            'country' => $this->faker->country(),
             'city' => $this->faker->city(),
             'subdistrict' => $this->faker->randomElement(['Semarang Tengah', 'Semarang Barang', 'Genuk', 'Lebaksiu', 'Tembalang', 'Slawi']),
             'village' => $this->faker->randomElement([

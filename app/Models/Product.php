@@ -42,6 +42,21 @@ class Product extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
+     * Get the product's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getProductNameById($id)
+    {
+        $product = self::select('name')
+            ->where('id', $id)
+            ->first();
+
+        return $product ? $product->name : null;
+    }
+
+    /**
      * Upload photo product of the product.
      *
      * @param \Illuminate\Http\UploadedFile $photo
