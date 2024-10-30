@@ -54,20 +54,4 @@ class CustomerObserver
             'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
-
-    /**
-     * Handle the Customer "restored" event.
-     */
-    public function restored(Customer $customer): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Customer "force deleted" event.
-     */
-    public function forceDeleted(Customer $customer): void
-    {
-        //
-    }
 }

@@ -47,7 +47,6 @@ Route::group(['middleware' => 'api'], function () {
         
         Route::post('/import/{type}', [ImportController::class, 'import']);
         
-        // Route::get('/activity/log', [ActivityLogController::class, 'indexUser']);
         Route::get('/activity/log/{type}', [ActivityLogController::class, 'indexUser']);
         Route::get('/activity/log/detail', [ActivityLogController::class, 'detail']);
         

@@ -52,20 +52,4 @@ class DealObserver
             'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
-
-    /**
-     * Handle the Deal "restored" event.
-     */
-    public function restored(Deal $deal): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Deal "force deleted" event.
-     */
-    public function forceDeleted(Deal $deal): void
-    {
-        //
-    }
 }

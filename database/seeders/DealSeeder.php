@@ -14,6 +14,7 @@ class DealSeeder extends Seeder
     public function run(): void
     {
         Deal::create([
+            'id' => '123e4567-e89b-12d7-a452-42661413400',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
             'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
@@ -30,6 +31,7 @@ class DealSeeder extends Seeder
         ]);
 
         Deal::create([
+            'id' => '123e4567-e89b-12d7-a452-42661413300',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
             'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
@@ -45,6 +47,7 @@ class DealSeeder extends Seeder
             'owner' => 'user_satu@gmail.com',
         ]);
         Deal::create([
+            'id' => '123e4567-e89b-12d7-a452-42661413200',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
             'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
@@ -62,6 +65,7 @@ class DealSeeder extends Seeder
             'owner' => 'user_satu@gmail.com',
         ]);
         Deal::create([
+            'id' => '123e4567-e89b-12d7-a452-42661413100',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
             'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',

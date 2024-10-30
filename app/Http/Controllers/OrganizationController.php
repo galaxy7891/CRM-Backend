@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Organization;
+use App\Traits\Filter;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,21 +12,24 @@ use Illuminate\Support\Facades\Validator;
 class OrganizationController extends Controller
 {
 
+    use Filter;
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = auth()->user();
-            if ($user->role == 'employee') {
-                $organizations = Organization::where('owner', $user->email)->latest()->paginate(25);
-            } else {
-                $organizations = Organization::latest()->paginate(25);
+
+            $query = Organization::query();
+            if ($user->role === 'employee') {
+                $query->where('owner', $user->email);
             }
 
+            $organizations = $this->applyFilters($request, $query);
             return new ApiResponseResource(
                 true,
                 'Daftar Organization',

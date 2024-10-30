@@ -52,20 +52,4 @@ class OrganizationObserver
             'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
-
-    /**
-     * Handle the Organization "restored" event.
-     */
-    public function restored(Organization $organization): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Organization "force deleted" event.
-     */
-    public function forceDeleted(Organization $organization): void
-    {
-        //
-    }
 }

@@ -52,20 +52,4 @@ class CompaniesObserver
             'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
-
-    /**
-     * Handle the Company "restored" event.
-     */
-    public function restored(Company $company): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Company "force deleted" event.
-     */
-    public function forceDeleted(Company $company): void
-    {
-        //
-    }
 }
