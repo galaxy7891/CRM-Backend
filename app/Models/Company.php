@@ -73,7 +73,7 @@ class Company extends Model
      * @param array $companyId
      * @return Company
      */
-    public static function updateCompany(array $dataCompany, string $companyId) :self
+    public static function updateCompany(array $dataCompany, string $companyId): self
     {
         $company = self::findOrFail($companyId);
 

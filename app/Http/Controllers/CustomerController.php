@@ -38,7 +38,6 @@ class CustomerController extends Controller
                 'Daftar leads',
                 $customers
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 true,
@@ -58,7 +57,7 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Customer::where('customerCategory', 'leads');
+            $query = Customer::where('customerCategory', 'contact');
 
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
@@ -73,7 +72,6 @@ class CustomerController extends Controller
                 'Daftar contact',
                 $customers
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 true,
@@ -155,7 +153,7 @@ class CustomerController extends Controller
             $customer = Customer::createCustomer($dataLeads);
             return new ApiResponseResource(
                 true,
-                'Data leads ' . ucfirst($customer->first_name). ' ' . ucfirst($customer->last_name) . ' berhasil ditambahkan!',
+                'Data leads ' . ucfirst($customer->first_name) . ' ' . ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
         } catch (\Exception $e) {
@@ -240,10 +238,9 @@ class CustomerController extends Controller
             $customer = Customer::createCustomer($dataContact);
             return new ApiResponseResource(
                 true,
-                'Data contact '. ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
+                'Data contact ' . ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -260,7 +257,7 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-            
+
             if (!$customer) {
                 return new ApiResponseResource(
                     false,
@@ -283,7 +280,6 @@ class CustomerController extends Controller
                 'Data leads',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -300,7 +296,7 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
-            
+
             if (!$customer) {
                 return new ApiResponseResource(
                     false,
@@ -323,7 +319,6 @@ class CustomerController extends Controller
                 'Data contact',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -339,7 +334,7 @@ class CustomerController extends Controller
     public function updateLeads(Request $request, $leadsId)
     {
         $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-        
+
         if (!$customer) {
             return new ApiResponseResource(
                 false,
@@ -424,7 +419,6 @@ class CustomerController extends Controller
                 'Data leads berhasil diubah!',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -440,7 +434,7 @@ class CustomerController extends Controller
     public function updateContact(Request $request, $contactId)
     {
         $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
-        
+
         if (!$customer) {
             return new ApiResponseResource(
                 false,
@@ -525,7 +519,6 @@ class CustomerController extends Controller
                 'Data contact berhasil diubah!',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -541,7 +534,7 @@ class CustomerController extends Controller
     public function convert(Request $request, $leadsId)
     {
         $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-        
+
         if (!$customer) {
             return new ApiResponseResource(
                 false,
@@ -618,7 +611,7 @@ class CustomerController extends Controller
                 null
             );
         }
-        
+
         try {
             $customer = Customer::convert($request->all(), $leadsId);
             return new ApiResponseResource(
@@ -626,7 +619,6 @@ class CustomerController extends Controller
                 'Data leads berhasil di konversi ke kontak',
                 $customer
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -670,7 +662,6 @@ class CustomerController extends Controller
                 'Data leads ' . ucfirst($first_name) . ' ' . ucfirst($last_name) . ' berhasil dihapus!',
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -714,7 +705,6 @@ class CustomerController extends Controller
                 'Data contact ' . ucfirst($first_name) . ' ' . ucfirst($last_name) . ' berhasil dihapus!',
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

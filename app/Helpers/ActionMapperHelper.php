@@ -137,12 +137,12 @@ class ActionMapperHelper
             case 'CREATE':
                 $description = self::mapCreateDescription($log, $modelName, $changes, $userName);
                 break;
-            case 'UPDATE':
-                $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
-                break;
-            case 'DELETE':
-                $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
-                break;
+            // case 'UPDATE':
+            //     $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
+            //     break;
+            // case 'DELETE':
+            //     $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
+            //     break;
         }
 
         return $description;
@@ -184,72 +184,72 @@ class ActionMapperHelper
         return '';
     }
 
-    private static function mapUpdateDescription($log, string $modelName, array $changes, string $userName): string
-    {
-        switch ($modelName) {
-            case 'companies':
-                return "$userName {memperbarui} data {Perusahaan} $changes[namaCompanies]";
-            case 'users':
-                $isSelfUpdate = $log->user->id === ($changes['id']['new'] ?? null);
+    // private static function mapUpdateDescription($log, string $modelName, array $changes, string $userName): string
+    // {
+    //     switch ($modelName) {
+    //         case 'companies':
+    //             return "$userName {memperbarui} data {Perusahaan} $changes[namaCompanies]";
+    //         case 'users':
+    //             $isSelfUpdate = $log->user->id === ($changes['id']['new'] ?? null);
                 
-                if ($isSelfUpdate) {
-                    return self::mapSelfUpdateDescription($changes, $userName);
-                } else {
-                    $namaKaryawanAdmin = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name); 
-                    return "$namaKaryawanAdmin {memperbarui} data diri {Karyawan} $changes[namaKaryawan]";
-                }
-            case 'customers':
-                $customerCategory = $changes['customerCategory']['new'] ?? '';
-                $firstNameLeads = $changes['firstNameLeads'] ?? '';
-                $lastNameLeads = $changes['lastNameLeads'] ?? '';
+    //             if ($isSelfUpdate) {
+    //                 return self::mapSelfUpdateDescription($changes, $userName);
+    //             } else {
+    //                 $namaKaryawanAdmin = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name); 
+    //                 return "$namaKaryawanAdmin {memperbarui} data diri {Karyawan} $changes[namaKaryawan]";
+    //             }
+    //         case 'customers':
+    //             $customerCategory = $changes['customerCategory']['new'] ?? '';
+    //             $firstNameLeads = $changes['firstNameLeads'] ?? '';
+    //             $lastNameLeads = $changes['lastNameLeads'] ?? '';
 
-                if ($customerCategory === 'leads') {
-                    return "$userName {memperbarui} data {Leads} $firstNameLeads $lastNameLeads";
-                } elseif ($customerCategory === 'contact') {
-                    return "$userName {memperbarui} data {Kontak} $firstNameLeads $lastNameLeads";
-                }
-                break;
-            case 'deals':
-                // Logika untuk deals
-                return self::mapDealsUpdateDescription($changes, $userName);
-            case 'organizations':
-                return "$userName {memperbarui} data {Perusahaan} $changes[namaOrganization]";
-            case 'products':
-                return self::mapProductsUpdateDescription($changes, $userName);
-        }
+    //             if ($customerCategory === 'leads') {
+    //                 return "$userName {memperbarui} data {Leads} $firstNameLeads $lastNameLeads";
+    //             } elseif ($customerCategory === 'contact') {
+    //                 return "$userName {memperbarui} data {Kontak} $firstNameLeads $lastNameLeads";
+    //             }
+    //             break;
+    //         case 'deals':
+    //             // Logika untuk deals
+    //             return self::mapDealsUpdateDescription($changes, $userName);
+    //         case 'organizations':
+    //             return "$userName {memperbarui} data {Perusahaan} $changes[namaOrganization]";
+    //         case 'products':
+    //             return self::mapProductsUpdateDescription($changes, $userName);
+    //     }
 
-        return '';
-    }
+    //     return '';
+    // }
 
-    private static function mapDeleteDescription($log, string $modelName, array $changes, string $userName): string
-    {
-        switch ($modelName) {
-            case 'companies':
-                return "{Perusahaan} {$changes['namaCompanies']} {dihapus} oleh $userName";
-            case 'users':
-                // Logika untuk deskripsi penghapusan user
-                return "$userName {menghapus} akunnya";
-            case 'customers':
-                $customerCategory = $changes['customerCategory']['new'] ?? '';
-                $firstNameLeads = $changes['firstNameLeads'] ?? '';
-                $lastNameLeads = $changes['lastNameLeads'] ?? '';
+    // private static function mapDeleteDescription($log, string $modelName, array $changes, string $userName): string
+    // {
+    //     switch ($modelName) {
+    //         case 'companies':
+    //             return "{Perusahaan} {$changes['namaCompanies']} {dihapus} oleh $userName";
+    //         case 'users':
+    //             // Logika untuk deskripsi penghapusan user
+    //             return "$userName {menghapus} akunnya";
+    //         case 'customers':
+    //             $customerCategory = $changes['customerCategory']['new'] ?? '';
+    //             $firstNameLeads = $changes['firstNameLeads'] ?? '';
+    //             $lastNameLeads = $changes['lastNameLeads'] ?? '';
 
-                if ($customerCategory === 'leads') {
-                    return "$userName {menghapus} data {Leads} $firstNameLeads $lastNameLeads";
-                } elseif ($customerCategory === 'contact') {
-                    return "$userName {menghapus} data {Kontak} {$changes['firstNameKontak']} {$changes['lastNameKontak']}";
-                }
-                break;
-            case 'deals':
-                return "$userName {menghapus} data {Deals}";
-            case 'organizations':
-                return "$userName {menghapus} data {Perusahaan} {$changes['namaOrganizations']}";
-            case 'products':
-                return "$userName {menghapus} data {Produk} {$changes['namaProduct']}";
-        }
+    //             if ($customerCategory === 'leads') {
+    //                 return "$userName {menghapus} data {Leads} $firstNameLeads $lastNameLeads";
+    //             } elseif ($customerCategory === 'contact') {
+    //                 return "$userName {menghapus} data {Kontak} {$changes['firstNameKontak']} {$changes['lastNameKontak']}";
+    //             }
+    //             break;
+    //         case 'deals':
+    //             return "$userName {menghapus} data {Deals}";
+    //         case 'organizations':
+    //             return "$userName {menghapus} data {Perusahaan} {$changes['namaOrganizations']}";
+    //         case 'products':
+    //             return "$userName {menghapus} data {Produk} {$changes['namaProduct']}";
+    //     }
 
-        return '';
-    }
+    //     return '';
+    // }
 
     private static function mapSelfUpdateDescription(array $changes, string $userName): string
     {

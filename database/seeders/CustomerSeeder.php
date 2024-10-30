@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use PharIo\Manifest\Email;
+use Illuminate\Support\Arr;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -14,6 +15,52 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
+        for ($i = 0; $i < 50; $i++) {
+            Customer::create([
+                'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
+                'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+                'first_name' => 'Customer',
+                'last_name' => 'Number' . $i,
+                'customerCategory' => 'leads',
+                'job' => 'PNS',
+                'description' => 'Lorem ipsum dolor sit amet.',
+                'status' => Arr::random(['warm', 'cold', 'hot']), // Same status
+                'email' => 'customer' . $i . '@gmail.com', // Unique email
+                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
+                'owner' => 'user_satu@gmail.com', // Same owner
+                'address' => 'Jl Kemayoran Baru',
+                'country' => 'Indonesia',
+                'province' => 'Jawa Tengah',
+                'city' => 'Kota Semarang',
+                'subdistrict' => 'Semarang Tengah',
+                'village' => 'Pendikan Kidul',
+                'zip_code' => '12345'
+            ]);
+        }
+
+        for ($i = 50; $i < 100; $i++) {
+            Customer::create([
+                'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
+                'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+                'first_name' => 'Customer',
+                'last_name' => 'Number' . $i,
+                'customerCategory' => 'contact',
+                'job' => 'PNS',
+                'description' => 'Lorem ipsum dolor sit amet.',
+                'status' => Arr::random(['warm', 'cold', 'hot']), // Same status
+                'email' => 'customer' . $i . '@gmail.com', // Unique email
+                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
+                'owner' => 'user_satu@gmail.com', // Same owner
+                'address' => 'Jl Kemayoran Baru',
+                'country' => 'Indonesia',
+                'province' => 'Jawa Tengah',
+                'city' => 'Kota Semarang',
+                'subdistrict' => 'Semarang Tengah',
+                'village' => 'Pendikan Kidul',
+                'zip_code' => '12345'
+            ]);
+        }
+
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174001',
             'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
