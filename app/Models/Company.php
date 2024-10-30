@@ -50,6 +50,21 @@ class Company extends Model
     }
 
     /**
+     * Get the company's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getCompaniesNameById($id)
+    {
+        $company = self::select('name')
+            ->where('id', $id)
+            ->first();
+
+        return $company ? $company->name : null;
+    }
+
+    /**
      * Create a new company instance associated with a user.
      *
      * @param array $dataCompany

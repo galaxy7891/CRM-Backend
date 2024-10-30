@@ -20,9 +20,8 @@ class CompaniesController extends Controller
         try {
             $query = Company::query();
 
-            $query = $this->applyFilters($request, $query);
+            $company = $this->applyFilters($request, $query);
 
-            $company = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar data perusahaan',

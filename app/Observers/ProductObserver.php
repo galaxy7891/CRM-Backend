@@ -13,7 +13,7 @@ class ProductObserver
      */
     public function created(Product $product): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products');
+        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'CREATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -28,7 +28,7 @@ class ProductObserver
      */
     public function updated(Product $product): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products');
+        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'UPDATE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
@@ -43,7 +43,7 @@ class ProductObserver
      */
     public function deleted(Product $product): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products');
+        $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'DELETE');
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',

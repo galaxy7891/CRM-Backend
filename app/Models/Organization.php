@@ -26,7 +26,7 @@ class Organization extends Model
         'owner',
         'website',
         'address',
-        'country',
+        'province',
         'city',
         'subdistrict',
         'village',
@@ -56,6 +56,21 @@ class Organization extends Model
     }
 
     /**
+     * Get the organization's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getOrganizationNameById($id)
+    {
+        $organization = self::select('name')
+            ->where('id', $id)
+            ->first();
+
+        return $organization ? $organization->name : null;
+    }
+
+    /**
      * Count Organization Owned
      * 
      * @param string $email
@@ -78,7 +93,7 @@ class Organization extends Model
             'owner' => $dataOrganization['owner'],
             'website' => $dataOrganization['website'] ?? null,
             'address' => $dataOrganization['address'] ?? null,
-            'country' => $dataOrganization['country'] ?? null,
+            'province' => $dataOrganization['province'] ?? null,
             'city' => $dataOrganization['city'] ?? null,
             'subdistrict' => $dataOrganization['subdistrict'] ?? null,
             'village' => $dataOrganization['village'] ?? null,
@@ -98,7 +113,7 @@ class Organization extends Model
             'owner' => $dataOrganization['owner'] ?? $organization->owner,
             'website' => $dataOrganization['website'] ?? $organization->website,
             'address' => $dataOrganization['address'] ?? $organization->address,
-            'country' => $dataOrganization['country'] ?? $organization->country,
+            'province' => $dataOrganization['province'] ?? $organization->province,
             'city' => $dataOrganization['city'] ?? $organization->city,
             'subdistrict' => $dataOrganization['subdistrict'] ?? $organization->subdistrict,
             'village' => $dataOrganization['village'] ?? $organization->village,

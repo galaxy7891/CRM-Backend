@@ -2,6 +2,12 @@
 
 namespace App\Helpers;
 
+use App\Models\Company;
+use App\Models\Customer;
+use App\Models\Deal;
+use App\Models\Product;
+use App\Models\User;
+
 class ActionMapperHelper
 {
     public static function mapActionTitle(string $action): string
@@ -34,7 +40,8 @@ class ActionMapperHelper
             'products' => 'produk',
             'organizations' => 'perusahaan pelanggan',
             'user_invitations' => 'karyawan',
-            'customers' => 'pelanggan',
+            'leads' => 'leads',
+            'contact' => 'kontak',
             'otps' => 'OTP',
         ];
 
@@ -62,7 +69,7 @@ class ActionMapperHelper
             'address' => 'alamat',
             'owner' => 'penanggung jawab',
             'code' => 'kode',
-            'expired_at' => 'kadaluarsa',  /////
+            'expired_at' => 'kadaluarsa',
         ];
         
         $modelSpecificMapping = [
@@ -85,7 +92,7 @@ class ActionMapperHelper
                 'token' => 'token',
             ],
             'otps' => [
-                'is_used' => 'digunakan',     /////
+                'is_used' => 'digunakan',
             ],
             'customers' => [
                 'customerCategory' => 'kategori pelanggan',
@@ -132,7 +139,7 @@ class ActionMapperHelper
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);
         $description = '';
-
+        
         switch ($log->action) {
             case 'CREATE':
                 $description = self::mapCreateDescription($log, $modelName, $changes, $userName);
@@ -152,35 +159,50 @@ class ActionMapperHelper
     {
         switch ($modelName) {
             case 'companies':
-                return 'Perusahaan ' . $changes['name']['new'] . ' dibuat oleh ' . $userName;
+                $companiesName = Company::getCompaniesNameById($log->changes['id']['new']);
+                return 'Perusahaan ' . $companiesName . ' dibuat oleh ' . $userName;
 
             case 'user_invitations':
-                return $userName . ' mengundang ' . $changes['email']['new'] . ' untuk bergabung di Perusahaan ' . $changes['name']['new'];
+                $companiesName = $log->user->company->name ??  '';
+                return $userName . ' mengundang ' . $changes['email']['new'] . ' untuk bergabung di Perusahaan ' . $companiesName;
 
             case 'users':
-                return 'Register akun ' . $userName;
+                $userAdminName = User::getUserNameById($changes['id']['new']);
+                return 'Register akun ' . $userAdminName;
 
-            case 'customers':
-                $customerCategory = $changes['customerCategory']['new'] ?? '';
-                $customerName = trim(($changes['first_name']['new'] ?? '') . ' ' . ($changes['last_name']['new'] ?? ''));
+            // case 'customers':
+            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
+            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
 
-                if ($customerCategory === 'leads') {
-                    return $userName . ' menambahkan data Leads ' .  $customerName;
-                } elseif ($customerCategory === 'contact') {
-                    return $userName . ' menambahkan data Kontak ' . $customerName;
-                }
+            //     if ($customerCategory === 'leads') {
+            //         return $userName . ' menambahkan data Leads ' .  $customerName;
+            //     } elseif ($customerCategory === 'contact') {
+            //         return $userName . ' menambahkan data Kontak ' . $customerName;
+            //     }
+            //     break;
+
+            case 'leads':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' menambahkan data Leads ' .  $customerName;
                 break;
+
+            case 'contact':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' menambahkan data Kontak ' . $customerName;
+                break;
+
             case 'deals':
-                $valueEstimated = $changes['value_estimated']['new'] ?? '';
-                return $userName . ' menambahkan data Deals ' . $changes['name']['new'] . ' sebesar ' . $valueEstimated;
+                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+                $dealsName = Deal::getDealsNameById($changes['id']['new']);
+                return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
 
             case 'organizations':
                 return $userName . ' menambahkan data Perusahaan ' . $changes['name']['new'];
 
             case 'products':
-                return $userName . ' menambahkan data Produk ' . $changes['name'];
+                return $userName . ' menambahkan data Produk ' . $changes['name']['new'];
         }
-////////sampe sini/////////
+
         return '';
     }
 
@@ -188,34 +210,57 @@ class ActionMapperHelper
     {
         switch ($modelName) {
             case 'companies':
-                return "$userName {memperbarui} data {Perusahaan} $changes[namaCompanies]";
+                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
+                return $userName . ' memperbarui data Perusahaan ' . $companiesName;
+
             case 'users':
                 $isSelfUpdate = $log->user->id === ($changes['id']['new'] ?? null);
+                $employeeName = User::getUserNameById($changes['id']['new']);
                 
                 if ($isSelfUpdate) {
                     return self::mapSelfUpdateDescription($changes, $userName);
                 } else {
-                    $namaKaryawanAdmin = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name); 
-                    return "$namaKaryawanAdmin {memperbarui} data diri {Karyawan} $changes[namaKaryawan]";
+                    return $userName . ' memperbarui data diri Karyawan ' . $employeeName;
                 }
-            case 'customers':
-                $customerCategory = $changes['customerCategory']['new'] ?? '';
-                $firstNameLeads = $changes['firstNameLeads'] ?? '';
-                $lastNameLeads = $changes['lastNameLeads'] ?? '';
 
-                if ($customerCategory === 'leads') {
-                    return "$userName {memperbarui} data {Leads} $firstNameLeads $lastNameLeads";
-                } elseif ($customerCategory === 'contact') {
-                    return "$userName {memperbarui} data {Kontak} $firstNameLeads $lastNameLeads";
-                }
+            // case 'customers':
+            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
+            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
+
+            //     if ($customerCategory === 'leads') {
+            //         return $userName . ' memperbarui data Leads ' . $customerName;
+            //     } elseif ($customerCategory === 'contact') {
+            //         return $userName . ' memperbarui data Kontak ' . $customerName;
+            //     }
+            //     break;
+
+            case 'leads':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' memperbarui data Leads ' . $customerName;
                 break;
-            case 'deals':
-                // Logika untuk deals
-                return self::mapDealsUpdateDescription($changes, $userName);
+
+            case 'contact':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' memperbarui data Kontak ' . $customerName;
+                break;
+
+            case 'deals':  
+                $dealsName = Deal::getDealsNameById($changes['id']['new']);
+                return self::mapDealsUpdateDescription($changes, $userName, $dealsName);
+
             case 'organizations':
-                return "$userName {memperbarui} data {Perusahaan} $changes[namaOrganization]";
-            case 'products':
-                return self::mapProductsUpdateDescription($changes, $userName);
+                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
+                return $userName . ' memperbarui data Perusahaan ' . $changes['name']['new'];
+         
+            case 'products': 
+                $productName = Product::getProductNameById($changes['id']['new']);
+                $quantityOld = $changes['quantity']['old']?? '';
+                $quantityNew = $changes['quantity']['new']?? '';
+                if (isset($quantityNew)){
+                    return $userName . ' memperbarui data jumlah Produk ' . $productName . ' dari ' . $quantityOld . ' menjadi ' . $quantityNew;
+                }
+
+                return $userName . ' memperbarui data Produk ' . $productName;
         }
 
         return '';
@@ -225,27 +270,44 @@ class ActionMapperHelper
     {
         switch ($modelName) {
             case 'companies':
-                return "{Perusahaan} {$changes['namaCompanies']} {dihapus} oleh $userName";
-            case 'users':
-                // Logika untuk deskripsi penghapusan user
-                return "$userName {menghapus} akunnya";
-            case 'customers':
-                $customerCategory = $changes['customerCategory']['new'] ?? '';
-                $firstNameLeads = $changes['firstNameLeads'] ?? '';
-                $lastNameLeads = $changes['lastNameLeads'] ?? '';
+                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
+                return 'Perusahaan ' . $companiesName . ' dihapus oleh ' . $userName;
 
-                if ($customerCategory === 'leads') {
-                    return "$userName {menghapus} data {Leads} $firstNameLeads $lastNameLeads";
-                } elseif ($customerCategory === 'contact') {
-                    return "$userName {menghapus} data {Kontak} {$changes['firstNameKontak']} {$changes['lastNameKontak']}";
-                }
+            case 'users':
+                return $userName . ' menghapus akunnya';
+            
+            // case 'customers':
+            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
+            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
+
+            //     if ($customerCategory === 'leads') {
+            //         return $userName . ' menghapus data Leads ' . $customerName;
+            //     } elseif ($customerCategory === 'contact') {
+            //         return $userName . ' menghapus data Kontak ' . $customerName;
+            //     }
+            //     break;
+
+            case 'leads':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' menghapus data Leads ' . $customerName;
                 break;
+            
+            case 'contact':
+                $customerName = Customer::getCustomerNameById($changes['id']['new']);
+                return $userName . ' menghapus data Kontak ' . $customerName;
+                break;
+
             case 'deals':
-                return "$userName {menghapus} data {Deals}";
+                $dealsName = Deal::getDealsNameById($changes['id']['new']);
+                return $userName . ' menghapus data Deals ' . $dealsName;
+
             case 'organizations':
-                return "$userName {menghapus} data {Perusahaan} {$changes['namaOrganizations']}";
+                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
+                return $userName . ' menghapus data Perusahaan ' . $companiesName;
+
             case 'products':
-                return "$userName {menghapus} data {Produk} {$changes['namaProduct']}";
+                $productName = Product::getProductNameById($changes['id']['new']);
+                return $userName . ' menghapus data Produk ' . $productName;
         }
 
         return '';
@@ -253,25 +315,38 @@ class ActionMapperHelper
 
     private static function mapSelfUpdateDescription(array $changes, string $userName): string
     {
-        // Implementasikan logika untuk deskripsi update data sendiri
         if (isset($changes['password'])) {
-            return "$userName {memperbarui} password";
-        } elseif (isset($changes['profile_picture'])) {
-            return "$userName {memperbarui} foto profil";
+            return $userName . ' memperbarui passwordnya';
+
+        } elseif (isset($changes['image_url'])) {
+            return $userName . ' memperbarui foto profilnya';
+        
         } else {
-            return "$userName {memperbarui} data diri";
+            return $userName . ' memperbarui data dirinya';
         }
     }
 
-    private static function mapDealsUpdateDescription(array $changes, string $userName): string
+    private static function mapDealsUpdateDescription(array $changes, string $userName, string $dealsName): string
     {
-        // Implementasikan logika untuk deskripsi update deals
-        return "$userName {memperbarui} data {Deals} {$changes['namaDeals']}";
-    }
+        $stageOld = $changes['stage']['old'] ?? '';
+        $stageNew = $changes['stage']['new'] ?? '';
 
-    private static function mapProductsUpdateDescription(array $changes, string $userName): string
-    {
-        // Implementasikan logika untuk deskripsi update produk
-        return "$userName {memperbarui} data {Produk} {$changes['namaProduk']}";
+        if (isset($stageNew)) {
+            if ($stageNew !== 'won' && $stageNew !== 'lost') {
+                return $userName . ' memindahkan tahap Deals ' . $dealsName .
+                    ' dari ' . $stageOld . ' menjadi ' . $stageNew;
+
+            } elseif ($stageNew == 'won') {
+                $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.')?? '';
+                return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual . 
+                    ' berhasil tercapai oleh ' . $userName;
+
+            } elseif ($stageNew == 'lost') {
+                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+                return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
+            }
+        }
+
+        return $userName . ' memperbarui data Deals ' . $dealsName;
     }
 }

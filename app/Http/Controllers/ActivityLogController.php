@@ -16,9 +16,8 @@ class ActivityLogController extends Controller
     public function indexUser(ActivityLogService $activityLogService, $modelName, Request $request)
     {
         try {
-            // $result = $activityLogService->getFormattedLogs();
-            $id = $request->query('id');
-            return $activityLogService->getFormattedLogsTest($modelName, $id);
+            $id = $request->input('id');
+            $result = $activityLogService->getFormattedLogsTest($modelName, $id);
     
             return new ApiResponseResource(
                 true,

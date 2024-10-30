@@ -20,9 +20,8 @@ class DealController extends Controller
         try {
             $query = Deal::query();
             
-            $query = $this->applyFilters($request, $query);
+            $deals = $this->applyFilters($request, $query);
 
-            $deals = $query->paginate(25);
             return new ApiResponseResource(
                 true,
                 'Daftar Deal',

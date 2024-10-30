@@ -71,14 +71,17 @@ class ActivityLog extends Model
         $query = self::with('user:id,first_name,last_name,email')
             ->orderByDesc('updated_at');
 
-        if ($modelName) {
-            $query->where('model_name', $modelName);
+        if ($modelName === 'contact' || $modelName === 'leads') {
+            $modelName = 'customers';        
         }
 
-        if ($modelName === 'users' && $id) {
-            $query->where('user_id', $id);
-        } elseif ($modelName && $id) {
-            $query->whereJsonContains('changes->id->new', $id);
+        if ($modelName && $id) {
+            if ($modelName === 'users') {
+                $query->where('user_id', $id);
+            } else{
+                $query->where('model_name', $modelName)
+                    ->whereJsonContains('changes->id->new', $id);
+            }
         }
 
         return $query->paginate(10);
@@ -90,7 +93,6 @@ class ActivityLog extends Model
         $groupedLogs = $paginatedLogs->getCollection()->groupBy(
             fn ($log) => Carbon::parse($log->updated_at)->format('F Y')
         );
-
         return [
             'paginatedLogs' => $paginatedLogs,
             'logs' => $groupedLogs,

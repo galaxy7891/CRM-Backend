@@ -69,6 +69,21 @@ class Deal extends Model
     }
 
     /**
+     * Get the deals's full name by ID.
+     *
+     * @param  int|string  $id
+     * @return string|null
+     */
+    public static function getDealsNameById($id)
+    {
+        $deals = self::select('name')
+            ->where('id', $id)
+            ->first();
+
+        return $deals ? $deals->name : null;
+    }
+
+    /**
      * Count Deals User by Stage
      * 
      * @param string $email

@@ -55,6 +55,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
+        $id = $user->id;
         if (!$user) {
             return new ApiResponseResource(
                 false,
@@ -65,10 +66,10 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'company_id' => 'sometimes|nullable|uuid',
-            'email' => 'sometimes|required|email|unique:users,email',
+            'email' => "sometimes|required|email|unique:users,email,$id",
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique:users,phone',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
             'gender' => 'sometimes|nullable|in:male,female,other',
