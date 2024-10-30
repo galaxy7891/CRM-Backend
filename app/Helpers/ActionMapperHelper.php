@@ -36,9 +36,9 @@ class ActionMapperHelper
     {
         $modelsMapping = [
             'users' => 'karyawan',
-            'companies' => 'perusahaan karyawan',
+            'companies' => 'perusahaan Karyawan',
             'products' => 'produk',
-            'organizations' => 'perusahaan pelanggan',
+            'organizations' => 'perusahaan Kontak',
             'user_invitations' => 'karyawan',
             'leads' => 'leads',
             'contact' => 'kontak',
@@ -104,7 +104,7 @@ class ActionMapperHelper
                 'name' => 'nama deals',
                 'deals_customer' => 'nama pelanggan',
                 'description' => 'deskripsi',
-                'tag' => 'tag',  /////
+                'tag' => 'tag',
                 'stage' => 'tahapan',
                 'open_date' => 'tanggal pembukaan',
                 'close_date' => 'tanggal penutupan',
@@ -170,17 +170,6 @@ class ActionMapperHelper
                 $userAdminName = User::getUserNameById($changes['id']['new']);
                 return 'Register akun ' . $userAdminName;
 
-            // case 'customers':
-            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
-            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
-
-            //     if ($customerCategory === 'leads') {
-            //         return $userName . ' menambahkan data Leads ' .  $customerName;
-            //     } elseif ($customerCategory === 'contact') {
-            //         return $userName . ' menambahkan data Kontak ' . $customerName;
-            //     }
-            //     break;
-
             case 'leads':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' menambahkan data Leads ' .  $customerName;
@@ -223,22 +212,11 @@ class ActionMapperHelper
                     return $userName . ' memperbarui data diri Karyawan ' . $employeeName;
                 }
 
-            // case 'customers':
-            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
-            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
-
-            //     if ($customerCategory === 'leads') {
-            //         return $userName . ' memperbarui data Leads ' . $customerName;
-            //     } elseif ($customerCategory === 'contact') {
-            //         return $userName . ' memperbarui data Kontak ' . $customerName;
-            //     }
-            //     break;
-
             case 'leads':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Leads ' . $customerName;
                 break;
-
+                
             case 'contact':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Kontak ' . $customerName;

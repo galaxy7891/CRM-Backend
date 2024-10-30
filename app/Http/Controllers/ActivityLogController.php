@@ -13,7 +13,7 @@ class ActivityLogController extends Controller
      * 
      * @param ActivityLogService $activityLogService
      */
-    public function indexUser(ActivityLogService $activityLogService, $modelName, Request $request)
+    public function index(ActivityLogService $activityLogService, $modelName, Request $request)
     {
         try {
             $id = $request->input('id');

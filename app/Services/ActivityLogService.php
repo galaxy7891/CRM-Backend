@@ -11,12 +11,14 @@ class ActivityLogService
     public function getDetailLogs()
     {
         $hiddenProperties = [
-            'id', 'password', 'company_id', 'google_id', 'organization_id', 'customer_id', 'deals_id', 'product_id', 'image_public_id', 'token', 'expired_at', 'created_at', 'updated_at', 'deleted_at'
+            'id', 'company_id', 'google_id', 'organization_id', 
+            'customer_id', 'deals_id', 'product_id', 'image_public_id', 
+            'token', 'expired_at', 'created_at', 'updated_at', 'deleted_at'
         ];
 
         $paginatedLogs = ActivityLog::getPaginatedLogs();
 
-        $result = $paginatedLogs->getCollection()->map(function ($log) use ($hiddenProperties){
+        $result = $paginatedLogs->getCollection()->map(function ($log) use ($hiddenProperties) {
             $changes = json_decode($log->changes, true);
             $actionTitle = ActionMapperHelper::mapActionTitle($log->action);
             $modelName = ActionMapperHelper::mapModels($log->model_name);
@@ -27,32 +29,39 @@ class ActivityLogService
 
             if (is_array($changes)) {
                 foreach ($changes as $key => $value) {
+                    if ($key === 'password') {
+                        $properties[] = 'Password';
+                        $before[] = $value['old'] ? '********' : null;
+                        $after[] = $value['new'] ? '********' : null;
+                        continue;
+                    }
+
                     if (!in_array($key, $hiddenProperties)) {
                         $mappedPropertyName = ActionMapperHelper::mapProperties($key, $log->model_name);
                         $properties[] = ucfirst($mappedPropertyName);
-            
-                        $before[] = array_key_exists('old', $value) ? $value['old'] : null;
-                        $after[] = array_key_exists('new', $value) ? $value['new'] : null;
+
+                        $before[] = $value['old'] ?? null;
+                        $after[] = $value['new'] ?? null;
                     }
                 }
             }
 
             return [
-                'activities' => "{$actionTitle} " . ucfirst($modelName),
-                'datetime' => $log->updated_at->format('d-m-Y H:i:s'),
-                'owner' => "{$log->user->email}",
+                'activities' => "{$actionTitle} Data " . ucfirst($modelName),
                 'properties' => $properties,
                 'before' => $before,
-                'after' => $after
+                'after' => $after,
+                'datetime' => $log->updated_at->format('d-m-Y H:i:s'),
+                'owner' => "{$log->user->email}",
             ];
         });
 
-        return array_merge(
-            $paginatedLogs->toArray(), 
-            ['data' => $result]
-        );
+        $paginatedLogsArray = $paginatedLogs->toArray();
+        $paginatedLogsArray['data'] = $result;
+
+        return $paginatedLogsArray;
     }
-    
+
     public function getFormattedLogsTest(string $modelName = null, string $id = null)
     {
         $groupedLogsData = ActivityLog::getLogsGroupedByMonthForModel($modelName, $id);
