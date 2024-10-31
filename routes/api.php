@@ -46,15 +46,15 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('/dashboard', [UserController::class, 'getSummary']);
 
         Route::post('/import/{type}', [ImportController::class, 'import']);
-        
+
         Route::get('/activity/log/{type}', [ActivityLogController::class, 'index']);
         Route::get('/detail/activity/log', [ActivityLogController::class, 'detail']);
-        
+
         Route::get('/user', [UserController::class, 'show']);
         Route::post('/user', [UserController::class, 'update']);
         Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
         Route::delete('/user', [UserController::class, 'destroy']);
-        
+
         Route::get('/companies', [CompaniesController::class, 'index']);
 
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
@@ -62,26 +62,26 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/leads', [CustomerController::class, 'storeLeads']);
         Route::post('/leads/{leadsId}', [CustomerController::class, 'updateLeads']);
         Route::post('/leads/convert/{leadsId}', [CustomerController::class, 'convert']);
-        Route::delete('/leads/{leadsId}', [CustomerController::class, 'destroyLeads']);
+        Route::delete('/leads', [CustomerController::class, 'destroyLeads']);
 
-        Route::get('/contacts', [CustomerController::class, 'indexContact']);
-        Route::get('/contacts/{contactId}', [CustomerController::class, 'showContact']);
-        Route::post('/contacts', [CustomerController::class, 'storeContact']);
-        Route::post('/contacts/{contactId}', [CustomerController::class, 'updateContact']);
-        Route::delete('/contacts/{contactId}', [CustomerController::class, 'destroyContact']);
+        Route::get('/contact', [CustomerController::class, 'indexContact']);
+        Route::get('/contact/{contactId}', [CustomerController::class, 'showContact']);
+        Route::post('/contact', [CustomerController::class, 'storeContact']);
+        Route::post('/contact/{contactId}', [CustomerController::class, 'updateContact']);
+        Route::delete('/contact', [CustomerController::class, 'destroyContact']);
 
         Route::get('/organization', [OrganizationController::class, 'index']);
         Route::get('/organization/{organizationId}', [OrganizationController::class, 'show']);
         Route::post('/organization', [OrganizationController::class, 'store']);
         Route::post('/organization/{organizationId}', [OrganizationController::class, 'update']);
         Route::delete('/organization', [OrganizationController::class, 'destroy']);
-        
+
         Route::get('/products', [ProductController::class, 'index']);
         Route::get('/products/{productId}', [ProductController::class, 'show']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{productsId}', [ProductController::class, 'update']);
-        Route::delete('/products', [ProductController::class, 'destroy']); 
-        Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']); 
+        Route::delete('/products', [ProductController::class, 'destroy']);
+        Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']);
 
         Route::apiResource('/deals', DealController::class);
 
