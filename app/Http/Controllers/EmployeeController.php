@@ -18,14 +18,22 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = User::query();
-
-            $users = $this->applyFilters($request, $query);
+            $user = auth()->user();
+            $query = User::where('company_id', $user->company_id);
+            
+            $employee = $this->applyFilters($request, $query);
+            if (!$employee) {
+                return new ApiResponseResource(
+                    false,
+                    'Data karyawan tidak ditemukan',
+                    null
+                );
+            }
 
             return new ApiResponseResource(
                 true,
                 'Daftar Karyawan',
-                $users
+                $employee
             );
             
         } catch (\Exception $e) {
@@ -35,22 +43,6 @@ class EmployeeController extends Controller
                 null
             );
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -160,26 +152,31 @@ class EmployeeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($employeeId)
+    public function destroy(Request $request)
     {
-        try {
+        
+        $id = $request->input('id', []);
+        if (empty($id)) {
+            return new ApiResponseResource(
+                true,
+                "Pilih data yang ingin dihapus terlebih dahulu",
+                null
+            );
+        }
 
-            $user = User::find($employeeId);
-            if (!$user) {
+        try {
+            $deletedCount = User::whereIn('id', $id)->delete();
+
+            if ($deletedCount > 0) {
                 return new ApiResponseResource(
-                    false,
-                    'Karyawan tidak ditemukan',
+                    true,
+                    $deletedCount . ' data karyawan berhasil dihapus',
                     null
                 );
             }
-
-            $first_name = $user->first_name;
-            $last_name = $user->last_name;
-            $user->delete();
-
             return new ApiResponseResource(
-                true,
-                "Karyawan {$first_name} {$last_name} Berhasil Dihapus!",
+                false,
+                'Data karyawan tidak ditemukan',
                 null
             );
 

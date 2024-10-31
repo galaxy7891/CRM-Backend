@@ -21,6 +21,13 @@ class ProductController extends Controller
             $query = Product::query();
             
             $product = $this->applyFilters($request, $query);
+            if (!$product) {
+                return new ApiResponseResource(
+                    false,
+                    'Data data produk tidak ditemukan',
+                    null
+                );
+            }
 
             return new ApiResponseResource(
                 true,
@@ -255,31 +262,36 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($productId)
-    {
-        $product = Product::find($productId);
-        if (!$product) {
+    public function destroy(Request $request)
+    { 
+        $id = $request->input('id', []);
+        if (empty($id)) {
             return new ApiResponseResource(
-                false, 
-                'Data  produk tidak ditemukan',
+                true,
+                "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
-
+        
         try {
-            $name = $product->name;
-            $product = Product::deleteProduct($productId);
+            $deletedCount = Product::whereIn('id', $id)->delete();
+            if ($deletedCount > 0) {
+                return new ApiResponseResource(
+                    true,
+                    $deletedCount . ' data produk berhasil dihapus',
+                    null
+                );
+            }
 
-            // Return response with first and last name 
             return new ApiResponseResource(
-                true,
-                "Data produk {$name} berhasil dihapus",
+                false,
+                'Data produk tidak ditemukan',
                 null
             );
-
+ 
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );

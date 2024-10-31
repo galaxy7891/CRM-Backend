@@ -93,13 +93,11 @@ class Company extends Model
         $company = self::findOrFail($companyId);
 
         $company->update([
+            'name' => $dataCompany['name']?? $company->name,
+            'industry' => $dataCompany['industry']?? $company->industry,
             'email' => $dataCompany['email'] ?? $company->email,
-            'first_name' => $dataCompany['first_name'] ?? $company->first_name,
-            'last_name' => $dataCompany['last_name'] ?? $company->last_name,
             'phone' => $dataCompany['phone'] ?? $company->phone,
-            'job_position' => $dataCompany['job_position'] ?? $company->job_position,
-            'role' => $dataCompany['role'] ?? $company->role,
-            'gender' => $dataCompany['gender'] ?? $company->gender,
+            'website' => $dataCompany['website'] ?? $company->website,
         ]);
 
         return $company;

@@ -24,7 +24,7 @@ class CustomerController extends Controller
         try {
             $user = auth()->user();
             $query = Customer::where('customerCategory', 'leads');
-
+            
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
             }
@@ -56,7 +56,7 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Customer::where('customerCategory', 'leads');
+            $query = Customer::where('customerCategory', 'contact');
 
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
@@ -66,7 +66,7 @@ class CustomerController extends Controller
 
             return new ApiResponseResource(
                 true,
-                'Daftar contact',
+                'Daftar kontak',
                 $contact
             );
         
@@ -635,35 +635,30 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroyLeads($leadsId)
+    public function destroyLeads(Request $request)
     {
-        try {
-            $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-
-            if (!$customer) {
-                return new ApiResponseResource(
-                    false,
-                    'Data leads tidak ditemukan',
-                    null
-                );
-            }
-
-            $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->email) {
-                return new ApiResponseResource(
-                    false,
-                    'Anda tidak memiliki akses untuk menghapus data leads ini!',
-                    null
-                );
-            }
-
-            $first_name = $customer->first_name;
-            $last_name = $customer->last_name;
-            $customer->delete();
-
+        $id = $request->input('id', []);
+        if (empty($id)) {
             return new ApiResponseResource(
                 true,
-                'Data leads ' . ucfirst($first_name) . ' ' . ucfirst($last_name) . ' berhasil dihapus!',
+                "Pilih data yang ingin dihapus terlebih dahulu",
+                null
+            );
+        }
+
+        try {
+            $deletedCount = Customer::whereIn('id', $id)->delete();
+            if ($deletedCount > 0) {
+                return new ApiResponseResource(
+                    true,
+                    $deletedCount . ' data leads berhasil dihapus',
+                    null
+                );
+            }
+
+            return new ApiResponseResource(
+                false,
+                'Data leads tidak ditemukan',
                 null
             );
 
@@ -679,35 +674,30 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroyContact($contactId)
+    public function destroyContact(Request $request)
     {
-        try {
-            $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
-
-            if (!$customer) {
-                return new ApiResponseResource(
-                    false,
-                    'Data contact tidak ditemukan',
-                    null
-                );
-            }
-
-            $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->email) {
-                return new ApiResponseResource(
-                    false,
-                    'Anda tidak memiliki akses untuk menghapus data contact ini!',
-                    null
-                );
-            }
-
-            $first_name = $customer->first_name;
-            $last_name = $customer->last_name;
-            $customer->delete();
-
+        $id = $request->input('id', []);
+        if (empty($id)) {
             return new ApiResponseResource(
                 true,
-                'Data contact ' . ucfirst($first_name) . ' ' . ucfirst($last_name) . ' berhasil dihapus!',
+                "Pilih data yang ingin dihapus terlebih dahulu",
+                null
+            );
+        }
+        
+        try {
+            $deletedCount = Customer::whereIn('id', $id)->delete();
+            if ($deletedCount > 0) {
+                return new ApiResponseResource(
+                    true,
+                    $deletedCount . ' data kontak berhasil dihapus',
+                    null
+                );
+            }
+
+            return new ApiResponseResource(
+                false,
+                'Data kontak tidak ditemukan',
                 null
             );
 

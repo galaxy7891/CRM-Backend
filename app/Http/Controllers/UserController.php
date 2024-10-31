@@ -222,7 +222,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 null
             );
-        } 
+        }
     }
 
     /**
