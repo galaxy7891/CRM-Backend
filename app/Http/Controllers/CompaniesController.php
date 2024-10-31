@@ -17,11 +17,19 @@ class CompaniesController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Data karyawan tidak ditemukan',
+                null
+            );
+        }
+
         try {
-            $query = Company::query();
+            $query = Company::where('company_id', $user->company_id);
 
             $company = $this->applyFilters($request, $query);
-
             return new ApiResponseResource(
                 true,
                 'Daftar data perusahaan',
@@ -40,9 +48,11 @@ class CompaniesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $companyId)
+    public function update(Request $request)
     {
-        $company = Company::find($companyId);
+        $user = auth()->user();
+        $companyId = $user->company_id;
+        $company = Company::where('id', $companyId)->first();
         if (!$company) {
             return new ApiResponseResource(
                 false, 
@@ -52,10 +62,10 @@ class CompaniesController extends Controller
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => "sometimes|required|string|max:100|unique:company,name,$companyId",
+            'name' => "sometimes|required|string|max:100|unique:companies,name,$companyId",
             'industry' => 'sometimes|required|string|max:50',
-            'email' => "sometimes|nullable|email|unique:company,email,$companyId",
-            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:company,phone,$companyId",
+            'email' => "sometimes|nullable|email|unique:companies,email,$companyId",
+            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:companies,phone,$companyId",
             'website' => 'sometimes|nullable|string|max:255',
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',

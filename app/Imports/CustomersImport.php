@@ -108,6 +108,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 ];
                 $this->summaryData['total_data']++;
                 $this->summaryData['invalid_data']++;
+                continue;
             } else {
                 $rowMap[$rowKey] = $index;
             }

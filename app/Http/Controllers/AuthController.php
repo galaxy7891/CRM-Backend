@@ -112,7 +112,7 @@ class AuthController extends Controller
                 null,
             );
         }
-
+        
         try {
             $company = Company::createCompany($request->only(['name', 'industry']));
             User::createUser($request->all(), $company->id);

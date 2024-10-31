@@ -30,9 +30,17 @@ class OrganizationController extends Controller
             }
 
             $organizations = $this->applyFilters($request, $query);
+            if (!$organizations) {
+                return new ApiResponseResource(
+                    false,
+                    'Data perusahaan tidak ditemukan',
+                    null
+                );
+            }
+
             return new ApiResponseResource(
                 true,
-                'Daftar Organization',
+                'Daftar perusahaan',
                 $organizations
             );
 
@@ -260,42 +268,36 @@ class OrganizationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($organizationId)
+    public function destroy(Request $request)
     {
-        try {
-
-            $organization = Organization::find($organizationId);
-            if (!$organization) {
-                return new ApiResponseResource(
-                    false, 
-                    'Organization tidak ditemukan',
-                    null
-                );
-            }
-
-            $user = auth()->auth();
-            if ($user == 'employee' && $organization->owner !== $user->email) {
-                return new ApiResponseResource(
-                    false, 
-                    'Anda tidak memiliki akses untuk menghapus data organisasi ini!',
-                    null
-                );
-            }
-
-
-            // Delete the organization
-            $organization->delete();
-
-            // Return response with first and last name
+        $id = $request->input('id', []);
+        if (empty($id)) {
             return new ApiResponseResource(
                 true,
-                "Organization {$organization->name} Berhasil Dihapus!",
+                "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
+        }
+        
+        try {
+            $deletedCount = Organization::whereIn('id', $id)->delete();
+            if ($deletedCount > 0) {
+                return new ApiResponseResource(
+                    true,
+                    $deletedCount . ' data perusahaan berhasil dihapus',
+                    null
+                );
+            }
 
+            return new ApiResponseResource(
+                false,
+                'Data perusahaan tidak ditemukan',
+                null
+            );
+ 
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );

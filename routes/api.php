@@ -56,8 +56,6 @@ Route::group(['middleware' => 'api'], function () {
         Route::delete('/user', [UserController::class, 'destroy']);
         
         Route::get('/companies', [CompaniesController::class, 'index']);
-        Route::post('/companies/{companyId}', [CompaniesController::class, 'update']);
-        Route::post('/companies/logo/{companyId}', [CompaniesController::class, 'updateLogo']);
 
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
         Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
@@ -76,20 +74,23 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('/organization/{organizationId}', [OrganizationController::class, 'show']);
         Route::post('/organization', [OrganizationController::class, 'store']);
         Route::post('/organization/{organizationId}', [OrganizationController::class, 'update']);
-        Route::delete('/organization/{organizationId}', [OrganizationController::class, 'destroy']);
-
+        Route::delete('/organization', [OrganizationController::class, 'destroy']);
+        
         Route::get('/products', [ProductController::class, 'index']);
         Route::get('/products/{productId}', [ProductController::class, 'show']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{productsId}', [ProductController::class, 'update']);
-        Route::delete('/products/{productsId}', [ProductController::class, 'destroy']);
-        Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']);
+        Route::delete('/products', [ProductController::class, 'destroy']); 
+        Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']); 
 
         Route::apiResource('/deals', DealController::class);
 
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
             Route::post('/employee/{employeeId}', [EmployeeController::class, 'update']);
-            Route::delete('/employee/{id}', [EmployeeController::class, 'destroy']);
+            Route::delete('/employee', [EmployeeController::class, 'destroy']);
+
+            Route::post('/companies', [CompaniesController::class, 'update']);
+            Route::post('/companies/logo/{companyId}', [CompaniesController::class, 'updateLogo']);
         });
 
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin, admin'], function () {
