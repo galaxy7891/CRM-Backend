@@ -29,7 +29,6 @@ class CustomerSeeder extends Seeder
                 'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
                 'owner' => 'user_satu@gmail.com', // Same owner
                 'address' => 'Jl Kemayoran Baru',
-                'country' => 'Indonesia',
                 'province' => 'Jawa Tengah',
                 'city' => 'Kota Semarang',
                 'subdistrict' => 'Semarang Tengah',
@@ -52,7 +51,6 @@ class CustomerSeeder extends Seeder
                 'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
                 'owner' => 'user_satu@gmail.com', // Same owner
                 'address' => 'Jl Kemayoran Baru',
-                'country' => 'Indonesia',
                 'province' => 'Jawa Tengah',
                 'city' => 'Kota Semarang',
                 'subdistrict' => 'Semarang Tengah',
