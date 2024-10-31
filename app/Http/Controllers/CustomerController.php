@@ -23,7 +23,12 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
+            $company = $user->company_id;
             $query = Customer::where('customerCategory', 'leads');
+            
+            $query->whereHas('user', function ($ownerQuery) use ($user) {
+                $ownerQuery->where('company_id', $user->company_id);
+            });
             
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
@@ -57,6 +62,10 @@ class CustomerController extends Controller
         try {
             $user = auth()->user();
             $query = Customer::where('customerCategory', 'contact');
+
+            $query->whereHas('user', function ($ownerQuery) use ($user) {
+                $ownerQuery->where('company_id', $user->company_id);
+            });
 
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
