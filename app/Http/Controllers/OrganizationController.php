@@ -23,8 +23,12 @@ class OrganizationController extends Controller
     {
         try {
             $user = auth()->user();
-
             $query = Organization::query();
+
+            $query->whereHas('user', function ($ownerQuery) use ($user) {
+                $ownerQuery->where('company_id', $user->company_id);
+            });
+
             if ($user->role === 'employee') {
                 $query->where('owner', $user->email);
             }
@@ -207,6 +211,7 @@ class OrganizationController extends Controller
             'village' => 'sometimes|nullable|string|max:100',
             'zip_code' => 'sometimes|nullable|string|max:5',
             'address' => 'sometimes|nullable|string|max:100',
+            'description' => 'sometimes|nullable|string|max:200',
         ], [
             'name.required' => 'Nama organisasi tidak boleh kosong.',
             'name.unique' => 'Nama organisasi sudah terdaftar.',
@@ -239,6 +244,8 @@ class OrganizationController extends Controller
             'zip_code.max' => 'Kode pos maksimal 5 karakter.',
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+            'description.max' => 'Deskripsi maksimal 200 karakter.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

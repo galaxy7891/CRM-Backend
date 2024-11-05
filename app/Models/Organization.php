@@ -24,6 +24,7 @@ class Organization extends Model
         'status',
         'phone',
         'owner',
+        'description',
         'website',
         'address',
         'province',
@@ -44,12 +45,19 @@ class Organization extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
+     * Get the user that owns the organization.
      * Get the customers associated with the organization.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    
+     public function user()
+     {
+         return $this->belongsTo(User::class, 'owner', 'email');
+     }
+
     public function customers()
     {
         return $this->hasMany(Customer::class, 'organization_id', 'id');
@@ -97,7 +105,8 @@ class Organization extends Model
             'city' => $dataOrganization['city'] ?? null,
             'subdistrict' => $dataOrganization['subdistrict'] ?? null,
             'village' => $dataOrganization['village'] ?? null,
-            'zip_code' => $dataOrganization['zip_code'] ?? null
+            'zip_code' => $dataOrganization['zip_code'] ?? null,
+            'description' => $dataOrganization['description'] ?? null
         ]);
     }
 
@@ -118,6 +127,7 @@ class Organization extends Model
             'subdistrict' => $dataOrganization['subdistrict'] ?? $organization->subdistrict,
             'village' => $dataOrganization['village'] ?? $organization->village,
             'zip_code' => $dataOrganization['zip_code'] ?? $organization->zip_code,
+            'description' => $dataOrganization['description'] ?? $organization->description,
         ]);
 
         return $organization;

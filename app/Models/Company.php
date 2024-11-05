@@ -39,6 +39,7 @@ class Company extends Model
 
     /**
      * Get the users associated with the company.
+     * Get the products associated with the company.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers.
      * 
@@ -47,6 +48,10 @@ class Company extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'company_id', 'id');
+    }
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'company_id', 'id');
     }
 
     /**

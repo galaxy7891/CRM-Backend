@@ -62,7 +62,7 @@ class ActivityLogService
         return $paginatedLogsArray;
     }
 
-    public function getFormattedLogsTest(string $modelName = null, string $id = null)
+    public function getFormattedLogs(string $modelName = null, string $id = null)
     {
         $groupedLogsData = ActivityLog::getLogsGroupedByMonthForModel($modelName, $id);
         $paginatedLogs = $groupedLogsData['paginatedLogs'];

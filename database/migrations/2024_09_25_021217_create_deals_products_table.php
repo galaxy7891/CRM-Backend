@@ -12,6 +12,8 @@ class CreateDealsProductsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('product_id');
             $table->uuid('deals_id');
+            $table->integer('quantity')->nullable();
+            $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
             
             // Foreign Key Constraints
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

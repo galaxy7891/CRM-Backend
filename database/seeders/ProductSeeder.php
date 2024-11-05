@@ -16,6 +16,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614171004',
             'name' => 'Pensil',
+            'company_id'=> '123e4567-e89b-12d3-a456-426614174000',
             'category' => 'stuff',
             'code' => 'PEN-001',
             'quantity' => 10,
@@ -26,6 +27,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614172004',
             'name' => 'Pulpen',
+            'company_id'=> '123e4567-e89b-12d3-a456-426614174000',
             'category' => 'stuff',
             'code' => 'BOL-001',
             'quantity' => 10,
@@ -37,6 +39,7 @@ class ProductSeeder extends Seeder
         Product::create([
             'id' => '123e4567-e89b-12d3-a456-426614173004',
             'name' => 'Bantal',
+            'company_id'=> '123e4567-e89b-12d3-a456-426614174000',
             'category' => 'stuff',
             'code' => 'BAN-001',
             'quantity' => 10,

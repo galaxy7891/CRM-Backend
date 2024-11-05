@@ -12,6 +12,7 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
+            $table->uuid('company_id');
             $table->enum('category', ['stuff', 'service']);
             $table->string('code', 100)->nullable();
             $table->integer('quantity')->nullable();
@@ -22,6 +23,9 @@ class CreateProductsTable extends Migration
             $table->string('image_public_id', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();
+            
+            // Foreign Key Constraints
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
     }
 

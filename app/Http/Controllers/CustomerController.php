@@ -23,7 +23,6 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $company = $user->company_id;
             $query = Customer::where('customerCategory', 'leads');
             
             $query->whereHas('user', function ($ownerQuery) use ($user) {
@@ -61,7 +60,8 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Customer::where('customerCategory', 'contact');
+            $query = Customer::with(['organization:id,name'])
+                    ->where('customerCategory', 'contact');
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('company_id', $user->company_id);
@@ -108,7 +108,7 @@ class CustomerController extends Controller
             'subdistrict' => 'nullable|string|max:100',
             'village' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:5',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:200',
         ], [
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
@@ -143,6 +143,7 @@ class CustomerController extends Controller
             'zip_code.string' => 'Kode pos harus berupa teks.',
             'zip_code.max' => 'Kode pos maksimal 10 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
+            'description.max' => 'Deskripsi maksimal 200 karakter.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -193,7 +194,7 @@ class CustomerController extends Controller
             'subdistrict' => 'nullable|string|max:100',
             'village' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:5',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:200',
         ], [
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
@@ -228,6 +229,7 @@ class CustomerController extends Controller
             'address.string' => 'Alamat harus berupa teks.',
             'address.max' => 'Alamat maksimal 100 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
+            'description.max' => 'Deskripsi maksimal 200 karakter.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

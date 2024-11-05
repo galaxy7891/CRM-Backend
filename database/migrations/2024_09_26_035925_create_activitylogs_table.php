@@ -15,10 +15,10 @@ class CreateActivityLogsTable extends Migration
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->nullable();
+            $table->uuid('user_id');
             $table->string('model_name', 100);
             $table->string('action', 255);
-            $table->text('changes')->nullable();
+            $table->text('changes');
             $table->timestamps();
             $table->softDeletes();
 
