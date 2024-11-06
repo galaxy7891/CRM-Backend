@@ -13,7 +13,7 @@ class DealSeeder extends Seeder
      */
     public function run(): void
     {
-        $deal1 = Deal::create([
+        Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413400',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
@@ -28,14 +28,8 @@ class DealSeeder extends Seeder
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
         ]);
-        $deal1->products()->attach([
-            '123e4567-e89b-12d3-a456-426614171004' => [
-                'quantity' => 5,
-                'unit' => 'pcs'
-            ]
-        ]);
 
-        $deal2 = Deal::create([
+        Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413300',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
@@ -50,14 +44,8 @@ class DealSeeder extends Seeder
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
         ]);
-        $deal2->products()->attach([
-            '123e4567-e89b-12d3-a456-426614172004' => [
-                'quantity' => 5,
-                'unit' => 'pcs'
-            ]
-        ]);
         
-        $deal3 = Deal::create([
+        Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413200',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
@@ -74,14 +62,8 @@ class DealSeeder extends Seeder
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
         ]);
-        $deal3->products()->attach([
-            '123e4567-e89b-12d3-a456-426614172004' => [
-                'quantity' => 2,
-                'unit' => 'pcs'
-            ]
-        ]);
-
-        $deal4 = Deal::create([
+        
+        Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413100',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
@@ -95,12 +77,6 @@ class DealSeeder extends Seeder
             'payment_category' => 'once',
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
-        ]);
-        $deal4->products()->attach([
-            '123e4567-e89b-12d3-a456-426614173004' => [
-                'quantity' => 5,
-                'unit' => 'pcs'
-            ]
         ]);
     }
 }

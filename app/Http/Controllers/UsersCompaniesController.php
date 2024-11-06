@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
-use App\Models\Company;
+use App\Models\UsersCompany;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CompaniesController extends Controller
+class UsersCompaniesController extends Controller
 {
     use Filter;
 
@@ -21,19 +21,19 @@ class CompaniesController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data karyawan tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
 
         try {
-            $query = Company::where('company_id', $user->company_id);
+            $userCompany = UsersCompany::where('id', $user->user_company_id)
+                    ->first();
 
-            $company = $this->applyFilters($request, $query);
             return new ApiResponseResource(
                 true,
-                'Daftar data perusahaan',
-                $company
+                'Daftar data perusahaan user',
+                $userCompany
             );
 
         } catch (\Exception $e) {
@@ -51,21 +51,21 @@ class CompaniesController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
-        $companyId = $user->company_id;
-        $company = Company::where('id', $companyId)->first();
-        if (!$company) {
+        $userCompanyId = $user->user_company_id;
+        $userCompany = UsersCompany::where('id', $userCompanyId)->first();
+        if (!$userCompany) {
             return new ApiResponseResource(
                 false, 
-                'Data perusahaan tidak ditemukan.',
+                'Data perusahaan user tidak ditemukan.',
                 null
             );
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => "sometimes|required|string|max:100|unique:companies,name,$companyId",
+            'name' => "sometimes|required|string|max:100|unique:users_companies,name,$userCompanyId",
             'industry' => 'sometimes|required|string|max:50',
-            'email' => "sometimes|nullable|email|unique:companies,email,$companyId",
-            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:companies,phone,$companyId",
+            'email' => "sometimes|nullable|email|unique:users_companies,email,$userCompanyId",
+            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:users_companies,phone,$userCompanyId",
             'website' => 'sometimes|nullable|string|max:255',
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',
@@ -91,11 +91,11 @@ class CompaniesController extends Controller
         }
         
         try {
-            $company = Company::updateCompany($request->all(), $companyId);
+            $userCompany = UsersCompany::updateCompany($request->all(), $userCompanyId);
             return new ApiResponseResource(
                 true,
-                "Data perusahaan {$company->name} berhasil diubah",
-                $company
+                "Data perusahaan {$userCompany->name} berhasil diubah",
+                $userCompany
             );
 
         } catch (\Exception $e) {
@@ -110,13 +110,13 @@ class CompaniesController extends Controller
     /**
      * Update logo profile in cloudinary.
      */
-    public function updateLogo(Request $request, $companyId)
+    public function updateLogo(Request $request, $userCompanyId)
     {
-        $company = Company::find($companyId);
-        if (!$company) {
+        $userCompany = UsersCompany::find($userCompanyId);
+        if (!$userCompany) {
             return new ApiResponseResource(
                 false, 
-                'Data perusahaan tidak ditemukan',
+                'Data perusahaan karyawan tidak ditemukan',
                 null
             );
         }
@@ -138,11 +138,11 @@ class CompaniesController extends Controller
         }
 
         try {
-            $logoData = $company->updateLogo($request->file('logo'), $companyId);
+            $logoData = $userCompany->updateLogo($request->file('logo'), $userCompanyId);
 
             return new ApiResponseResource(
                 true,
-                "Logo perusahaan {$company->name} berhasil diperbarui",
+                "Logo perusahaan {$userCompany->name} berhasil diperbarui",
                 $logoData
             );
         

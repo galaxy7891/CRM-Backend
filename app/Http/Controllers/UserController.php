@@ -6,7 +6,7 @@ use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateForgetPassword;
 use App\Models\Customer;
 use App\Models\Deal;
-use App\Models\Organization;
+use App\Models\CustomersCompany;
 use App\Models\PasswordResetToken;
 use App\Models\User;
 
@@ -28,7 +28,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
@@ -59,13 +59,13 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
 
         $validator = Validator::make($request->all(), [
-            'company_id' => 'sometimes|nullable|uuid',
+            'user_company_id' => 'sometimes|nullable|uuid',
             'email' => "sometimes|required|email|unique:users,email,$id",
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
@@ -74,7 +74,7 @@ class UserController extends Controller
             'role' => 'sometimes|required|in:super_admin,admin,employee',
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
-            'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
+            'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
@@ -185,7 +185,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
@@ -234,7 +234,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
@@ -418,7 +418,7 @@ class UserController extends Controller
         $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
         $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
 
-        $organizationsCount = Organization::countOrganization($user->email);
+        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email);
 
         $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
         $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
@@ -440,7 +440,7 @@ class UserController extends Controller
                 'activities' => [
                     'leads' => $leadsCount,
                     'contacts' => $contactsCount,
-                    'organizations' => $organizationsCount,
+                    'customers_companies' => $customersCompanyCount,
                 ],
                 'deals_pipeline' => [
                     'count' => [

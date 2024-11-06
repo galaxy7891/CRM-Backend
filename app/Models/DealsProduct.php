@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DealProduct extends Model
+class DealsProduct extends Model
 {
-    use HasFactory;
-
+    public $timestamps = false;
+    
     /**
      * The attributes that are mass assignable.
      * 
@@ -18,5 +18,7 @@ class DealProduct extends Model
         'id',
         'deals_id',
         'product_id',
+        'quantity',
+        'unit'
     ];
 }

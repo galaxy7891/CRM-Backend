@@ -100,7 +100,6 @@ class UserInvitationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'invited_by' => 'required',
             'email' => 'required|email|unique:users,email|max:100',
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|min:8|same:password',
@@ -109,7 +108,6 @@ class UserInvitationController extends Controller
             'phone' => 'required|numeric|max_digits:15|unique:users,phone',
         ], [
             'token.required' => 'Token tidak boleh kosong',
-            'invited_by.required' => 'Email inviter tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
@@ -147,10 +145,10 @@ class UserInvitationController extends Controller
 
         try {
             $inviter = $invitation->inviter;
-            $company_id = $inviter?->company_id;
+            $useruser_company_id = $inviter?->user_company_id;
 
             $dataUser = [
-                'company_id' => $company_id,
+                'user_company_id' => $useruser_company_id,
                 'email' => $request->email,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -158,7 +156,7 @@ class UserInvitationController extends Controller
                 'phone' => $request->phone,
             ];
 
-            $user = User::createUser($dataUser, $company_id);
+            $user = User::createUser($dataUser, $useruser_company_id);
             $invitation->updateStatus('accepted');
 
             return new ApiResponseResource(

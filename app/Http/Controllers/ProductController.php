@@ -24,7 +24,7 @@ class ProductController extends Controller
             if (!$product) {
                 return new ApiResponseResource(
                     false,
-                    'Data data produk tidak ditemukan',
+                    'Data produk tidak ditemukan',
                     null
                 );
             }

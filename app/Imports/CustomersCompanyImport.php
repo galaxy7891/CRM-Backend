@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 
-class OrganizationsImport implements ToCollection, WithHeadingRow
+class CustomersCompanyImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
@@ -173,12 +173,12 @@ class OrganizationsImport implements ToCollection, WithHeadingRow
 
             // Validasi data menggunakan Validator
             $validator = Validator::make($row->toArray(), [
-                'nama_perusahaan' => 'required|unique:organizations,name|string|max:100',
+                'nama_perusahaan' => 'required|unique:customers_companies,name|string|max:100',
                 'jenis_industri' => 'nullable|string|max:50',
                 'status' => 'required|in:hot,warm,cold',
-                'email' => 'nullable|email|unique:organizations,email|max:100',
-                'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
-                'website' => 'nullable|unique:organizations,website|string|max:255',
+                'email' => 'nullable|email|unique:customers_companies,email|max:100',
+                'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
+                'website' => 'nullable|unique:customers_companies,website|string|max:255',
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
                 'kecamatan' => 'nullable|string|max:100',

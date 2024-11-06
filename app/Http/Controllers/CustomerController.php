@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
@@ -26,7 +27,7 @@ class CustomerController extends Controller
             $query = Customer::where('customerCategory', 'leads');
             
             $query->whereHas('user', function ($ownerQuery) use ($user) {
-                $ownerQuery->where('company_id', $user->company_id);
+                $ownerQuery->where('user_company_id', $user->user_company_id);
             });
             
             if ($user->role == 'employee') {
@@ -34,6 +35,18 @@ class CustomerController extends Controller
             }
 
             $leads = $this->applyFilters($request, $query);
+            if ($leads->isEmpty()) {
+                return new ApiResponseResource(
+                    false,
+                    'Data leads tidak ditemukan',
+                    null
+                );
+            }
+            
+            $leads->getCollection()->transform(function ($lead) {
+                $lead->status = ActionMapperHelper::mapStatus($lead->status);
+                return $lead;
+            });
 
             return new ApiResponseResource(
                 true,
@@ -60,23 +73,35 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Customer::with(['organization:id,name'])
+            $query = Customer::with(['customers_companies:id,name'])
                     ->where('customerCategory', 'contact');
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
-                $ownerQuery->where('company_id', $user->company_id);
+                $ownerQuery->where('user_company_id', $user->user_company_id);
             });
 
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
             }
 
-            $contact = $this->applyFilters($request, $query);
+            $contacts = $this->applyFilters($request, $query);
+            if ($contacts->isEmpty()) {
+                return new ApiResponseResource(
+                    false,
+                    'Data kontak tidak ditemukan',
+                    null
+                );
+            }
 
+            $contacts->getCollection()->transform(function ($contact) {
+                $contact->status = ActionMapperHelper::mapStatus($contact->status);
+                return $contact;
+            });
+            
             return new ApiResponseResource(
                 true,
                 'Daftar kontak',
-                $contact
+                $contacts
             );
         
         } catch (\Exception $e) {
@@ -186,7 +211,7 @@ class CustomerController extends Controller
             'birthdate' => 'nullable|date',
             'email' => 'nullable|email|unique:customers,email|max:100',
             'job' => 'nullable|string|max:100',
-            'organization_id' => 'nullable|uuid',
+            'customers_company_id' => 'nullable|uuid',
             'owner' => 'required|email|max:100',
             'address' => 'nullable|string|max:100',
             'province' => 'nullable|string|max:100',
@@ -212,7 +237,7 @@ class CustomerController extends Controller
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'customers_company_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
@@ -247,7 +272,7 @@ class CustomerController extends Controller
             $customer = Customer::createCustomer($dataContact);
             return new ApiResponseResource(
                 true,
-                'Data contact '. ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
+                'Data kontak '. ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
 
@@ -266,9 +291,9 @@ class CustomerController extends Controller
     public function showLeads($leadsId)
     {
         try {
-            $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
+            $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
             
-            if (!$customer) {
+            if (!$leads) {
                 return new ApiResponseResource(
                     false,
                     'Data leads tidak ditemukan!',
@@ -277,7 +302,7 @@ class CustomerController extends Controller
             }
 
             $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->email) {
+            if ($user->role == 'employee' && $leads->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
                     'Anda tidak memiliki akses untuk menampilkan data leads ini!',
@@ -285,10 +310,12 @@ class CustomerController extends Controller
                 );
             }
 
+            $leads->status = ActionMapperHelper::mapStatus($leads->status);
+
             return new ApiResponseResource(
                 true,
                 'Data leads',
-                $customer
+                $leads
             );
 
         } catch (\Exception $e) {
@@ -306,29 +333,31 @@ class CustomerController extends Controller
     public function showContact($contactId)
     {
         try {
-            $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
+            $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
             
-            if (!$customer) {
+            if (!$contacts) {
                 return new ApiResponseResource(
                     false,
-                    'Data contact tidak ditemukan!',
+                    'Data kontak tidak ditemukan!',
                     null
                 );
             }
 
             $user = auth()->user();
-            if ($user->role == 'employee' && $customer->owner !== $user->email) {
+            if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
-                    'Anda tidak memiliki akses untuk menampilkan data contact ini!',
+                    'Anda tidak memiliki akses untuk menampilkan data kontak ini!',
                     null
                 );
             }
 
+            $contacts->status = ActionMapperHelper::mapStatus($contacts->status);
+            
             return new ApiResponseResource(
                 true,
-                'Data contact',
-                $customer
+                'Data kontak',
+                $contacts
             );
 
         } catch (\Exception $e) {
@@ -345,9 +374,8 @@ class CustomerController extends Controller
      */
     public function updateLeads(Request $request, $leadsId)
     {
-        $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-        
-        if (!$customer) {
+        $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
+        if (!$leads) {
             return new ApiResponseResource(
                 false,
                 'Data leads tidak ditemukan',
@@ -356,7 +384,7 @@ class CustomerController extends Controller
         }
 
         $user = auth()->user();
-        if ($user->role == 'employee' && $customer->owner !== $user->email) {
+        if ($user->role == 'employee' && $leads->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
                 'Anda tidak memiliki akses untuk mengubah data leads ini!',
@@ -372,7 +400,7 @@ class CustomerController extends Controller
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'organization_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|uuid',
             'owner' => 'sometimes|required|email|max:100',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -398,7 +426,7 @@ class CustomerController extends Controller
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'customers_company_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
@@ -425,11 +453,11 @@ class CustomerController extends Controller
         }
 
         try {
-            $customer = Customer::updateCustomer($request->all(), $leadsId);
+            $leads = Customer::updateCustomer($request->all(), $leadsId);
             return new ApiResponseResource(
                 true,
                 'Data leads berhasil diubah!',
-                $customer
+                $leads
             );
 
         } catch (\Exception $e) {
@@ -446,21 +474,21 @@ class CustomerController extends Controller
      */
     public function updateContact(Request $request, $contactId)
     {
-        $customer = Customer::findCustomerByIdCategory($contactId, 'contact');
+        $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
         
-        if (!$customer) {
+        if (!$contacts) {
             return new ApiResponseResource(
                 false,
-                'Data contact tidak ditemukan',
+                'Data kontak tidak ditemukan',
                 null
             );
         }
 
         $user = auth()->user();
-        if ($user->role == 'employee' && $customer->owner !== $user->email) {
+        if ($user->role == 'employee' && $contacts->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
-                'Anda tidak memiliki akses untuk mengubah data contact ini!',
+                'Anda tidak memiliki akses untuk mengubah data kontak ini!',
                 null
             );
         }
@@ -473,7 +501,7 @@ class CustomerController extends Controller
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'organization_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|uuid',
             'owner' => 'sometimes|required|email|max:100',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -499,7 +527,7 @@ class CustomerController extends Controller
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'customers_company_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
@@ -526,11 +554,11 @@ class CustomerController extends Controller
         }
 
         try {
-            $customer = Customer::updateCustomer($request->all(), $contactId);
+            $contacts = Customer::updateCustomer($request->all(), $contactId);
             return new ApiResponseResource(
                 true,
-                'Data contact berhasil diubah!',
-                $customer
+                'Data kontak berhasil diubah!',
+                $contacts
             );
 
         } catch (\Exception $e) {
@@ -547,9 +575,8 @@ class CustomerController extends Controller
      */
     public function convert(Request $request, $leadsId)
     {
-        $customer = Customer::findCustomerByIdCategory($leadsId, 'leads');
-        
-        if (!$customer) {
+        $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
+        if (!$leads) {
             return new ApiResponseResource(
                 false,
                 'Data leads tidak ditemukan',
@@ -558,7 +585,7 @@ class CustomerController extends Controller
         }
 
         $user = auth()->user();
-        if ($user->role == 'employee' && $customer->owner !== $user->email) {
+        if ($user->role == 'employee' && $leads->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
                 'Anda tidak memiliki akses untuk konversi data leads ini!',
@@ -574,7 +601,7 @@ class CustomerController extends Controller
             'status' => 'sometimes|required|in:hot,warm,cold',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'organization_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|uuid',
             'owner' => 'sometimes|required|email|max:100',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -600,7 +627,7 @@ class CustomerController extends Controller
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'organization_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
+            'customers_company_id.uuid' => 'ID organisasi harus berupa UUID yang valid.',
             'owner.required' => 'Pemilik kontak tidak boleh kosong.',
             'owner.email' => 'Pemilik kontak harus berupa email valid.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
@@ -627,11 +654,11 @@ class CustomerController extends Controller
         }
         
         try {
-            $customer = Customer::convert($request->all(), $leadsId);
+            $leads = Customer::convert($request->all(), $leadsId);
             return new ApiResponseResource(
                 true,
                 'Data leads berhasil di konversi ke kontak',
-                $customer
+                $leads
             );
 
         } catch (\Exception $e) {

@@ -10,7 +10,7 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('company_id')->nullable();
+            $table->uuid('user_company_id')->nullable();
             $table->string('google_id', 255)->nullable();
             $table->string('email', 100)->unique();
             $table->string('first_name', 50);
@@ -26,7 +26,7 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('user_company_id')->references('id')->on('users_companies')->onDelete('cascade');
         });
     }
 

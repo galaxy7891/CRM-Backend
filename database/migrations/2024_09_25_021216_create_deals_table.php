@@ -13,7 +13,6 @@ class CreateDealsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('customer_id');
             $table->string('name', 100);
-            $table->string('deals_customer', 100);
             $table->text('description')->nullable();
             $table->string('tag', 255)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);

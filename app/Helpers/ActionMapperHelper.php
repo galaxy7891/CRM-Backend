@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Models\Company;
+use App\Models\UsersCompany;
 use App\Models\Customer;
 use App\Models\Deal;
 use App\Models\Product;
@@ -36,9 +36,9 @@ class ActionMapperHelper
     {
         $modelsMapping = [
             'users' => 'karyawan',
-            'companies' => 'perusahaan Karyawan',
+            'users_companies' => 'perusahaan User',
             'products' => 'produk',
-            'organizations' => 'perusahaan Kontak',
+            'customers_companies' => 'perusahaan Pelanggan',
             'user_invitations' => 'karyawan',
             'leads' => 'leads',
             'contact' => 'kontak',
@@ -73,8 +73,8 @@ class ActionMapperHelper
         ];
         
         $modelSpecificMapping = [
-            'companies' => [
-                'name' => 'nama perusahaan',
+            'users_companies' => [
+                'name' => 'nama perusahaan user',
                 'image_url' => 'foto profil perusahaan',
             ],
             'user_invitations' => [
@@ -102,7 +102,6 @@ class ActionMapperHelper
             ],
             'deals' => [
                 'name' => 'nama deals',
-                'deals_customer' => 'nama pelanggan',
                 'description' => 'deskripsi',
                 'tag' => 'tag',
                 'stage' => 'tahapan',
@@ -114,7 +113,7 @@ class ActionMapperHelper
                 'payment_category' => 'kategori pembayaran',
                 'payment_duration' => 'durasi pembayaran',
             ],
-            'organizations' => [
+            'customers_companies' => [
                 'name' => 'nama perusahaan',
             ],
             'products' => [
@@ -133,6 +132,20 @@ class ActionMapperHelper
         }
     
         return $commonMapping[$propertiesName] ?? $propertiesName;
+    }
+
+    public static function mapStatus($status)
+    {
+        switch ($status) {
+            case 'cold':
+                return 'Rendah';
+            case 'warm':
+                return 'Sedang';
+            case 'hot':
+                return 'Tinggi';
+            default:
+                return $status;
+        }
     }
 
     public static function mapDescription($log, array $changes, string $modelName): string
@@ -158,13 +171,13 @@ class ActionMapperHelper
     private static function mapCreateDescription($log, string $modelName, array $changes, string $userName): string
     {
         switch ($modelName) {
-            case 'companies':
-                $companiesName = Company::getCompaniesNameById($log->changes['id']['new']);
-                return 'Perusahaan ' . $companiesName . ' dibuat oleh ' . $userName;
+            case 'users_companies':
+                $userCompaniesName = UsersCompany::getCompaniesNameById($log->changes['id']['new']);
+                return 'Perusahaan ' . $userCompaniesName . ' dibuat oleh ' . $userName;
 
             case 'user_invitations':
-                $companiesName = $log->user->company->name ??  '';
-                return $userName . ' mengundang ' . $changes['email']['new'] . ' untuk bergabung di Perusahaan ' . $companiesName;
+                $userCompaniesName = $log->user->company->name ??  '';
+                return $userName . ' mengundang ' . $changes['email']['new'] . ' untuk bergabung di Perusahaan ' . $userCompaniesName;
 
             case 'users':
                 $userAdminName = User::getUserNameById($changes['id']['new']);
@@ -185,7 +198,7 @@ class ActionMapperHelper
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
 
-            case 'organizations':
+            case 'customers_companies':
                 return $userName . ' menambahkan data Perusahaan ' . $changes['name']['new'];
 
             case 'products':
@@ -198,9 +211,9 @@ class ActionMapperHelper
     private static function mapUpdateDescription($log, string $modelName, array $changes, string $userName): string
     {
         switch ($modelName) {
-            case 'companies':
-                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
-                return $userName . ' memperbarui data Perusahaan ' . $companiesName;
+            case 'users_companies':
+                $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
+                return $userName . ' memperbarui data Perusahaan ' . $userCompaniesName;
 
             case 'users':
                 $isSelfUpdate = $log->user->id === ($changes['id']['new'] ?? null);
@@ -226,8 +239,8 @@ class ActionMapperHelper
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return self::mapDealsUpdateDescription($changes, $userName, $dealsName);
 
-            case 'organizations':
-                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
+            case 'customers_companies':
+                $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Perusahaan ' . $changes['name']['new'];
          
             case 'products': 
@@ -247,9 +260,9 @@ class ActionMapperHelper
     private static function mapDeleteDescription($log, string $modelName, array $changes, string $userName): string
     {
         switch ($modelName) {
-            case 'companies':
-                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
-                return 'Perusahaan ' . $companiesName . ' dihapus oleh ' . $userName;
+            case 'users_companies':
+                $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
+                return 'Perusahaan ' . $userCompaniesName . ' dihapus oleh ' . $userName;
 
             case 'users':
                 return $userName . ' menghapus akunnya';
@@ -279,9 +292,9 @@ class ActionMapperHelper
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return $userName . ' menghapus data Deals ' . $dealsName;
 
-            case 'organizations':
-                $companiesName = Company::getCompaniesNameById($changes['id']['new']);
-                return $userName . ' menghapus data Perusahaan ' . $companiesName;
+            case 'customers_companies':
+                $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
+                return $userName . ' menghapus data Perusahaan ' . $userCompaniesName;
 
             case 'products':
                 $productName = Product::getProductNameById($changes['id']['new']);

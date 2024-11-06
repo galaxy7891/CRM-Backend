@@ -28,7 +28,7 @@ class DealObserver
      */
     public function updated(Deal $deal): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($deal, 'deals', 'UPDATE');
+        $changes = ModelChangeLoggerHelper::getModelChanges($deal, 'deals', 'UPDATE'); 
 
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',

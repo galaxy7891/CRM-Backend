@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Company;
+use App\Models\UsersCompany;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
 
@@ -20,7 +20,6 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -29,7 +28,6 @@ class AuthController extends Controller
             'email.email' => 'Email harus valid',
             'password.required' => 'Password tidak boleh kosong',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -114,8 +112,8 @@ class AuthController extends Controller
         }
         
         try {
-            $company = Company::createCompany($request->only(['name', 'industry']));
-            User::createUser($request->all(), $company->id);
+            $userCompany = UsersCompany::createCompany($request->only(['name', 'industry']));
+            User::createUser($request->all(), $userCompany->id);
 
             $credentials = [
                 'email' => $request->email,
@@ -232,13 +230,23 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        $user = auth()->user();
         return new ApiResponseResource(
             true,
             'Token berhasil dibuat',
             [
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60
+                'expires_in' => auth()->factory()->getTTL() * 60,
+                'user' => [
+                   'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
+                   'email' => $user->email,
+                   'phone' => $user->phone,
+                   'job_position' => $user->job_position,
+                   'role' => $user->role,
+                   'gender' => $user->gender,
+                   'photo' => $user->image_url,
+                ]
             ],
         );
     }

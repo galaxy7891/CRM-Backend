@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
-use App\Models\Organization;
+use App\Models\CustomersCompany;
 use App\Traits\Filter;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class OrganizationController extends Controller
+class CustomersCompanyController extends Controller
 {
-
     use Filter;
     
     /**
@@ -23,29 +23,34 @@ class OrganizationController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Organization::query();
+            $query = CustomersCompany::query();
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
-                $ownerQuery->where('company_id', $user->company_id);
+                $ownerQuery->where('user_company_id', $user->user_company_id);
             });
 
             if ($user->role === 'employee') {
                 $query->where('owner', $user->email);
             }
 
-            $organizations = $this->applyFilters($request, $query);
-            if (!$organizations) {
+            $CustomersCompanies = $this->applyFilters($request, $query);
+            if (!$CustomersCompanies) {
                 return new ApiResponseResource(
                     false,
-                    'Data perusahaan tidak ditemukan',
+                    'Data perusahaan pelanggan tidak ditemukan',
                     null
                 );
             }
 
+            $CustomersCompanies->getCollection()->transform(function ($CustomersCompany) {
+                $CustomersCompany->status = ActionMapperHelper::mapStatus($CustomersCompany->status);
+                return $CustomersCompany;
+            });
+
             return new ApiResponseResource(
                 true,
-                'Daftar perusahaan',
-                $organizations
+                'Daftar perusahaan pelanggan',
+                $CustomersCompanies
             );
 
         } catch (\Exception $e) {
@@ -63,11 +68,11 @@ class OrganizationController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:organizations,name|string|max:100',
+            'name' => 'required|unique:customers_companies,name|string|max:100',
             'industry' => 'nullable|string|max:50',
             'status' => 'required|in:hot,warm,cold',
-            'email' => 'nullable|email|unique:organizations,email|max:100',
-            'phone' => 'nullable|numeric|max_digits:15|unique:organizations,phone',
+            'email' => 'nullable|email|unique:customers_companies,email|max:100',
+            'phone' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
             'website' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100',
             'province' => 'nullable|string|max:100',
@@ -118,11 +123,11 @@ class OrganizationController extends Controller
         }
 
         try {
-            $organization = Organization::createOrganization($request->all());
+            $CustomersCompany = CustomersCompany::createCustomersCompany($request->all());
             return new ApiResponseResource(
                 true,
-                "Data {$organization->name} Berhasil Ditambahkan!", 
-                $organization
+                "Data {$CustomersCompany->name} berhasil ditambahkan!", 
+                $CustomersCompany
             );
 
         } catch (\Exception $e) {
@@ -137,31 +142,33 @@ class OrganizationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($organizationId)
+    public function show($customersCompanyId)
     {
         try {
-            $organization = Organization::find($organizationId);
-            if (is_null($organization)) {
+            $CustomersCompany = CustomersCompany::find($customersCompanyId);
+            if (is_null($CustomersCompany)) {
                 return new ApiResponseResource(
                     false, 
-                    'Data Organisasi Tidak Ditemukan!',
+                    'Data perusahaan pelanggan tidak ditemukan!',
                     null
                 );
             }
 
             $user = auth()->user();
-            if ($user->role == 'employee' && $organization->owner !== $user->email) {
+            if ($user->role == 'employee' && $CustomersCompany->owner !== $user->email) {
                 return new ApiResponseResource(
                     false, 
-                    'Anda tidak memiliki akses untuk menampilkan data organisasi ini!',
+                    'Anda tidak memiliki akses untuk menampilkan data perusahaan pelanggan ini!',
                     null
                 );
             }
 
+            $CustomersCompany->status = ActionMapperHelper::mapStatus($CustomersCompany->status);
+
             return new ApiResponseResource(
                 true,
-                'Data Organisasi Ditemukan!',
-                $organization
+                'Data perusahaan pelanggan',
+                $CustomersCompany
             );
 
         } catch (\Exception $e) {
@@ -176,33 +183,33 @@ class OrganizationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $organizationId)
+    public function update(Request $request, $customersCompanyId)
     {
-        $organization = Organization::find($organizationId);
+        $CustomersCompany = CustomersCompany::find($customersCompanyId);
 
-        if (!$organization) {
+        if (!$CustomersCompany) {
             return new ApiResponseResource(
                 false, 
-                'Organization tidak ditemukan',
+                'Perusahaan pelanggan tidak ditemukan',
                 null
             );
         }
 
-        $user = auth()->auth();
-        if ($user == 'employee' && $organization->owner !== $user->email) {
+        $user = auth()->user();
+        if ($user == 'employee' && $CustomersCompany->owner !== $user->email) {
             return new ApiResponseResource(
                 false, 
-                'Anda tidak memiliki akses untuk mengubah data organisasi ini!',
+                'Anda tidak memiliki akses untuk mengubah data perusahaan pelanggan ini!',
                 null
             );
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|unique:organizations,name|string|max:100',
+            'name' => 'sometimes|required|unique:customers_companies,name|string|max:100',
             'industry' => 'sometimes|nullable|string|max:50',
             'status' => 'sometimes|required|in:hot,warm,cold',
-            'email' => "sometimes|nullable|email|unique:organizations,email,$organizationId|max:100",
-            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:organizations,phone,$organizationId",
+            'email' => "sometimes|nullable|email|unique:customers_companies,email,$customersCompanyId|max:100",
+            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:customers_companies,phone,$customersCompanyId",
             'website' => 'sometimes|nullable|string|max:255',
             'owner' => 'sometimes|required|email|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -256,11 +263,11 @@ class OrganizationController extends Controller
         }
 
         try {
-            $organization = Organization::updateOrganization($request->all(), $organizationId);
+            $CustomersCompany = CustomersCompany::updateCustomersCompany($request->all(), $customersCompanyId);
             return new ApiResponseResource(
                 true, 
-                'Data Organization Berhasil Diubah!',
-                $organization 
+                'Data perusahaan pelanggan berhasil diubah!',
+                $CustomersCompany 
             );
 
         } catch (\Exception $e) {
@@ -281,24 +288,24 @@ class OrganizationController extends Controller
         if (empty($id)) {
             return new ApiResponseResource(
                 true,
-                "Pilih data yang ingin dihapus terlebih dahulu",
+                "Pilih data perusahaan pelanggan yang ingin dihapus terlebih dahulu",
                 null
             );
         }
         
         try {
-            $deletedCount = Organization::whereIn('id', $id)->delete();
+            $deletedCount = CustomersCompany::whereIn('id', $id)->delete();
             if ($deletedCount > 0) {
                 return new ApiResponseResource(
                     true,
-                    $deletedCount . ' data perusahaan berhasil dihapus',
+                    $deletedCount . ' data perusahaan pelanggan berhasil dihapus',
                     null
                 );
             }
 
             return new ApiResponseResource(
                 false,
-                'Data perusahaan tidak ditemukan',
+                'Data perusahaan pelanggan tidak ditemukan',
                 null
             );
  

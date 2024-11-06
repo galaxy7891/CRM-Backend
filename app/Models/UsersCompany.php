@@ -7,7 +7,7 @@ use Cloudinary\Cloudinary;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Company extends Model
+class UsersCompany extends Model
 {
     use SoftDeletes, HasUuid;
 
@@ -47,11 +47,11 @@ class Company extends Model
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'company_id', 'id');
+        return $this->hasMany(User::class, 'user_company_id', 'id');
     }
     public function products()
     {
-        return $this->hasMany(Product::class, 'company_id', 'id');
+        return $this->hasMany(Product::class, 'user_company_id', 'id');
     }
 
     /**
@@ -62,11 +62,11 @@ class Company extends Model
      */
     public static function getCompaniesNameById($id)
     {
-        $company = self::select('name')
+        $userCompany = self::select('name')
             ->where('id', $id)
             ->first();
 
-        return $company ? $company->name : null;
+        return $userCompany ? $userCompany->name : null;
     }
 
     /**
@@ -90,34 +90,34 @@ class Company extends Model
      * Update company
      *
      * @param array $dataCompany
-     * @param array $companyId
+     * @param array $userCompanyId
      * @return Company
      */
-    public static function updateCompany(array $dataCompany, string $companyId) :self
+    public static function updateCompany(array $dataCompany, string $userCompanyId) :self
     {
-        $company = self::findOrFail($companyId);
+        $userCompany = self::findOrFail($userCompanyId);
 
-        $company->update([
-            'name' => $dataCompany['name']?? $company->name,
-            'industry' => $dataCompany['industry']?? $company->industry,
-            'email' => $dataCompany['email'] ?? $company->email,
-            'phone' => $dataCompany['phone'] ?? $company->phone,
-            'website' => $dataCompany['website'] ?? $company->website,
+        $userCompany->update([
+            'name' => $dataCompany['name']?? $userCompany->name,
+            'industry' => $dataCompany['industry']?? $userCompany->industry,
+            'email' => $dataCompany['email'] ?? $userCompany->email,
+            'phone' => $dataCompany['phone'] ?? $userCompany->phone,
+            'website' => $dataCompany['website'] ?? $userCompany->website,
         ]);
 
-        return $company;
+        return $userCompany;
     }
 
     /**
      * Update the logo of the companies.
      *
      * @param \Illuminate\Http\UploadedFile $logo
-     * @param string $companyId 
+     * @param string $userCompanyId 
      * @return array
      */
-    public function updateLogo($logo, string $companyId)
+    public function updateLogo($logo, string $userCompanyId)
     {
-        $comapny = self::findOrFail($companyId);
+        $comapny = self::findOrFail($userCompanyId);
 
         $cloudinary = new Cloudinary();
         if ($comapny->image_public_id) {
@@ -125,7 +125,7 @@ class Company extends Model
         }
 
         $uploadResult = $cloudinary->uploadApi()->upload($logo->getRealPath(), [
-            'folder' => 'companies',
+            'folder' => 'usercompanies',
         ]);
         $comapny->update([
             'image_url' => $uploadResult['secure_url'],

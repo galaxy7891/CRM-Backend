@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
+use App\Imports\CustomersCompanyImport;
 use App\Imports\CustomersImport;
-use App\Imports\OrganizationsImport;
 use App\Imports\ProductsImport;
 use App\Models\Customer;
-use App\Models\Organization;
+use App\Models\CustomersCompany;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,9 +40,9 @@ class ImportController extends Controller
                     $model = 'customer';
                     break;
 
-                case 'organizations':
-                    $import = new OrganizationsImport($user->email);
-                    $model = 'organization';
+                case 'customers_companies':
+                    $import = new CustomersCompanyImport($user->email);
+                    $model = 'customers_companies';
                     break;
 
                 case 'products':
@@ -91,8 +91,8 @@ class ImportController extends Controller
                         case 'customer':
                             Customer::createCustomer($data);
                             break;
-                        case 'organization':
-                            Organization::createOrganization($data);
+                        case 'customers_companies':
+                            CustomersCompany::createCustomersCompany($data);
                             break;
                         case 'product':
                             Product::createProduct($data);
@@ -102,7 +102,7 @@ class ImportController extends Controller
 
                 return new ApiResponseResource(
                     true,
-                    'Tidak ditemukan adanya data rusak.',
+                    'Berhasil import data!',
                     [
                         'file' => $originalFileName,
                         'data_type' => $model,
@@ -124,7 +124,7 @@ class ImportController extends Controller
                     'failedData' => $failedDataPaginated,
                 ]
             );
-
+        
         } catch(\Exception $e){
             return new ApiResponseResource(
                 false,

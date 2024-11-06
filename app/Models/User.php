@@ -22,7 +22,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'id',
-        'company_id',
+        'user_company_id',
         'google_id',
         'email',
         'first_name',
@@ -64,7 +64,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function company()
     {
-        return $this->belongsTo(Company::class,'company_id', 'id');
+        return $this->belongsTo(UsersCompany::class,'user_company_id', 'id');
     }
 
     /**
@@ -148,14 +148,14 @@ class User extends Authenticatable implements JWTSubject
      * Create a new user instance after a valid registration.
      *
      * @param array $dataUser
-     * @param string $companyId 
+     * @param string $userCompanyId 
      * @return User
      */
-    public static function createUser(array $dataUser, ?string $companyId): self
+    public static function createUser(array $dataUser, ?string $userCompanyId): self
     {
         return self::create([
             'google_id' => $dataUser['google_id'] ?? null,
-            'company_id' => $companyId ?? null,
+            'user_company_id' => $userCompanyId ?? null,
             'email' => $dataUser['email'],
             'first_name' => $dataUser['first_name'],
             'last_name' => $dataUser['last_name'] ?? null,
@@ -178,7 +178,7 @@ class User extends Authenticatable implements JWTSubject
         $user = self::findOrFail($userId);
 
         $user->update([
-            'company_id' => $dataUser['company_id'] ?? $user->company_id,
+            'user_company_id' => $dataUser['user_company_id'] ?? $user->user_company_id,
             'email' => $dataUser['email'] ?? $user->email,
             'first_name' => $dataUser['first_name'] ?? $user->first_name,
             'last_name' => $dataUser['last_name'] ?? $user->last_name,

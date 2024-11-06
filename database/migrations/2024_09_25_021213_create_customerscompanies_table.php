@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrganizationsTable extends Migration
+class CreateCustomersCompaniesTable extends Migration
 {
     public function up()
     {
-        Schema::create('organizations', function (Blueprint $table) {
+        Schema::create('customers_companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
             $table->string('industry', 50)->nullable();
@@ -34,6 +34,6 @@ class CreateOrganizationsTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('organizations');
+        Schema::dropIfExists('customers_companies');
     }
 }

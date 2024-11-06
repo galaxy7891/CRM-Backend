@@ -21,7 +21,6 @@ class Deal extends Model
         'id',
         'customer_id',
         'name',
-        'deals_customer',
         'description',
         'tag',
         'stage',
@@ -66,6 +65,18 @@ class Deal extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
+    }
+
+    /**
+     * Get the deals's by ID.
+     *
+     * @param  int  $id
+     * @return self
+     */
+    public static function findDealsById(string $id)
+    {
+        return self::where('id', $id)
+            ->first();
     }
 
     /**
@@ -131,7 +142,6 @@ class Deal extends Model
         return self::create([
             'customer_id' => $dataDeal['customer_id'],
             'name' => $dataDeal['name'],
-            'deals_customer' => $dataDeal['deals_customer'],
             'description' => $dataDeal['description'] ?? null,
             'tag' => $dataDeal['tag'] ?? null,
             'stage' => $dataDeal['stage'],
@@ -151,7 +161,6 @@ class Deal extends Model
         $deal->update([
             'customer_id' => $dataDeal['customer_id'] ?? $deal->customer_id,
             'name' => $dataDeal['name'] ?? $deal->name,
-            'deals_customer' => $dataDeal['deals_customer'] ?? $deal->deals_customer,
             'description' => $dataDeal['description'] ?? $deal->description,
             'tag' => $dataDeal['tag'] ?? $deal->tag,
             'stage' => $dataDeal['stage'] ?? $deal->stage,

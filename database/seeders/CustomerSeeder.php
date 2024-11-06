@@ -16,7 +16,7 @@ class CustomerSeeder extends Seeder
     {
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174001',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Tejo',
             'last_name' => 'Wijaya',
             'customerCategory' => 'leads',
@@ -36,7 +36,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174002',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Siti',
             'last_name' => 'Aisyah',
             'customerCategory' => 'contact',
@@ -56,7 +56,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174003',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Andi',
             'last_name' => 'Saputra',
             'customerCategory' => 'leads',
@@ -76,7 +76,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174004',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Rani',
             'last_name' => 'Putri',
             'customerCategory' => 'contact',
@@ -96,7 +96,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174005',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Dian',
             'last_name' => 'Sari',
             'customerCategory' => 'leads',
@@ -116,7 +116,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174006',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Budi',
             'last_name' => 'Setiawan',
             'customerCategory' => 'contact',
@@ -136,7 +136,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174007',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Agus',
             'last_name' => 'Slamet',
             'customerCategory' => 'leads',
@@ -156,7 +156,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174008',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Eka',
             'last_name' => 'Yulianto',
             'customerCategory' => 'contact',
@@ -176,7 +176,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174009',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Fauzi',
             'last_name' => 'Rahman',
             'customerCategory' => 'leads',
@@ -196,7 +196,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174010',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Gita',
             'last_name' => 'Pratiwi',
             'customerCategory' => 'contact',
@@ -215,7 +215,7 @@ class CustomerSeeder extends Seeder
         ]);
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174011',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Hari',
             'last_name' => 'Santoso',
             'customerCategory' => 'leads',
@@ -235,7 +235,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174012',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Dewi',
             'last_name' => 'Lestari',
             'customerCategory' => 'contact',
@@ -255,7 +255,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174013',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Irwan',
             'last_name' => 'Prakoso',
             'customerCategory' => 'leads',
@@ -275,7 +275,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174014',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Feri',
             'last_name' => 'Suharto',
             'customerCategory' => 'contact',
@@ -295,7 +295,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174015',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Rina',
             'last_name' => 'Sulastri',
             'customerCategory' => 'leads',
@@ -315,7 +315,7 @@ class CustomerSeeder extends Seeder
 
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614171011',
-            'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+            'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Rina',
             'last_name' => 'Sulastri',
             'customerCategory' => 'leads',
