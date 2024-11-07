@@ -11,7 +11,7 @@ class TimeGreetingHelper
         $currentHour = Carbon::now()->format('H'); 
 
         switch (true) {
-            case ($currentHour >= 5 && $currentHour < 12):
+            case ($currentHour >= 3 && $currentHour < 12):
                 return 'Selamat pagi';
             case ($currentHour >= 12 && $currentHour < 15):
                 return 'Selamat siang';

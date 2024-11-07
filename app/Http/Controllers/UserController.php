@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateForgetPassword;
 use App\Models\Customer;
@@ -34,6 +35,8 @@ class UserController extends Controller
         }
 
         try {
+            $user->role = ActionMapperHelper::mapRole($user->role);
+            $user->gender = ActionMapperHelper::mapGender($user->gender);
             return new ApiResponseResource(
                 true,
                 "Data user {$user->first_name} " . strtolower($user->last_name),
@@ -48,7 +51,7 @@ class UserController extends Controller
             );
         }
     }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -118,7 +121,7 @@ class UserController extends Controller
             );
         }
     }
-
+     
     /**
      * Update the authenticated user's password.
      *
@@ -189,7 +192,7 @@ class UserController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->only('photo'), [
             'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ], [
@@ -409,23 +412,27 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse 
      */
     public function getSummary()
-    {
+    {   
         $user = auth()->user();
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
+        
+        $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
+        $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
 
-        $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
-        $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
+        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
-        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email);
-
-        $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
-        $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
-        $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
-        $dealsWon = Deal::countDealsByStage($user->email, 'won');
-        $dealsLost = Deal::countDealsByStage($user->email, 'lose');
-        $dealsValue = Deal::sumValueEstimatedByStage($user->email);
+        $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
+        
+        $dealsProposal = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'proposal');
+        
+        $dealsNegotiation = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'negotiate');
+        
+        $dealsWon = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'won');
+        
+        $dealsLost = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'lose');
+        $dealsValue = Deal::sumValueEstimatedByStage($user->email, $user->role);
 
         Carbon::setLocale('id');
         $formattedDate = now()->translatedFormat('l, d F Y');

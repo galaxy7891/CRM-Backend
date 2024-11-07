@@ -24,6 +24,9 @@ class DealController extends Controller
             $deals = $this->applyFilters($request, $query);
             $mappeddeals = $deals->map(function ($deal) {
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
+                $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
+                $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
+
                 return $deal;
             });
 
@@ -128,6 +131,8 @@ class DealController extends Controller
                 );
             }
             $deals->status = ActionMapperHelper::mapStatus($deals->status);
+            $deals->stage = ActionMapperHelper::mapStageDeal($deals->stage);
+            $deals->payment_category = ActionMapperHelper::mapPaymentCategory($deals->payment_category);
             
             return new ApiResponseResource(
                 true,

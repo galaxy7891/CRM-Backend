@@ -43,6 +43,18 @@ class Product extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
+     * Get the user company that owns the product.
+     * 
+     * This defines a many-to-one relationship where the user belongs to a company.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function userCompany()
+    {
+        return $this->belongsTo(UsersCompany::class, 'user_company_id', 'id');
+    }
+
+    /**
      * Get the product's full name by ID.
      *
      * @param  int|string  $id
@@ -93,6 +105,7 @@ class Product extends Model
         }
 
         return self::create([
+            'user_company_id' => $data['user_company_id'],
             'name' => $data['name'],
             'category' => $data['category'],
             'code' => $data['code'] ?? null,
@@ -105,18 +118,18 @@ class Product extends Model
         ]);
     }
 
-    public static function updateProduct(array $data, string $productId): self
+    public static function updateProduct(array $dataProduct, string $productId): self
     {
         $product = self::findOrFail($productId);
 
         $product->update([
-            'name' => $data['name'],
-            'category' => $data['category'],
-            'code' => $data['code'] ?? null,
-            'quantity' => $data['quantity'] ?? null,
-            'unit' => $data['unit'] ?? null,
-            'price' => $data['price'],
-            'description' => $data['description'] ?? null,
+            'name' => $dataProduct['name'] ?? $product->name,
+            'category' => $dataProduct['category'] ?? $product->category,
+            'code' => $dataProduct['code'] ?? $product->code,
+            'quantity' => $dataProduct['quantity'] ?? $product->quantity,
+            'unit' => $dataProduct['unit'] ?? $product->unit,
+            'price' => $dataProduct['price'] ?? $product->price,
+            'description' => $dataProduct['description'] ?? $product->description,
         ]);
 
         return $product; 

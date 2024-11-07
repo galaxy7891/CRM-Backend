@@ -101,11 +101,19 @@ class Deal extends Model
      * @param string $stage
      * @return int
      */
-    public static function countDealsByStage($email, $stage)
+    public static function countDealsByStage($email, $role, $userCompanyId, $stage)
     {
-        return self::where('owner', $email)
-            ->where('stage', $stage)
-            ->count();
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        }); 
+        
+        $query->where('stage', $stage);
+
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
+        
+        return $query->count();
     }
 
     /**
@@ -114,9 +122,9 @@ class Deal extends Model
      * @param string $email
      * @return \Illuminate\Support\Collection
      */
-    public static function sumValueEstimatedByStage($email)
+    public static function sumValueEstimatedByStage($email, $role)
     {
-        $results = self::select('stage', \Illuminate\Support\Facades\DB::raw("
+        $query = self::select('stage', \Illuminate\Support\Facades\DB::raw("
                 SUM(
                     CASE 
                         WHEN stage = 'won' THEN value_actual 
@@ -124,18 +132,23 @@ class Deal extends Model
                     END
                 ) as total_value
             "))
-            ->where('owner', $email)
-            ->groupBy('stage')
-            ->pluck('total_value', 'stage');
+            ->groupBy('stage');
+        
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
 
+        $results = $query->pluck('total_value', 'stage');
+        
         return [
-            'qualification' => $results->get('qualificated', 0),
+            'qualification' => $results->get('qualification', 0),
             'proposal' => $results->get('proposal', 0),
-            'negotiation' => $results->get('negotiate', 0),
+            'negotiation' => $results->get('negotiation', 0),
             'won' => $results->get('won', 0),
             'lose' => $results->get('lose', 0),
         ];
     }
+
 
     public static function createDeal(array $dataDeal): self
     {

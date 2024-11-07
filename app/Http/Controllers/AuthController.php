@@ -77,7 +77,6 @@ class AuthController extends Controller
             'job_position' => 'required|max:50',
             'name' => 'required|max:100',
             'industry' => 'required|max:50',
-            'photo' => 'nullable|url',
         ], [
             'google_id.unique' => 'Akun Google sudah terdaftar',
             'email.required' => 'Email tidak boleh kosong',
@@ -101,7 +100,6 @@ class AuthController extends Controller
             'name' => 'Nama perusahaan tidak boleh kosong',
             'industry.required' => 'Jenis industri tidak boleh kosong',
             'industry.max' => 'Jenis industri maksimal 50 karakter',
-            'photo.url' => 'URL photo tidak valid',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -137,7 +135,7 @@ class AuthController extends Controller
             );
         }
     }
-
+    
     /**
      * Redirect the user to the Google login page.
      *

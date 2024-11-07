@@ -28,7 +28,7 @@ class ImportController extends Controller
                 'file.mimes' => 'Dokumen harus sesuai format.',
                 'file.max' => 'Ukuran Dokumen maksimal 2mb.',
             ]);
-
+            
             switch ($type) {
                 case 'leads':
                     $import = new CustomersImport($user->email, 'leads');

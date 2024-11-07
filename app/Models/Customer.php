@@ -111,14 +111,21 @@ class Customer extends Model
      * @param string $email
      * @param string $category
      * @return int
-     */
-    public static function countCustomerByCategory($email, $category)
-    {
-        return self::where('owner', $email)
-            ->where('customerCategory', $category)
-            ->count();
-    }
+     */ 
+    public static function countCustomerSummary($email, $category, $role, $userCompanyId)
+    {   
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        }); 
+        
+        $query->where('customerCategory', $category);
 
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
+        
+        return $query->count();
+    }   
 
     public static function createCustomer(array $dataCustomer): self
     {
@@ -193,7 +200,8 @@ class Customer extends Model
             'village' => $dataCustomer['village'] ?? $customer->village,
             'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
         ]);
-
+    
         return $customer;
     }
-}
+}   
+                                                                        

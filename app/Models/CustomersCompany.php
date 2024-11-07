@@ -84,10 +84,17 @@ class CustomersCompany extends Model
      * @param string $email
      * @return int
      */
-    public static function countCustomersCompany($email)
+    public static function countCustomersCompany($email, $role, $userCompanyId)
     {
-        return self::where('owner', $email)
-            ->count();
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        });
+
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
+        
+        return $query->count();
     }
 
     public static function createCustomersCompany(array $dataCustomersCompany): self

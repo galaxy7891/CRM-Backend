@@ -32,7 +32,7 @@ class CustomersCompanyController extends Controller
             if ($user->role === 'employee') {
                 $query->where('owner', $user->email);
             }
-
+            
             $CustomersCompanies = $this->applyFilters($request, $query);
             if (!$CustomersCompanies) {
                 return new ApiResponseResource(

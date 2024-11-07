@@ -134,6 +134,18 @@ class ActionMapperHelper
         return $commonMapping[$propertiesName] ?? $propertiesName;
     }
 
+    public static function mapCategoryProduct($categoryProduct)
+    {
+        switch ($categoryProduct) {
+            case 'stuff':
+                return 'Barang';
+            case 'service':
+                return 'Jasa';
+            default:
+                return $categoryProduct;
+        }
+    }
+
     public static function mapStatus($status)
     {
         switch ($status) {
@@ -145,6 +157,68 @@ class ActionMapperHelper
                 return 'Tinggi';
             default:
                 return $status;
+        }
+    }
+    
+    public static function mapRole($role)
+    {
+        switch ($role) {
+            case 'super_admin':
+                return 'Super Admin';
+            case 'admin':
+                return 'Admin';
+            case 'employee':
+                return 'Karyawan';
+            default:
+                return $role;
+        }
+    }
+
+    public static function mapGender($gender)
+    {
+        switch ($gender) {
+            case 'male':
+                return 'Laki-laki';
+            case 'female':
+                return 'Perempuan';
+            case 'other':
+                return 'Lainnya';
+            default:
+                return $gender;
+        }
+    }
+    
+    public static function mapStageDeal($stage)
+    {
+        switch ($stage) {
+            case 'qualificated':
+                return 'Kualifikasi';
+            case 'proposal':
+                return 'Proposal';
+            case 'negotiate':
+                return 'Negosisasi';
+            case 'won':
+                return 'Tercapai';
+            case 'lose':
+                return 'Gagal';
+            default:
+                return $stage;
+        }
+    }
+
+    public static function mapPaymentCategory($paymentCategory)
+    {
+        switch ($paymentCategory) {
+            case 'once':
+                return 'Sekali';
+            case 'daily':
+                return 'Harian';
+            case 'monthly':
+                return 'Bulanan';
+            case 'yearly':
+                return 'Tahunan';
+            default:
+                return $paymentCategory;
         }
     }
 

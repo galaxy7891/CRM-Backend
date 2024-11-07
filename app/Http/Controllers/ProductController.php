@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
 use App\Traits\Filter;
@@ -18,10 +19,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Product::query();
-            
-            $product = $this->applyFilters($request, $query);
-            if (!$product) {
+            $user = auth()->user();
+            $query = Product::where('user_company_id', $user->user_company_id);
+
+            $products = $this->applyFilters($request, $query);
+            if (!$products) {
                 return new ApiResponseResource(
                     false,
                     'Data produk tidak ditemukan',
@@ -29,10 +31,15 @@ class ProductController extends Controller
                 );
             }
 
+            $products->getCollection()->transform(function ($product) {
+                $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
+                return $product;
+            });
+
             return new ApiResponseResource(
                 true,
                 'Daftar data produk',
-                $product
+                $products
             );
 
         } catch (\Exception $e) {
@@ -43,7 +50,7 @@ class ProductController extends Controller
             );
         }
     }
-
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -94,7 +101,11 @@ class ProductController extends Controller
         }
 
         try {
-            $product = Product::createProduct($request->all());
+            $user = auth()->user();
+            $productData = $request->all();
+            $productData['user_company_id'] = $user->user_company_id;
+
+            $product = Product::createProduct($productData);
             return new ApiResponseResource(
                 true,
                 "Data produk {$request->name} berhasil ditambahkan",
@@ -114,17 +125,19 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show($productId)
-    {
-        $product = Product::find($productId);
-        if (!$product) {
-            return new ApiResponseResource(
-                false, 
-                'Data produk tidak ditemukan.',
-                null
-            );
-        }
-        
+    {   
         try {
+            $product = Product::find($productId);
+            if (!$product) {
+                return new ApiResponseResource(
+                    false, 
+                    'Data produk tidak ditemukan.',
+                    null
+                );
+            }
+
+            $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
+            
             return new ApiResponseResource(
                 true,
                 "Data produk {$product->name}",

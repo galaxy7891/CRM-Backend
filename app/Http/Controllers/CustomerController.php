@@ -342,7 +342,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-
+             
             $user = auth()->user();
             if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
