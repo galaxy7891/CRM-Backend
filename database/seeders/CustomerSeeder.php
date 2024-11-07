@@ -24,10 +24,10 @@ class CustomerSeeder extends Seeder
                 'customerCategory' => 'leads',
                 'job' => 'PNS',
                 'description' => 'Lorem ipsum dolor sit amet.',
-                'status' => Arr::random(['warm', 'cold', 'hot']), // Same status
-                'email' => 'customer' . $i . '@gmail.com', // Unique email
-                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
-                'owner' => 'user_satu@gmail.com', // Same owner
+                'status' => Arr::random(['warm', 'cold', 'hot']), 
+                'email' => 'customer' . $i . '@gmail.com', 
+                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), 
+                'owner' => 'user_satu@gmail.com', 
                 'address' => 'Jl Kemayoran Baru',
                 'province' => 'Jawa Tengah',
                 'city' => 'Kota Semarang',

@@ -241,8 +241,8 @@ class ActionMapperHelper
                 return $userName . ' memperbarui data Produk ' . $productName;
         }
 
-    //     return '';
-    // }
+        return '';
+    }
 
     private static function mapDeleteDescription($log, string $modelName, array $changes, string $userName): string
     {
@@ -288,8 +288,8 @@ class ActionMapperHelper
                 return $userName . ' menghapus data Produk ' . $productName;
         }
 
-    //     return '';
-    // }
+        return '';
+    }
 
     private static function mapSelfUpdateDescription(array $changes, string $userName): string
     {

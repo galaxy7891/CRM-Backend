@@ -40,18 +40,18 @@ class UserInvitationController extends Controller
             );
         }
 
-        $recentInvitation = UserInvitation::getRecentInvitation($request->email);
+        // $recentInvitation = UserInvitation::getRecentInvitation($request->email);
 
-        if ($recentInvitation) {
-            $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
+        // if ($recentInvitation) {
+        //     $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
 
-            return new ApiResponseResource(
-                false,
-                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
-                    "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                null
-            );
-        }
+        //     return new ApiResponseResource(
+        //         false,
+        //         'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
+        //             "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+        //         null
+        //     );
+        // }
 
         try {
             $email = $request->email;
