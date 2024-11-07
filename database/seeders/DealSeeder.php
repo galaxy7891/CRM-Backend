@@ -17,7 +17,6 @@ class DealSeeder extends Seeder
             'id' => '123e4567-e89b-12d7-a452-42661413400',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
-            'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
             'description' => 'Lorem ipsum dolor sit amet.',
             'tag' => 'Alat Tulis',
             'status' => 'warm',
@@ -34,7 +33,6 @@ class DealSeeder extends Seeder
             'id' => '123e4567-e89b-12d7-a452-42661413300',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
-            'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
             'description' => 'Lorem ipsum dolor sit amet.',
             'tag' => 'Alat Tulis',
             'status' => 'warm',
@@ -46,11 +44,11 @@ class DealSeeder extends Seeder
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
         ]);
+        
         Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413200',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
-            'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
             'description' => 'Lorem ipsum dolor sit amet.',
             'tag' => 'Alat Tulis',
             'status' => 'warm',
@@ -64,11 +62,11 @@ class DealSeeder extends Seeder
             'payment_duration' => 1,
             'owner' => 'user_satu@gmail.com',
         ]);
+        
         Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413100',
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
-            'deals_customer' => '123e4567-e89b-12d3-a456-426614174001',
             'description' => 'Lorem ipsum dolor sit amet.',
             'tag' => 'Alat Tulis',
             'status' => 'warm',

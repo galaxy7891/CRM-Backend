@@ -18,7 +18,7 @@ class CreateActivityLogsTable extends Migration
             $table->uuid('user_id')->nullable();
             $table->string('model_name', 100);
             $table->string('action', 255);
-            $table->text('changes')->nullable();
+            $table->text('changes');
             $table->timestamps();
             $table->softDeletes();
 

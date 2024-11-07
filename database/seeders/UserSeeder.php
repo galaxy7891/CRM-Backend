@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         User::create([
             'id' => '123e4567-e89b-12d3-a456-426614174003',
-            'company_id' => '123e4567-e89b-12d3-a456-426614174000',
+            'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
             'google_id' => null,
             'email' => 'user_satu@gmail.com',
             'first_name' => 'User',
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'id' => '123e4567-e89b-12d3-a456-426614174010',
-            'company_id' => '123e4567-e89b-12d3-a456-426614174000',
+            'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
             'google_id' => null,
             'email' => 'user_dua@gmail.com',
             'first_name' => 'User',
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'id' => '123e4567-e89b-12d3-a456-426614174100',
-            'company_id' => '123e4567-e89b-12d3-a456-426614174000',
+            'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
             'google_id' => null,
             'email' => 'user_admin@gmail.com',
             'first_name' => 'User',

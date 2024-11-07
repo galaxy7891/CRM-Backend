@@ -19,7 +19,7 @@ class EmployeeController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = User::where('company_id', $user->company_id);
+            $query = User::where('user_company_id', $user->user_company_id);
             
             $employee = $this->applyFilters($request, $query);
             if (!$employee) {
@@ -97,7 +97,7 @@ class EmployeeController extends Controller
             'phone' => "sometimes|required|numeric|max_digits:15|unique:users, phone,$employeeId",
             'email' => "sometimes|required|email|unique:users,email,$employeeId",
             'job_position' => 'sometimes|required|max:50',
-            'company_id' => 'sometimes|nullable|uuid',
+            'user_company_id' => 'sometimes|nullable|uuid',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
@@ -116,7 +116,7 @@ class EmployeeController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
-            'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
+            'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',

@@ -10,7 +10,7 @@ class CreateCustomersTable extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('organization_id')->nullable();
+            $table->uuid('customers_company_id')->nullable();
             $table->string('first_name', 50);
             $table->string('last_name', 50)->nullable();
             $table->enum('customerCategory', ['leads', 'contact'])->default('leads');
@@ -32,7 +32,7 @@ class CreateCustomersTable extends Migration
 
             // Foreign Key Constraints
             $table->foreign('owner')->references('email')->on('users')->onDelete('cascade');
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
+            $table->foreign('customers_company_id')->references('id')->on('customers_companies')->onDelete('cascade');
         });
     }
 

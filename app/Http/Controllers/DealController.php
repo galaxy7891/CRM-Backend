@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Deal;
 use App\Traits\Filter;
@@ -21,11 +22,18 @@ class DealController extends Controller
             $query = Deal::query();
             
             $deals = $this->applyFilters($request, $query);
+            $mappeddeals = $deals->map(function ($deal) {
+                $deal->status = ActionMapperHelper::mapStatus($deal->status);
+                $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
+                $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
+
+                return $deal;
+            });
 
             return new ApiResponseResource(
                 true,
-                'Daftar Deal',
-                $deals
+                'Daftar deals',
+                $mappeddeals
             );
 
         } catch (\Exception $e) {
@@ -45,7 +53,6 @@ class DealController extends Controller
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|max:100',
-            'deals_customer' => 'required|string|max:100',
             'description' => 'nullable|string',
             'status' => 'required|in:hot,warm,cold',
             'tag' => 'nullable|string|max:255',
@@ -63,9 +70,6 @@ class DealController extends Controller
             'name.required' => 'Nama tidak boleh kosong.',
             'name.string' => 'Nama harus berupa teks.',
             'name.max' => 'Nama maksimal 100 karakter.',
-            'deals_customer.required' => 'Pelanggan tidak boleh kosong.',
-            'deals_customer.string' => 'Pelanggan harus berupa teks.',
-            'deals_customer.max' => 'Pelanggan maksimal 100 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
@@ -87,8 +91,6 @@ class DealController extends Controller
             'owner.emaik' => 'Pemilik harus berupa email.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
         ]);
-
-        // check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -97,14 +99,14 @@ class DealController extends Controller
             );
         }
 
-        // create customer 
         try {
             $deal = Deal::createDeal($request->all());
             return new ApiResponseResource(
                 true,
-                'Deal ditambahkan',
+                'Data deals berhasil ditambahkan',
                 $deal 
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -114,31 +116,33 @@ class DealController extends Controller
         }
     }
 
-
     /**
      * Display the specified resource.
      */
     public function show($id)
     {
         try {
-            $deal = Deal::find($id);
-            if (is_null($deal)) {
+            $deals = Deal::findDealsById($id);
+            if (is_null($deals)) {
                 return new ApiResponseResource(
                     false,
-                    'Data Customer Tidak Ditemukan!',
+                    'Data deals tidak ditemukan!',
                     null
                 );
             }
-
+            $deals->status = ActionMapperHelper::mapStatus($deals->status);
+            $deals->stage = ActionMapperHelper::mapStageDeal($deals->stage);
+            $deals->payment_category = ActionMapperHelper::mapPaymentCategory($deals->payment_category);
+            
             return new ApiResponseResource(
                 true,
-                'Data Customer Ditemukan!', 
-                $deal 
+                'Data deals', 
+                $deals 
             );
             
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                 false, 
                 $e->getMessage(),
                 null
             );
@@ -150,8 +154,7 @@ class DealController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Check if customer exists
-        $deal = Deal::find($id);
+        $deal = Deal::findDealsById($id);
         if (!$deal) {
             return new ApiResponseResource(
                 false, 
@@ -160,11 +163,9 @@ class DealController extends Controller
             );
         }
 
-
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|max:100',
-            'deals_customer' => 'required|string|max:100',
             'description' => 'nullable|string',
             'status' => 'required|in:hot,warm,cold',
             'tag' => 'nullable|string|max:255',
@@ -182,9 +183,6 @@ class DealController extends Controller
             'name.required' => 'Nama tidak boleh kosong.',
             'name.string' => 'Nama harus berupa teks.',
             'name.max' => 'Nama maksimal 100 karakter.',
-            'deals_customer.required' => 'Pelanggan tidak boleh kosong.',
-            'deals_customer.string' => 'Pelanggan harus berupa teks.',
-            'deals_customer.max' => 'Pelanggan maksimal 100 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
@@ -206,8 +204,6 @@ class DealController extends Controller
             'owner.emaik' => 'Pemilik harus berupa email.',
             'owner.max' => 'Pemilik maksimal 100 karakter.',
         ]);
-
-        // Check if validation fails
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false, 
@@ -217,12 +213,13 @@ class DealController extends Controller
         }
 
         try {
-            $deal = Deal::updateDeal($request->all(), $id);
+            $deals = Deal::updateDeal($request->all(), $id);
             return new ApiResponseResource(
                 true, 
-                'Data Deal Berhasil Diubah!', 
-                $deal 
+                'Data deals berhasil diubah!', 
+                $deals 
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false, 
@@ -231,33 +228,37 @@ class DealController extends Controller
             );
         }
     }
-
+    
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
+        $id = $request->input('id', []);
+        if (empty($id)) {
+            return new ApiResponseResource(
+                true,
+                "Pilih data yang ingin dihapus terlebih dahulu",
+                null
+            );
+        }
+        
         try {
-
-            // Check if deal exists
-            $deal = Deal::find($id);
-            if (!$deal) {
+            $deletedCount = Deal::whereIn('id', $id)->delete();
+            if ($deletedCount > 0) {
                 return new ApiResponseResource(
-                    false, 
-                    'Deal tidak ditemukan',
+                    true,
+                    $deletedCount . ' data deals berhasil dihapus',
                     null
                 );
             }
 
-            // Delete the customer
-            $deal->delete();
-
-            // Return response with first and last name
-            return new ApiResponseResource(
-                true, 
-                "Deal {$deal->name} Berhasil Dihapus!", 
-                null 
+        return new ApiResponseResource(
+                false,
+                'Data deals tidak ditemukan',
+                null
             );
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false, 

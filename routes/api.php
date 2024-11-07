@@ -4,14 +4,14 @@ use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\UsersCompaniesController;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ImportController;
-use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\CustomersCompanyController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\RoleMiddleware;
@@ -54,8 +54,8 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/user', [UserController::class, 'update']);
         Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
         Route::delete('/user', [UserController::class, 'destroy']);
-
-        Route::get('/companies', [CompaniesController::class, 'index']);
+        
+        Route::get('/users/companies', [UsersCompaniesController::class, 'index']);
 
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
         Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
@@ -69,13 +69,13 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/contact', [CustomerController::class, 'storeContact']);
         Route::post('/contact/{contactId}', [CustomerController::class, 'updateContact']);
         Route::delete('/contact', [CustomerController::class, 'destroyContact']);
-
-        Route::get('/organization', [OrganizationController::class, 'index']);
-        Route::get('/organization/{organizationId}', [OrganizationController::class, 'show']);
-        Route::post('/organization', [OrganizationController::class, 'store']);
-        Route::post('/organization/{organizationId}', [OrganizationController::class, 'update']);
-        Route::delete('/organization', [OrganizationController::class, 'destroy']);
-
+        
+        Route::get('/customers/companies', [CustomersCompanyController::class, 'index']);
+        Route::get('/customers/companies/{customersCompaniesId}', [CustomersCompanyController::class, 'show']);
+        Route::post('/customers/companies', [CustomersCompanyController::class, 'store']);
+        Route::post('/customers/companies/{customersCompaniesId}', [CustomersCompanyController::class, 'update']);
+        Route::delete('/customers/companies', [CustomersCompanyController::class, 'destroy']);
+        
         Route::get('/products', [ProductController::class, 'index']);
         Route::get('/products/{productId}', [ProductController::class, 'show']);
         Route::post('/products', [ProductController::class, 'store']);
@@ -89,8 +89,8 @@ Route::group(['middleware' => 'api'], function () {
             Route::post('/employee/{employeeId}', [EmployeeController::class, 'update']);
             Route::delete('/employee', [EmployeeController::class, 'destroy']);
 
-            Route::post('/companies', [CompaniesController::class, 'update']);
-            Route::post('/companies/logo/{companyId}', [CompaniesController::class, 'updateLogo']);
+            Route::post('/users/companies', [UsersCompaniesController::class, 'update']);
+            Route::post('/users/companies/logo/{companyId}', [UsersCompaniesController::class, 'updateLogo']);
         });
 
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin, admin'], function () {

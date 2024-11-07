@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,7 +17,7 @@ class Customer extends Model
      */
     protected $fillable = [
         'id',
-        'organization_id',
+        'customers_company_id',
         'first_name',
         'last_name',
         'customerCategory',
@@ -49,7 +48,7 @@ class Customer extends Model
 
     /**
      * Get the user that owns the customer.
-     * Get the organization that owns the customer.
+     * Get the customersCompany that owns the customer.
      * 
      * This defines a many-to-one relationship where the user belongs to a company.
      * 
@@ -60,9 +59,9 @@ class Customer extends Model
         return $this->belongsTo(User::class, 'owner', 'email');
     }
 
-    public function organization()
+    public function customersCompany()
     {
-        return $this->belongsTo(Organization::class, 'organization_id', 'id');
+        return $this->belongsTo(customersCompany::class, 'customers_company_id', 'id');
     }
 
     /**
@@ -83,7 +82,7 @@ class Customer extends Model
      * @param  int|string  $id
      * @return string|null
      */
-    public static function getCustomerNameById($id)
+    public static function getCustomerNameById(string $id)
     {
         $customer = self::select('first_name', 'last_name')
             ->where('id', $id)
@@ -91,7 +90,14 @@ class Customer extends Model
 
         return $customer ? trim($customer->first_name . ' ' . $customer->last_name) : null;
     }
-    
+
+    /**
+     * Get the customer's by ID and category.
+     *
+     * @param string $id
+     * @param string $customerCategory
+     * @return self
+     */
     public static function findCustomerByIdCategory(string $id, string $customerCategory)
     {
         return self::where('id', $id)
@@ -105,19 +111,26 @@ class Customer extends Model
      * @param string $email
      * @param string $category
      * @return int
-     */
-    public static function countCustomerByCategory($email, $category)
-    {
-        return self::where('owner', $email)
-            ->where('customerCategory', $category)
-            ->count();
-    }
+     */ 
+    public static function countCustomerSummary($email, $category, $role, $userCompanyId)
+    {   
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        }); 
+        
+        $query->where('customerCategory', $category);
 
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
+        
+        return $query->count();
+    }   
 
     public static function createCustomer(array $dataCustomer): self
     {
         return self::create([
-            'organization_id' => $dataCustomer['organization_id'] ?? null,
+            'customers_company_id' => $dataCustomer['customers_company_id'] ?? null,
             'first_name' => $dataCustomer['first_name'],
             'last_name' => $dataCustomer['last_name'] ?? null,
             'customerCategory' => $dataCustomer['customerCategory'],
@@ -142,7 +155,7 @@ class Customer extends Model
         $customer = self::findOrFail($customerId);
         
         $customer->update([
-            'organization_id' => $dataCustomer['organization_id'] ?? $customer->organization_id,
+            'customers_company_id' => $dataCustomer['customers_company_id'] ?? $customer->customers_company_id,
             'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
             'last_name' => $dataCustomer['last_name'] ?? $customer->last_name,
             'customerCategory' => $dataCustomer['customerCategory'] ?? $customer->customerCategory,
@@ -169,7 +182,7 @@ class Customer extends Model
         $customer = self::findOrFail($customerId);
         
         $customer->update([
-            'organization_id' => $dataCustomer['organization_id'] ?? $customer->organization_id,
+            'customers_company_id' => $dataCustomer['customers_company_id'] ?? $customer->customers_company_id,
             'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
             'last_name' => $dataCustomer['last_name'] ?? $customer->last_name,
             'customerCategory' => 'contact',
@@ -187,7 +200,8 @@ class Customer extends Model
             'village' => $dataCustomer['village'] ?? $customer->village,
             'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
         ]);
-
+    
         return $customer;
     }
-}
+}   
+                                                                        

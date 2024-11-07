@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Deal;
-use App\Models\User;
+use App\Helpers\ActionMapperHelper;
+use App\Mail\TemplateForgetPassword;
 use App\Models\Customer;
+use App\Models\Deal;
+use App\Models\CustomersCompany;
+use App\Models\PasswordResetToken;
+use App\Models\User;
 use Illuminate\Support\Str;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use App\Models\PasswordResetToken;
-use App\Mail\TemplateForgetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -28,12 +30,14 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
 
         try {
+            $user->role = ActionMapperHelper::mapRole($user->role);
+            $user->gender = ActionMapperHelper::mapGender($user->gender);
             return new ApiResponseResource(
                 true,
                 "Data user {$user->first_name} " . strtolower($user->last_name),
@@ -58,13 +62,13 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
 
         $validator = Validator::make($request->all(), [
-            'company_id' => 'sometimes|nullable|uuid',
+            'user_company_id' => 'sometimes|nullable|uuid',
             'email' => "sometimes|required|email|unique:users,email,$id",
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
@@ -75,7 +79,7 @@ class UserController extends Controller
             'email' => "sometimes|required|email|unique:users,email,$id",
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
-            'company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
+            'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
@@ -184,7 +188,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
@@ -232,7 +236,7 @@ class UserController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Data user tidak ditemukan',
+                'Unauthorized',
                 null
             );
         }
@@ -417,17 +421,21 @@ class UserController extends Controller
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
 
-        $leadsCount = Customer::countCustomerByCategory($user->email, 'leads');
-        $contactsCount = Customer::countCustomerByCategory($user->email, 'contact');
+        $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
+        $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
 
-        $organizationsCount = Organization::countOrganization($user->email);
+        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
-        $dealsQualification = Deal::countDealsByStage($user->email, 'qualificated');
-        $dealsProposal = Deal::countDealsByStage($user->email, 'proposal');
-        $dealsNegotiation = Deal::countDealsByStage($user->email, 'negotiate');
-        $dealsWon = Deal::countDealsByStage($user->email, 'won');
-        $dealsLost = Deal::countDealsByStage($user->email, 'lose');
-        $dealsValue = Deal::sumValueEstimatedByStage($user->email);
+        $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
+
+        $dealsProposal = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'proposal');
+
+        $dealsNegotiation = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'negotiate');
+
+        $dealsWon = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'won');
+
+        $dealsLost = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'lose');
+        $dealsValue = Deal::sumValueEstimatedByStage($user->email, $user->role);
 
         Carbon::setLocale('id');
         $formattedDate = now()->translatedFormat('l, d F Y');
@@ -442,7 +450,7 @@ class UserController extends Controller
                 'activities' => [
                     'leads' => $leadsCount,
                     'contacts' => $contactsCount,
-                    'organizations' => $organizationsCount,
+                    'customers_companies' => $customersCompanyCount,
                 ],
                 'deals_pipeline' => [
                     'count' => [

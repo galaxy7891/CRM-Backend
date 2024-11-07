@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrganizationsTable extends Migration
+class CreateCustomersCompaniesTable extends Migration
 {
     public function up()
     {
-        Schema::create('organizations', function (Blueprint $table) {
+        Schema::create('customers_companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
             $table->string('industry', 50)->nullable();
@@ -16,6 +16,7 @@ class CreateOrganizationsTable extends Migration
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->string('phone', 15)->nullable();
             $table->string('owner', 100);
+            $table->text('description')->nullable();
             $table->string('website', 255)->nullable();
             $table->string('address', 100)->nullable();
             $table->string('province', 100)->nullable();
@@ -25,11 +26,14 @@ class CreateOrganizationsTable extends Migration
             $table->string('zip_code', 5)->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            // Foreign Key Constraints
+            $table->foreign('owner')->references('email')->on('users')->onDelete('cascade');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('organizations');
+        Schema::dropIfExists('customers_companies');
     }
 }

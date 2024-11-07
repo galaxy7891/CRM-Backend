@@ -68,19 +68,19 @@ class UserInvitationController extends Controller
                 'invited_by' => $invited_by,
             ];
 
-            $url = url('/accept-invitation?email=' . urlencode($email) . '&token=' . $token);
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $url = $frontendUrl . '/accept-invitation?email=' . urlencode($email) . '&token=' . $token;
+            
             Mail::to($email)->send(new TemplateInviteUser($email, $url, $nama, $invited_by));
 
             UserInvitation::createInvitation($dataUser);
-
+            
             return new ApiResponseResource(
                 true,
                 'Link invitasi berhasil dikirimkan ke email anda.',
-                [
-                    'email' => $email,
-                    'nama' => $nama
-                ]
+                null
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -99,27 +99,34 @@ class UserInvitationController extends Controller
     public function createUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email|max:100',
             'token' => 'required',
+            'email' => 'required|email|unique:users,email|max:100',
+            'password' => 'required|string|min:8',
+            'password_confirmation' => 'required|min:8|same:password',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'password' => 'required|string|min:8',
-            'new_password' => 'required|string|min:8',
+            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
         ], [
-            'invited_by.required' => 'Email pengundang tidak boleh kosong',
+            'token.required' => 'Token tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
-            'token.required' => 'Token tidak boleh kosong',
+            'password.required' => 'Password tidak boleh kosong',
+            'password.mnin' => 'Password tidak boleh kosong',
+            'password_confirmation.required' => 'Kata sandi tidak boleh kosong',
+            'password_confirmation.same' => 'Kata sandi tidak sama',
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50  karakter',
             'last_name.required' => 'Nama belakang tidak boleh kosong',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
+            'phone.required' => 'Nomor telepon tidak boleh kosong',
+            'phone.numeric' => 'Nomor telepon harus berupa angka',
+            'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -138,17 +145,18 @@ class UserInvitationController extends Controller
 
         try {
             $inviter = $invitation->inviter;
-            $company_id = $inviter?->company_id;
+            $useruser_company_id = $inviter?->user_company_id;
 
             $dataUser = [
-                'company_id' => $company_id,
+                'user_company_id' => $useruser_company_id,
                 'email' => $request->email,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'password' => $request->password,
+                'phone' => $request->phone,
             ];
 
-            $user = User::createUser($dataUser, $company_id);
+            $user = User::createUser($dataUser, $useruser_company_id);
             $invitation->updateStatus('accepted');
 
             return new ApiResponseResource(

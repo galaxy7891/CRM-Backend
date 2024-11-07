@@ -21,7 +21,6 @@ class Deal extends Model
         'id',
         'customer_id',
         'name',
-        'deals_customer',
         'description',
         'tag',
         'stage',
@@ -69,6 +68,18 @@ class Deal extends Model
     }
 
     /**
+     * Get the deals's by ID.
+     *
+     * @param  int  $id
+     * @return self
+     */
+    public static function findDealsById(string $id)
+    {
+        return self::where('id', $id)
+            ->first();
+    }
+
+    /**
      * Get the deals's full name by ID.
      *
      * @param  int|string  $id
@@ -90,11 +101,19 @@ class Deal extends Model
      * @param string $stage
      * @return int
      */
-    public static function countDealsByStage($email, $stage)
+    public static function countDealsByStage($email, $role, $userCompanyId, $stage)
     {
-        return self::where('owner', $email)
-            ->where('stage', $stage)
-            ->count();
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        }); 
+        
+        $query->where('stage', $stage);
+
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
+        
+        return $query->count();
     }
 
     /**
@@ -103,9 +122,9 @@ class Deal extends Model
      * @param string $email
      * @return \Illuminate\Support\Collection
      */
-    public static function sumValueEstimatedByStage($email)
+    public static function sumValueEstimatedByStage($email, $role)
     {
-        $results = self::select('stage', \Illuminate\Support\Facades\DB::raw("
+        $query = self::select('stage', \Illuminate\Support\Facades\DB::raw("
                 SUM(
                     CASE 
                         WHEN stage = 'won' THEN value_actual 
@@ -113,25 +132,29 @@ class Deal extends Model
                     END
                 ) as total_value
             "))
-            ->where('owner', $email)
-            ->groupBy('stage')
-            ->pluck('total_value', 'stage');
+            ->groupBy('stage');
+        
+        if ($role !== 'super_admin' && $role !== 'admin') {
+            $query->where('owner', $email);
+        }
 
+        $results = $query->pluck('total_value', 'stage');
+        
         return [
-            'qualification' => $results->get('qualificated', 0),
+            'qualification' => $results->get('qualification', 0),
             'proposal' => $results->get('proposal', 0),
-            'negotiation' => $results->get('negotiate', 0),
+            'negotiation' => $results->get('negotiation', 0),
             'won' => $results->get('won', 0),
             'lose' => $results->get('lose', 0),
         ];
     }
+
 
     public static function createDeal(array $dataDeal): self
     {
         return self::create([
             'customer_id' => $dataDeal['customer_id'],
             'name' => $dataDeal['name'],
-            'deals_customer' => $dataDeal['deals_customer'],
             'description' => $dataDeal['description'] ?? null,
             'tag' => $dataDeal['tag'] ?? null,
             'stage' => $dataDeal['stage'],
@@ -151,7 +174,6 @@ class Deal extends Model
         $deal->update([
             'customer_id' => $dataDeal['customer_id'] ?? $deal->customer_id,
             'name' => $dataDeal['name'] ?? $deal->name,
-            'deals_customer' => $dataDeal['deals_customer'] ?? $deal->deals_customer,
             'description' => $dataDeal['description'] ?? $deal->description,
             'tag' => $dataDeal['tag'] ?? $deal->tag,
             'stage' => $dataDeal['stage'] ?? $deal->stage,

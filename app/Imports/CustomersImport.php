@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\Models\Organization;
+use App\Models\CustomersCompany;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -213,24 +213,28 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 $this->summaryData['invalid_data']++;
                 continue;
             }
-
-            $organization = Organization::whereRaw('LOWER(name) = ?', [strtolower($row['nama_perusahaan'])])->first();
-            if (!$organization) {
-                $this->failedData[] = [
-                    'row' => $index + 2,
-                    'data' => [
-                        'property' => 'Nama Perusahaan',
-                        'fail' => 'Perusahaan belum terdaftar',
-                    ],
-                ];
-
-                $this->summaryData['total_data']++;
-                $this->summaryData['invalid_data']++;
-                continue;
+            if ($this->customerCategory === 'contact'){
+                $customersCompany = CustomersCompany::whereRaw('LOWER(name) = ?', [strtolower($row['nama_perusahaan'])])->first();
+                if (!$customersCompany) {
+                    $this->failedData[] = [
+                        'row' => $index + 2,
+                        'data' => [
+                            'property' => 'Nama Perusahaan',
+                            'fail' => 'Perusahaan belum terdaftar',
+                        ],
+                    ];
+    
+                    $this->summaryData['total_data']++;
+                    $this->summaryData['invalid_data']++;
+                    continue;
+                }
+                $customerCompanyId = $customersCompany->id;
+            } else {
+                $customerCompanyId = null;
             }
 
             $this->validData[] = [
-                'organization_name' => $row['nama_perusahaan'],
+                'customer_company_id' => $customerCompanyId,
                 'first_name' => $row['nama_depan'],
                 'last_name' => $row['nama_belakang'],
                 'customerCategory' => $this->customerCategory,
@@ -270,7 +274,6 @@ class CustomersImport implements ToCollection, WithHeadingRow
     public function headingRowValidator($row)
     {
         $expectedHeadings = [
-            'nama_perusahaan', 
             'nama_depan', 
             'nama_belakang', 
             'pekerjaan', 
@@ -279,13 +282,18 @@ class CustomersImport implements ToCollection, WithHeadingRow
             'tanggal_lahir', 
             'email', 
             'nomor_telepon',
-            'alamat', 
+            'alamat',
             'provinsi', 
             'kota', 
             'kecamatan', 
             'kelurahan', 
             'kode_pos'
         ];
+    
+        if ($this->customerCategory === 'contact') {
+            array_unshift($expectedHeadings, 'nama_perusahaan');
+        }
+
         $fileHeadings = array_keys($row->toArray());
 
         if ($fileHeadings !== $expectedHeadings) {

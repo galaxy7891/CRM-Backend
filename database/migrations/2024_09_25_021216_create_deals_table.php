@@ -13,7 +13,6 @@ class CreateDealsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('customer_id');
             $table->string('name', 100);
-            $table->string('deals_customer', 100);
             $table->text('description')->nullable();
             $table->string('tag', 255)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
@@ -23,7 +22,7 @@ class CreateDealsTable extends Migration
             $table->date('expected_close_date');
             $table->decimal('value_estimated', 20, 2);
             $table->decimal('value_actual', 20, 2)->nullable();
-            $table->enum('payment_category', ['once', 'daily', 'monthly', 'yearly']);
+            $table->enum('payment_category', ['once', 'daily', 'monthly', 'yearly']); 
             $table->integer('payment_duration')->nullable();
             $table->string('owner', 100);
             $table->timestamps();

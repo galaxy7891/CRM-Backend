@@ -11,7 +11,7 @@ class ActivityLogService
     public function getDetailLogs()
     {
         $hiddenProperties = [
-            'id', 'company_id', 'google_id', 'organization_id', 
+            'id', 'user_company_id', 'google_id', 'customers_company_id', 
             'customer_id', 'deals_id', 'product_id', 'image_public_id', 
             'token', 'expired_at', 'created_at', 'updated_at', 'deleted_at'
         ];
@@ -62,7 +62,7 @@ class ActivityLogService
         return $paginatedLogsArray;
     }
 
-    public function getFormattedLogsTest(string $modelName = null, string $id = null)
+    public function getFormattedLogs(string $modelName = null, string $id = null)
     {
         $groupedLogsData = ActivityLog::getLogsGroupedByMonthForModel($modelName, $id);
         $paginatedLogs = $groupedLogsData['paginatedLogs'];
