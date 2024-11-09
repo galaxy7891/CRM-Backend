@@ -3,20 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ActionMapperHelper;
-use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateForgetPassword;
 use App\Models\Customer;
 use App\Models\Deal;
 use App\Models\CustomersCompany;
 use App\Models\PasswordResetToken;
 use App\Models\User;
-
+use Illuminate\Support\Str;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ApiResponseResource;
 
 class UserController extends Controller
 {
@@ -42,7 +43,6 @@ class UserController extends Controller
                 "Data user {$user->first_name} " . strtolower($user->last_name),
                 $user->load('company'),
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -51,7 +51,7 @@ class UserController extends Controller
             );
         }
     }
-    
+
     /**
      * Update the specified resource in storage.
      */
@@ -75,6 +75,8 @@ class UserController extends Controller
             'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
+            'email' => "sometimes|required|email|unique:users,email,$id",
             'gender' => 'sometimes|nullable|in:male,female,other',
         ], [
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
@@ -112,7 +114,6 @@ class UserController extends Controller
                 "Data user {$updatedUser->first_name} " . strtolower($updatedUser->last_name) . " berhasil diubah",
                 $updatedUser
             );
-            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -121,7 +122,7 @@ class UserController extends Controller
             );
         }
     }
-     
+
     /**
      * Update the authenticated user's password.
      *
@@ -152,7 +153,7 @@ class UserController extends Controller
         }
 
         $user = auth()->user();
-        
+
         try {
             if (!Hash::check($request->password, $user->password)) {
                 return new ApiResponseResource(
@@ -161,16 +162,15 @@ class UserController extends Controller
                     null
                 );
             }
-    
+
             $user->updatePassword($request->new_password);
-    
+
             return new ApiResponseResource(
                 true,
                 'Password berhasil diubah',
                 null
             );
-
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),
@@ -192,7 +192,7 @@ class UserController extends Controller
                 null
             );
         }
-        
+
         $validator = Validator::make($request->only('photo'), [
             'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ], [
@@ -210,15 +210,14 @@ class UserController extends Controller
         }
 
         try {
-            
-            $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id); 
+
+            $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id);
 
             return new ApiResponseResource(
                 true,
                 "Foto profil user {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $photoData
             );
-        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -252,7 +251,6 @@ class UserController extends Controller
                 "Data user {$first_name} " . strtolower($last_name) . "berhasil dihapus",
                 null
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -271,12 +269,17 @@ class UserController extends Controller
      */
     public function sendResetLink(Request $request)
     {
+        // Inisialisasi variabel
+        $email = '';
+        $frontendPath = '';
+
+        // Cek apakah pengguna terautentikasi
         if (auth()->check()) {
             $user = auth()->user();
             $email = $user->email;
             $frontendPath = '/change-password-email?email=';
-        
         } else {
+            // Validasi email jika pengguna tidak terautentikasi
             $validator = Validator::make($request->only('email'), [
                 'email' => 'required|email|exists:users,email|max:100'
             ], [
@@ -285,6 +288,8 @@ class UserController extends Controller
                 'email.exists' => 'Email belum terdaftar',
                 'email.max' => 'Email maksimal 100 karakter',
             ]);
+
+            // Jika validasi gagal
             if ($validator->fails()) {
                 return new ApiResponseResource(
                     false,
@@ -292,28 +297,28 @@ class UserController extends Controller
                     null
                 );
             }
-    
+
+            // Ambil email dari permintaan
             $email = $request->email;
-            $frontendPath = '/reset-password?email=';
+            $frontendPath = '/reset-password?email='; // Path untuk pengguna tidak terautentikasi
         }
 
         $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($email);
 
         if ($recentResetPassword) {
             $remainingTime = PasswordResetToken::getRemainingTime($recentResetPassword);
-
             return new ApiResponseResource(
                 false,
                 'Dapat mengirim ulang link reset kata sandi dalam ' . "{$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                $remainingTime['minutes'] .':'. $remainingTime['seconds'],
+                $remainingTime['minutes'] . ':' . $remainingTime['seconds'],
             );
         }
 
+        // Jika tidak ada token yang masih valid, lanjutkan dengan pembuatan token baru
         try {
-            $token = Str::uuid()->toString();
-
-            $user = User::findByEmail($email);
-            $nama = $user->first_name . ' ' . $user->last_name;
+            $token = Str::uuid()->toString(); // Buat token baru
+            $user = User::findByEmail($email); // Cari pengguna berdasarkan email
+            $nama = $user->first_name . ' ' . $user->last_name; // Ambil nama pengguna
 
             $dataUser = [
                 'email' => $email,
@@ -321,10 +326,10 @@ class UserController extends Controller
             ];
 
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token;
-            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama));
+            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token; // URL untuk reset password
+            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama)); // Kirim email reset password
 
-            PasswordResetToken::createPasswordResetToken($dataUser);
+            PasswordResetToken::createPasswordResetToken($dataUser); // Simpan token reset password
 
             return new ApiResponseResource(
                 true,
@@ -333,7 +338,6 @@ class UserController extends Controller
                     'email' => $email
                 ]
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -395,7 +399,6 @@ class UserController extends Controller
                 'kata sandi berhasil diubah.',
                 null
             );
-
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -412,25 +415,25 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse 
      */
     public function getSummary()
-    {   
+    {
         $user = auth()->user();
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
-        
+
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
 
         $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
-        
+
         $dealsProposal = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'proposal');
-        
+
         $dealsNegotiation = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'negotiate');
-        
+
         $dealsWon = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'won');
-        
+
         $dealsLost = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'lose');
         $dealsValue = Deal::sumValueEstimatedByStage($user->email, $user->role);
 

@@ -28,13 +28,13 @@ class ImportController extends Controller
                 'file.mimes' => 'Dokumen harus sesuai format.',
                 'file.max' => 'Ukuran Dokumen maksimal 2mb.',
             ]);
-            
+
             switch ($type) {
                 case 'leads':
                     $import = new CustomersImport($user->email, 'leads');
                     $model = 'customer';
                     break;
-                
+
                 case 'contact':
                     $import = new CustomersImport($user->email, 'contact');
                     $model = 'customer';
@@ -52,13 +52,13 @@ class ImportController extends Controller
 
                 default:
                     return new ApiResponseResource(
-                        false, 
+                        false,
                         "Invalid request '../{$type}'",
                         null
                     );
             }
 
-            $originalFileName =$request->file('file')->getClientOriginalName();
+            $originalFileName = $request->file('file')->getClientOriginalName();
             Excel::import($import, $request->file('file'));
 
             $validData = $import->getValidData();
@@ -68,17 +68,17 @@ class ImportController extends Controller
             $perPage = 25;
             $page = LengthAwarePaginator::resolveCurrentPage();
             $validDataPaginated = new LengthAwarePaginator(
-                array_slice($validData, ($page - 1) * $perPage, $perPage), 
-                count($validData), 
-                $perPage, 
-                $page, 
+                array_slice($validData, ($page - 1) * $perPage, $perPage),
+                count($validData),
+                $perPage,
+                $page,
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
             $failedDataPaginated = new LengthAwarePaginator(
-                array_slice($failedData, ($page - 1) * $perPage, $perPage), 
-                count($failedData), 
-                $perPage, 
-                $page, 
+                array_slice($failedData, ($page - 1) * $perPage, $perPage),
+                count($failedData),
+                $perPage,
+                $page,
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
 
@@ -124,8 +124,7 @@ class ImportController extends Controller
                     'failedData' => $failedDataPaginated,
                 ]
             );
-        
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
                 $e->getMessage(),

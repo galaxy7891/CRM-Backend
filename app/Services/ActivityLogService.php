@@ -96,7 +96,7 @@ class ActivityLogService
 
         return [
             array_merge(
-                $paginatedLogs->toArray(), 
+                $paginatedLogs->toArray(),
                 ['data' => $result]
             )
         ];

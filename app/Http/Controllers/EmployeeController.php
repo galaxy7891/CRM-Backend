@@ -94,7 +94,7 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:users, phone,$employeeId",
+            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$employeeId",
             'email' => "sometimes|required|email|unique:users,email,$employeeId",
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
