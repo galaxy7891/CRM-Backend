@@ -42,7 +42,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-            
+
             $leads->getCollection()->transform(function ($lead) {
                 $lead->status = ActionMapperHelper::mapStatus($lead->status);
                 return $lead;
@@ -72,8 +72,8 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = Customer::with(['customers_companies:id,name'])
-                    ->where('customerCategory', 'contact');
+            $query = Customer::with(['customersCompany:id,name'])
+                ->where('customerCategory', 'contact');
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
@@ -96,7 +96,7 @@ class CustomerController extends Controller
                 $contact->status = ActionMapperHelper::mapStatus($contact->status);
                 return $contact;
             });
-            
+
             return new ApiResponseResource(
                 true,
                 'Daftar kontak',
@@ -270,7 +270,7 @@ class CustomerController extends Controller
             $customer = Customer::createCustomer($dataContact);
             return new ApiResponseResource(
                 true,
-                'Data kontak '. ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
+                'Data kontak ' . ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
         } catch (\Exception $e) {
@@ -289,7 +289,7 @@ class CustomerController extends Controller
     {
         try {
             $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
-            
+
             if (!$leads) {
                 return new ApiResponseResource(
                     false,
@@ -330,7 +330,7 @@ class CustomerController extends Controller
     {
         try {
             $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
-            
+
             if (!$contacts) {
                 return new ApiResponseResource(
                     false,
@@ -338,7 +338,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-             
+
             $user = auth()->user();
             if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
@@ -349,7 +349,7 @@ class CustomerController extends Controller
             }
 
             $contacts->status = ActionMapperHelper::mapStatus($contacts->status);
-            
+
             return new ApiResponseResource(
                 true,
                 'Data kontak',
@@ -469,7 +469,7 @@ class CustomerController extends Controller
     public function updateContact(Request $request, $contactId)
     {
         $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
-        
+
         if (!$contacts) {
             return new ApiResponseResource(
                 false,

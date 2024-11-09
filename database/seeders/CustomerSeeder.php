@@ -18,16 +18,16 @@ class CustomerSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             Customer::create([
                 'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
-                'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+                'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
                 'first_name' => 'Customer',
                 'last_name' => 'Number' . $i,
                 'customerCategory' => 'leads',
                 'job' => 'PNS',
                 'description' => 'Lorem ipsum dolor sit amet.',
-                'status' => Arr::random(['warm', 'cold', 'hot']), 
-                'email' => 'customer' . $i . '@gmail.com', 
-                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), 
-                'owner' => 'user_satu@gmail.com', 
+                'status' => Arr::random(['warm', 'cold', 'hot']),
+                'email' => 'customer' . $i . '@gmail.com',
+                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                'owner' => 'user_satu@gmail.com',
                 'address' => 'Jl Kemayoran Baru',
                 'province' => 'Jawa Tengah',
                 'city' => 'Kota Semarang',
@@ -40,7 +40,7 @@ class CustomerSeeder extends Seeder
         for ($i = 50; $i < 100; $i++) {
             Customer::create([
                 'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
-                'organization_id' => '123e4567-e89b-12d3-a456-426614174004',
+                'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
                 'first_name' => 'Customer',
                 'last_name' => 'Number' . $i,
                 'customerCategory' => 'contact',
