@@ -305,12 +305,12 @@ class ActionMapperHelper
             case 'CREATE':
                 $description = self::mapCreateDescription($log, $modelName, $changes, $userName);
                 break;
-            case 'UPDATE':
-                $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
-                break;
-            case 'DELETE':
-                $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
-                break;
+            // case 'UPDATE':
+            //     $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
+            //     break;
+            // case 'DELETE':
+            //     $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
+            //     break;
         }
 
         return $description;

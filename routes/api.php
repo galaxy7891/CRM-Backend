@@ -44,12 +44,12 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
-        
+
         Route::post('/import/{type}', [ImportController::class, 'import']);
-        
+
         Route::get('/activity/log/{type}', [ActivityLogController::class, 'index']);
         Route::get('/detail/activity/log', [ActivityLogController::class, 'detail']);
-        
+
         Route::get('/user', [UserController::class, 'show']);
         Route::post('/user', [UserController::class, 'update']);
         Route::post('/user/profile', [UserController::class, 'updateProfilePhoto']);
@@ -63,7 +63,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/leads/{leadsId}', [CustomerController::class, 'updateLeads']);
         Route::post('/leads/convert/{leadsId}', [CustomerController::class, 'convert']);
         Route::delete('/leads', [CustomerController::class, 'destroyLeads']);
-        
+
         Route::get('/contact', [CustomerController::class, 'indexContact']);
         Route::get('/contact/{contactId}', [CustomerController::class, 'showContact']);
         Route::post('/contact', [CustomerController::class, 'storeContact']);

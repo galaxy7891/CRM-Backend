@@ -50,9 +50,9 @@ class ActivityLog extends Model
     {
         return self::with('user:id,first_name,last_name,email')
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
     }
-    
+
     public static function getLogsGroupedByMonth()
     {
         $paginatedLogs = self::getPaginatedLogs();
@@ -100,4 +100,3 @@ class ActivityLog extends Model
     }
 
 }
-
