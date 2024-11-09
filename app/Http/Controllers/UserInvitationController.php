@@ -150,6 +150,7 @@ class UserInvitationController extends Controller
             $dataUser = [
                 'user_company_id' => $useruser_company_id,
                 'email' => $request->email,
+                'role' => 'employee',
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'password' => $request->password,

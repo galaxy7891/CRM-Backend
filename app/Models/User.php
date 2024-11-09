@@ -157,6 +157,7 @@ class User extends Authenticatable implements JWTSubject
             'google_id' => $dataUser['google_id'] ?? null,
             'user_company_id' => $userCompanyId ?? null,
             'email' => $dataUser['email'],
+            'role' => $dataUser['role'] ?? 'super_admin',
             'first_name' => $dataUser['first_name'],
             'last_name' => $dataUser['last_name'] ?? null,
             'password' => Hash::make($dataUser['password']) ?? null,

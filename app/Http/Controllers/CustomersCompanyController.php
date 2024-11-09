@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
+use App\Models\Customer;
 use App\Models\CustomersCompany;
 use App\Traits\Filter;
 
@@ -11,14 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CustomersCompanyController extends Controller
-{
+{   
     use Filter;
     
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     */
+     */ 
     public function index(Request $request)
     {
         try {
@@ -28,7 +29,7 @@ class CustomersCompanyController extends Controller
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             });
-
+            
             if ($user->role === 'employee') {
                 $query->where('owner', $user->email);
             }
@@ -40,7 +41,7 @@ class CustomersCompanyController extends Controller
                     'Data perusahaan pelanggan tidak ditemukan',
                     null
                 );
-            }
+            } 
 
             $CustomersCompanies->getCollection()->transform(function ($CustomersCompany) {
                 $CustomersCompany->status = ActionMapperHelper::mapStatus($CustomersCompany->status);
@@ -70,7 +71,7 @@ class CustomersCompanyController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|unique:customers_companies,name|string|max:100',
             'industry' => 'nullable|string|max:50',
-            'status' => 'required|in:hot,warm,cold',
+            'status' => 'required|in:tinggi,sedang,rendah',
             'email' => 'nullable|email|unique:customers_companies,email|max:100',
             'phone' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
             'website' => 'nullable|string|max:255',
@@ -89,7 +90,7 @@ class CustomersCompanyController extends Controller
             'industry.string' => 'Jenis industri harus berupa teks.',
             'industry.max' => 'Jenis industri maksimal 50 karakter.',
             'status.required' => 'Status tidak boleh kosong.',
-            'status.in' => 'Status harus pilih salah satu dari: hot, warm, cold.',
+            'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
@@ -98,9 +99,9 @@ class CustomersCompanyController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter.',
-            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
-            'owner.email' => 'Pemilik kontak harus berupa email valid.',
-            'owner.max' => 'Pemilik maksimal 100 karakter.',
+            'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
+            'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
+            'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
@@ -121,9 +122,14 @@ class CustomersCompanyController extends Controller
                 null
             );
         }
-
+        
+        $data = $request->all();
+        if (isset($data['status'])) {
+            $data['status'] = ActionMapperHelper::mapStatusToDatabase($data['status']);
+        }
+        
         try {
-            $CustomersCompany = CustomersCompany::createCustomersCompany($request->all());
+            $CustomersCompany = CustomersCompany::createCustomersCompany($data);
             return new ApiResponseResource(
                 true,
                 "Data {$CustomersCompany->name} berhasil ditambahkan!", 
@@ -180,7 +186,7 @@ class CustomersCompanyController extends Controller
         }
     }
 
-    /**
+    /** 
      * Update the specified resource in storage.
      */
     public function update(Request $request, $customersCompanyId)
@@ -205,9 +211,9 @@ class CustomersCompanyController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|unique:customers_companies,name|string|max:100',
+            'name' => "sometimes|required|unique:customers_companies,name,$customersCompanyId|string|max:100",
             'industry' => 'sometimes|nullable|string|max:50',
-            'status' => 'sometimes|required|in:hot,warm,cold',
+            'status' => 'sometimes|required|in:tinggi,sedang,rendah',
             'email' => "sometimes|nullable|email|unique:customers_companies,email,$customersCompanyId|max:100",
             'phone' => "sometimes|nullable|numeric|max_digits:15|unique:customers_companies,phone,$customersCompanyId",
             'website' => 'sometimes|nullable|string|max:255',
@@ -219,7 +225,7 @@ class CustomersCompanyController extends Controller
             'zip_code' => 'sometimes|nullable|string|max:5',
             'address' => 'sometimes|nullable|string|max:100',
             'description' => 'sometimes|nullable|string|max:200',
-        ], [
+        ], [    
             'name.required' => 'Nama organisasi tidak boleh kosong.',
             'name.unique' => 'Nama organisasi sudah terdaftar.',
             'name.string' => 'Nama organisasi harus berupa teks.',
@@ -227,7 +233,7 @@ class CustomersCompanyController extends Controller
             'industry.string' => 'Jenis industri harus berupa teks.',
             'industry.max' => 'Jenis industri maksimal 50 karakter.',
             'status.required' => 'Status tidak boleh kosong.',
-            'status.in' => 'Status harus pilih salah satu dari: hot, warm, cold.',
+            'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
@@ -236,9 +242,9 @@ class CustomersCompanyController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter.',
-            'owner.required' => 'Pemilik kontak tidak boleh kosong.',
-            'owner.email' => 'Pemilik kontak harus berupa email valid.',
-            'owner.max' => 'Pemilik maksimal 100 karakter.',
+            'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
+            'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
+            'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
@@ -262,8 +268,13 @@ class CustomersCompanyController extends Controller
             );
         }
 
+        $data = $request->all();
+        if (isset($data['status'])) {
+            $data['status'] = ActionMapperHelper::mapStatusToDatabase($data['status']);
+        }
+
         try {
-            $CustomersCompany = CustomersCompany::updateCustomersCompany($request->all(), $customersCompanyId);
+            $CustomersCompany = CustomersCompany::updateCustomersCompany($data, $customersCompanyId);
             return new ApiResponseResource(
                 true, 
                 'Data perusahaan pelanggan berhasil diubah!',
@@ -283,7 +294,7 @@ class CustomersCompanyController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request)
-    {
+    {   
         $id = $request->input('id', []);
         if (empty($id)) {
             return new ApiResponseResource(
@@ -294,6 +305,8 @@ class CustomersCompanyController extends Controller
         }
         
         try {
+            Customer::nullifyCompanyAssociation($id);
+
             $deletedCount = CustomersCompany::whereIn('id', $id)->delete();
             if ($deletedCount > 0) {
                 return new ApiResponseResource(
@@ -302,13 +315,13 @@ class CustomersCompanyController extends Controller
                     null
                 );
             }
-
+            
             return new ApiResponseResource(
                 false,
                 'Data perusahaan pelanggan tidak ditemukan',
                 null
             );
- 
+            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

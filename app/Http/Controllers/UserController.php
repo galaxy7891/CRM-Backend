@@ -75,7 +75,7 @@ class UserController extends Controller
             'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
             'job_position' => 'sometimes|required|max:50',
             'role' => 'sometimes|required|in:super_admin,admin,employee',
-            'gender' => 'sometimes|nullable|in:male,female,other',
+            'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
         ], [
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
@@ -94,7 +94,7 @@ class UserController extends Controller
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
-            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
+            'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -103,9 +103,14 @@ class UserController extends Controller
                 null
             );
         }
+        
+        $data = $request->all();
+        if (isset($data['gender'])) {
+            $data['gender'] = ActionMapperHelper::mapGenderToDatabase($data['gender']);
+        }
 
         try {
-            $updatedUser = User::updateUser($request->all(), $user->id);
+            $updatedUser = User::updateUser($data, $user->id);
 
             return new ApiResponseResource(
                 true,
@@ -412,15 +417,15 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse 
      */
     public function getSummary()
-    {   
+    {    
         $user = auth()->user();
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
-
+        
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
         
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
-
+        
         $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');

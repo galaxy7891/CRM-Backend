@@ -35,5 +35,4 @@ trait Filter
 
         return $query->paginate($perPage);
     }
-
 }

@@ -106,16 +106,28 @@ class Customer extends Model
     }
 
     /**
+     * Nullify the `customers_company_id` for all customers related to the specified company IDs.
+     *
+     * @param array $companyIds
+     * @return int Number of customers updated
+     */
+    public static function nullifyCompanyAssociation(array $customerCompanyIds): int
+    {
+        return self::whereIn('customers_company_id', $customerCompanyIds)
+            ->update(['customers_company_id' => null]);
+    }
+
+    /**
      * Count Customer User by Category
      * 
      * @param string $email
      * @param string $category
      * @return int
      */ 
-    public static function countCustomerSummary($email, $category, $role, $userCompanyId)
+    public static function countCustomerSummary($email, $category, $role, $userCompanyIds)
     {   
-        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
-            $ownerQuery->where('user_company_id', $userCompanyId);
+        $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyIds) {
+            $ownerQuery->where('user_company_id', $userCompanyIds);
         }); 
         
         $query->where('customerCategory', $category);

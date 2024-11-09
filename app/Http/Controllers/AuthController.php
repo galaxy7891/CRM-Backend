@@ -229,6 +229,8 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         $user = auth()->user();
+        $userCompany = $user->company;
+
         return new ApiResponseResource(
             true,
             'Token berhasil dibuat',
@@ -237,6 +239,7 @@ class AuthController extends Controller
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60,
                 'user' => [
+                   'id' => $user->id,
                    'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
                    'email' => $user->email,
                    'phone' => $user->phone,
@@ -244,6 +247,7 @@ class AuthController extends Controller
                    'role' => $user->role,
                    'gender' => $user->gender,
                    'photo' => $user->image_url,
+                   'company_id' => $userCompany ? $userCompany->id : null
                 ]
             ],
         );

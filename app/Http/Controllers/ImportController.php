@@ -46,7 +46,7 @@ class ImportController extends Controller
                     break;
 
                 case 'products':
-                    $import = new ProductsImport($user->email);
+                    $import = new ProductsImport($user->company->id);
                     $model = 'product';
                     break;
 

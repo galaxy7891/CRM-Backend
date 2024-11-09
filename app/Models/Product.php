@@ -43,6 +43,16 @@ class Product extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
+     * The deals that belong to the product.
+     */
+    public function deals()
+    {
+        return $this->belongsToMany(Deal::class, 'deals_products', 'product_id', 'deals_id')
+                    ->withPivot('quantity', 'unit')
+                    ->withTimestamps();
+    }
+    
+    /**
      * Get the user company that owns the product.
      * 
      * This defines a many-to-one relationship where the user belongs to a company.
@@ -105,8 +115,8 @@ class Product extends Model
         }
 
         return self::create([
-            'user_company_id' => $data['user_company_id'],
             'name' => $data['name'],
+            'user_company_id' => $data['user_company_id'],
             'category' => $data['category'],
             'code' => $data['code'] ?? null,
             'quantity' => $data['quantity'] ?? null,
@@ -122,6 +132,17 @@ class Product extends Model
     {
         $product = self::findOrFail($productId);
 
+        if (isset($dataProduct['photo_product'])) {
+            $uploadResult = $product->uploadPhoto($dataProduct['photo_product']);
+            $photoUrl = $uploadResult['image_url'];
+            $publicId = $uploadResult['image_public_id'];
+
+            $product->update([
+                'image_url' => $photoUrl,
+                'image_public_id' => $publicId,
+            ]);
+        }
+
         $product->update([
             'name' => $dataProduct['name'] ?? $product->name,
             'category' => $dataProduct['category'] ?? $product->category,
@@ -132,8 +153,9 @@ class Product extends Model
             'description' => $dataProduct['description'] ?? $product->description,
         ]);
 
-        return $product; 
+        return $product;
     }
+
 
     /**
      * Update the photo product URL and public_id of the product.

@@ -175,7 +175,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
             $validator = Validator::make($row->toArray(), [
                 'nama_perusahaan' => 'required|unique:customers_companies,name|string|max:100',
                 'jenis_industri' => 'nullable|string|max:50',
-                'status' => 'required|in:hot,warm,cold',
+                'status' => 'required|in:tinggi,sedang,rendah',
                 'email' => 'nullable|email|unique:customers_companies,email|max:100',
                 'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
                 'website' => 'nullable|unique:customers_companies,website|string|max:255',
@@ -193,7 +193,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 'jenis_industri.string' => 'Jenis industri harus berupa teks.',
                 'jenis_industri.max' => 'Jenis industri maksimal 50 karakter.',
                 'status.required' => 'Status wajib diisi.',
-                'status.in' => 'Status harus pilih salah satu dari: hot, warm, cold.',
+                'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'email.max' => 'Email maksimal 100 karakter.',

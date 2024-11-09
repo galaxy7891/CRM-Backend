@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
+use App\Models\Customer;
 use App\Models\Deal;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
@@ -26,6 +27,9 @@ class DealController extends Controller
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
                 $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
+
+                $customer = Customer::where('id', $deal->customer_id)->first(['first_name', 'last_name']);
+                $deal->customer_name = $customer ? trim(ucfirst($customer->first_name) . ' ' . ucfirst($customer->last_name)) : null;
 
                 return $deal;
             });
@@ -54,14 +58,14 @@ class DealController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'status' => 'required|in:hot,warm,cold',
+            'status' => 'required|in:tinggi,sedang,rendah',
             'tag' => 'nullable|string|max:255',
-            'stage' => 'required|in:qualificated,proposal,negotiate,won,lose',
+            'stage' => 'required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
             'open_date' => 'required|date',
             'close_date' => 'nullable|date',
             'expected_close_date' => 'required|date',
             'value_estimated' => 'nullable|numeric|max_digits:20',
-            'payment_category' => 'required|in:once,daily,monthly,yearly',
+            'payment_category' => 'required|in:sekali,hari,bulan,tahun',
             'payment_duration' => 'nullable|integer',
             'owner' => 'required|email|max:100',
         ], [
@@ -72,11 +76,11 @@ class DealController extends Controller
             'name.max' => 'Nama maksimal 100 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'status.required' => 'Status wajib dipilih.',
-            'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
+            'status.in' => 'Status harus pilih salah satu: tinggi, sedang, atau rendah.',
             'tag.string' => 'Tag harus berupa teks.',
             'tag.max' => 'Tag maksimal 255 karakter.',
-            'stage.required' => 'Status tidak boleh kosong.',
-            'stage.in' => 'Status harus pilih salah satu: qualificated,proposal,negotiate,won,lose.',
+            'stage.required' => 'Tahapan tidak boleh kosong.',
+            'stage.in' => 'Tahapan harus pilih salah satu: kualifikasi, proposal,negosiasi, tercapai, atau gagal',
             'open_date.required' => 'Tanggal buka tidak boleh kosong.',
             'open_date.date' => 'Tanggal buka harus berupa tanggal.',
             'close_date.date' => 'Tanggal tutup harus berupa tanggal.',
@@ -85,11 +89,11 @@ class DealController extends Controller
             'value_estimated.numeric' => 'Perkiraan pembayaran harus berupa angka.',
             'value_estimated.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.',
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong.',
-            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: once,daily,monthly,yearly.',
+            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: sekali, harian, bulanan, tahunan.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
-            'owner.required' => 'Pemilik tidak boleh kosong.',
-            'owner.emaik' => 'Pemilik harus berupa email.',
-            'owner.max' => 'Pemilik maksimal 100 karakter.',
+            'owner.required' => 'Penanggung jawab tidak boleh kosong.',
+            'owner.email' => 'Penanggung jawab harus berupa email.',
+            'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -98,9 +102,19 @@ class DealController extends Controller
                 null
             );
         }
+        $dataDeals = $request->all();
+        if (isset($dataDeals['status'])) {
+            $dataDeals['status'] = ActionMapperHelper::mapStatusToDatabase($dataDeals['status']);
+        }
+        if (isset($dataDeals['stage'])) {
+            $dataDeals['stage'] = ActionMapperHelper::mapStageDealToDatabase($dataDeals['stage']);
+        }
+        if (isset($dataDeals['payment_category'])) {
+            $dataDeals['payment_category'] = ActionMapperHelper::mapPaymentCategoryToDatabase($dataDeals['payment_category']);
+        }
 
         try {
-            $deal = Deal::createDeal($request->all());
+            $deal = Deal::createDeal($dataDeals);
             return new ApiResponseResource(
                 true,
                 'Data deals berhasil ditambahkan',
@@ -122,22 +136,25 @@ class DealController extends Controller
     public function show($id)
     {
         try {
-            $deals = Deal::findDealsById($id);
-            if (is_null($deals)) {
+            $deal = Deal::findDealsById($id);
+            if (is_null($deal)) {
                 return new ApiResponseResource(
                     false,
                     'Data deals tidak ditemukan!',
                     null
                 );
             }
-            $deals->status = ActionMapperHelper::mapStatus($deals->status);
-            $deals->stage = ActionMapperHelper::mapStageDeal($deals->stage);
-            $deals->payment_category = ActionMapperHelper::mapPaymentCategory($deals->payment_category);
+            $deal->status = ActionMapperHelper::mapStatus($deal->status);
+            $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
+            $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
             
+            $customer = Customer::where('id', $deal->customer_id)->first(['first_name', 'last_name']);
+                $deal->customer_name = $customer ? trim(ucfirst($customer->first_name) . ' ' . ucfirst($customer->last_name)) : null;
+
             return new ApiResponseResource(
                 true,
                 'Data deals', 
-                $deals 
+                $deal 
             );
             
         } catch (\Exception $e) {
@@ -167,14 +184,14 @@ class DealController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'status' => 'required|in:hot,warm,cold',
+            'status' => 'required|in:tinggi,sedang,rendah',
             'tag' => 'nullable|string|max:255',
-            'stage' => 'required|in:qualificated,proposal,negotiate,won,lose',
+            'stage' => 'required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
             'open_date' => 'required|date',
             'close_date' => 'nullable|date',
             'expected_close_date' => 'required|date',
             'value_estimated' => 'nullable|numeric|max_digits:20',
-            'payment_category' => 'required|in:once,daily,monthly,yearly',
+            'payment_category' => 'required|in:sekali,hari,bulan,tahun',
             'payment_duration' => 'nullable|integer',
             'owner' => 'required|email|max:100',
         ], [
@@ -185,7 +202,7 @@ class DealController extends Controller
             'name.max' => 'Nama maksimal 100 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'status.required' => 'Status wajib dipilih.',
-            'status.in' => 'Status harus pilih salah satu: hot, warm, atau cold.',
+            'status.in' => 'Status harus pilih salah satu: tinggi, sedang, atau rendah.',
             'tag.string' => 'Tag harus berupa teks.',
             'tag.max' => 'Tag maksimal 255 karakter.',
             'stage.required' => 'Status tidak boleh kosong.',
@@ -200,9 +217,9 @@ class DealController extends Controller
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong.',
             'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: once,daily,monthly,yearly.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
-            'owner.required' => 'Pemilik tidak boleh kosong.',
-            'owner.emaik' => 'Pemilik harus berupa email.',
-            'owner.max' => 'Pemilik maksimal 100 karakter.',
+            'owner.required' => 'Penanggung jawab tidak boleh kosong.', 
+            'owner.email' => 'Penanggung jawab harus berupa email.',
+            'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -212,8 +229,19 @@ class DealController extends Controller
             );
         }
 
+        $dataDeals = $request->all();
+        if (isset($dataDeals['status'])) {
+            $dataDeals['status'] = ActionMapperHelper::mapStatusToDatabase($dataDeals['status']);
+        }
+        if (isset($dataDeals['stage'])) {
+            $dataDeals['stage'] = ActionMapperHelper::mapStageDealToDatabase($dataDeals['stage']);
+        }
+        if (isset($dataDeals['payment_category'])) {
+            $dataDeals['payment_category'] = ActionMapperHelper::mapPaymentCategoryToDatabase($dataDeals['payment_category']);
+        }
+        
         try {
-            $deals = Deal::updateDeal($request->all(), $id);
+            $deals = Deal::updateDeal($dataDeals, $id);
             return new ApiResponseResource(
                 true, 
                 'Data deals berhasil diubah!', 

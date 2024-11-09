@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\User;
 use App\Traits\Filter;
@@ -121,7 +122,6 @@ class EmployeeController extends Controller
             'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
         ]);
-
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -129,13 +129,17 @@ class EmployeeController extends Controller
                 null
             );
         }
-
+        
+        $data = $request->all();
+        if (isset($data['gender'])) {
+            $data['gender'] = ActionMapperHelper::mapGenderToDatabase($data['gender']);
+        }
+        
         try {
-
-            $user = User::updateUser($request->all(), $employeeId);
+            $user = User::updateUser($data, $employeeId);
             return new ApiResponseResource(
                 true, 
-                "Data karyawan {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
+                'Data karyawan ' .  ucfirst($user->first_name) . ucfirst($user->last_name) . " berhasil diubah",
                 $user
             );
 
@@ -154,7 +158,6 @@ class EmployeeController extends Controller
      */
     public function destroy(Request $request)
     {
-        
         $id = $request->input('id', []);
         if (empty($id)) {
             return new ApiResponseResource(

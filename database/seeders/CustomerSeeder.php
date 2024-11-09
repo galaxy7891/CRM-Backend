@@ -33,7 +33,7 @@ class CustomerSeeder extends Seeder
             'village' => 'Kemayoran Baru',
             'zip_code' => '12345'
         ]);
-
+        
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174002',
             'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
@@ -75,7 +75,7 @@ class CustomerSeeder extends Seeder
         ]);
 
         Customer::create([
-            'id' => '123e4567-e89b-12d3-a456-426614174004',
+            'id' => '123e4367-e89b-12d3-a456-426214154004',
             'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
             'first_name' => 'Rani',
             'last_name' => 'Putri',

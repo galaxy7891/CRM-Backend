@@ -145,6 +145,18 @@ class ActionMapperHelper
                 return $categoryProduct;
         }
     }
+    
+    public static function mapCategoryProductToDatabase($categoryProduct)
+    {
+        switch ($categoryProduct) {
+            case 'barang':
+                return 'stuff';
+            case 'jasa':
+                return 'service';
+            default:
+                return $categoryProduct;
+        }
+    }
 
     public static function mapStatus($status)
     {
@@ -155,6 +167,20 @@ class ActionMapperHelper
                 return 'Sedang';
             case 'hot':
                 return 'Tinggi';
+            default:
+                return $status;
+        }
+    }
+
+    public static function mapStatusToDatabase($status)
+    {
+        switch ($status) {
+            case 'rendah':
+                return 'cold';
+            case 'sedang':
+                return 'warm';
+            case 'tinggi':
+                return 'hot';
             default:
                 return $status;
         }
@@ -187,6 +213,20 @@ class ActionMapperHelper
                 return $gender;
         }
     }
+ 
+    public static function mapGenderToDatabase($status)
+    {
+        switch ($status) {
+            case 'laki-laki':
+                return 'male';
+            case 'perempuan':
+                return 'female';
+            case 'lainnya':
+                return 'other';
+            default:
+                return $status;
+        }
+    }
     
     public static function mapStageDeal($stage)
     {
@@ -205,6 +245,24 @@ class ActionMapperHelper
                 return $stage;
         }
     }
+    
+    public static function mapStageDealToDatabase($stage)
+    {
+        switch ($stage) {
+            case 'kualifikasi':
+                return 'qualificated';
+            case 'proposal':
+                return 'proposal';
+            case 'negosiasi':
+                return 'negotiate';
+            case 'tercapai':
+                return 'won';
+            case 'gagal':
+                return 'lose';
+            default:
+                return $stage;
+        }
+    }
 
     public static function mapPaymentCategory($paymentCategory)
     {
@@ -217,6 +275,22 @@ class ActionMapperHelper
                 return 'Bulanan';
             case 'yearly':
                 return 'Tahunan';
+            default:
+                return $paymentCategory;
+        }
+    }
+
+    public static function mapPaymentCategoryToDatabase($paymentCategory)
+    {
+        switch ($paymentCategory) {
+            case 'sekali':
+                return 'once';
+            case 'harian':
+                return 'daily';
+            case 'bulanan':
+                return 'monthly';
+            case 'tahunan':
+                return 'yearly';
             default:
                 return $paymentCategory;
         }

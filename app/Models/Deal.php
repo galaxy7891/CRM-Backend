@@ -45,6 +45,16 @@ class Deal extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'open_date', 'close_date', 'expected_close_date'];
 
     /**
+     * The products that belong to the deal.
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id')
+                    ->withPivot('quantity', 'unit')
+                    ->withTimestamps();
+    }
+
+    /**
      * Get the customer that owns the deal.
      * Get the user that owns the deal.
      * 
@@ -61,10 +71,6 @@ class Deal extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'owner', 'email');
-    }
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id');
     }
 
     /**

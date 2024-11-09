@@ -12,7 +12,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
-    protected $owner;
+    protected $userCompanyId;
     protected $validData = [];
     protected $failedData = [];
     protected $summaryData = [
@@ -39,9 +39,9 @@ class ProductsImport implements ToCollection, WithHeadingRow
         return $this->summaryData;
     }
 
-    public function __construct($owner)
+    public function __construct($userCompanyId)
     {
-        $this->owner = $owner;
+        $this->userCompanyId = $userCompanyId;
     }
 
     public function collection($rows)
@@ -189,6 +189,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
             // Simpan data valid
             $this->validData[] = [
                 'name' => $row['nama_produk'],
+                'user_company_id'=> $this->userCompanyId, 
                 'category' => $row['kategori_produk'],
                 'code' => $row['kode_produk'],
                 'quantity' => $row['jumlah_produk'],
@@ -218,7 +219,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
     public function headingRowValidator($row)
     {
         $expectedHeadings = [
-            'nama_produk', 
+            'nama_produk',
             'kode_produk',
             'kategori_produk', 
             'jumlah_produk', 
@@ -228,7 +229,6 @@ class ProductsImport implements ToCollection, WithHeadingRow
         ];
         $fileHeadings = array_keys($row->toArray());
 
-        // Cek apakah semua heading sesuai dengan yang diharapkan
         if ($fileHeadings !== $expectedHeadings) {
             throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
         }

@@ -56,9 +56,10 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|unique:products,name',
-            'category' => 'required|string|max:100',
+            'category' => 'required|in:barang,jasa|max:100',
             'code' => 'required|string|max:100',
             'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
             'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
@@ -71,7 +72,7 @@ class ProductController extends Controller
             'name.max' => 'Nama produk maksimal 100 karakter.',
             'name.unique' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
-            'category.string' => 'Kategori produk harus berupa teks.',
+            'category.in' => 'Kategori produk harus pilih salah satu: barang atau jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode tidak boleh kosong.',
             'code.string' => 'Kode harus berupa string.',
@@ -100,11 +101,13 @@ class ProductController extends Controller
             );
         }
 
-        try {
-            $user = auth()->user();
-            $productData = $request->all();
-            $productData['user_company_id'] = $user->user_company_id;
+        $productData = $request->all();
+        if (isset($productData['category'])) {
+            $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
+        }
+        $productData['user_company_id'] = $user->company->id;
 
+        try {
             $product = Product::createProduct($productData);
             return new ApiResponseResource(
                 true,
@@ -157,7 +160,7 @@ class ProductController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $productId)
-    {
+    {   
         $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
@@ -175,6 +178,7 @@ class ProductController extends Controller
             'unit' => 'sometimes|required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
+            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -198,6 +202,9 @@ class ProductController extends Controller
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
             'description.string' => 'Harga maksimal 20 digit.',
+            'photo_product.image' => 'Foto produk harus berupa gambar.',
+            'photo_product.max' => 'Foto produk tidak sesuai format.',
+            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -207,8 +214,13 @@ class ProductController extends Controller
             );
         }
         
+        $productData = $request->all();
+        if (isset($productData['category'])) {
+            $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
+        }
+
         try {
-            $updatedProduct = Product::updateProduct($request->all(), $productId);
+            $updatedProduct = Product::updateProduct($productData, $productId);
             return new ApiResponseResource(
                 true,
                 "Data produk {$updatedProduct->name} berhasil diubah",
@@ -277,8 +289,8 @@ class ProductController extends Controller
      */
     public function destroy(Request $request)
     { 
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
                 true,
                 "Pilih data yang ingin dihapus terlebih dahulu",
@@ -286,20 +298,37 @@ class ProductController extends Controller
             );
         }
         
+        $productsWithDeals = [];
+        $productsWithoutDeals = [];
+        $productsWithDealsNames = [];
+    
+        foreach ($ids as $productId) {
+            $product = Product::find($productId);
+            if (!$product) {
+                continue;
+            }
+
+            if ($product && $product->deals()->exists()) {
+                $productsWithDeals[] = $product->id;
+                $productsWithDealsNames[] = ucfirst($product->name);
+                
+            } else {
+                $productsWithoutDeals[] = $product->id;
+            }
+        }
+
         try {
-            $deletedCount = Product::whereIn('id', $id)->delete();
-            if ($deletedCount > 0) {
-                return new ApiResponseResource(
-                    true,
-                    $deletedCount . ' data produk berhasil dihapus',
-                    null
-                );
+            $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
+
+            $message = $deletedCount . " data produk berhasil dihapus. ";
+            if (count($productsWithDeals) > 0) {
+                $message .= count($productsWithDeals) . " data produk tidak dapat dihapus karena terhubung dengan data deals.";
             }
 
             return new ApiResponseResource(
-                false,
-                'Data produk tidak ditemukan',
-                null
+                true,
+                $message,
+                $productsWithDealsNames
             );
  
         } catch (\Exception $e) {
