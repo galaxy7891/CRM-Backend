@@ -162,11 +162,11 @@ class ActionMapperHelper
     {
         switch ($status) {
             case 'cold':
-                return 'Rendah';
+                return 'rendah';
             case 'warm':
-                return 'Sedang';
+                return 'sedang';
             case 'hot':
-                return 'Tinggi';
+                return 'tinggi';
             default:
                 return $status;
         }
