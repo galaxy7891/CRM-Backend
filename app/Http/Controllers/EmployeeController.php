@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -20,7 +21,8 @@ class EmployeeController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = User::where('user_company_id', $user->user_company_id);
+            $query = User::where('user_company_id', $user->user_company_id)
+                ->where('id', '!=', $user->id);
             
             $employee = $this->applyFilters($request, $query);
             if (!$employee) {
@@ -95,8 +97,8 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$employeeId",
-            'email' => "sometimes|required|email|unique:users,email,$employeeId",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($employeeId)->whereNull('deleted_at'),
+            'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($employeeId)->whereNull('deleted_at'),
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
             'role' => 'sometimes|required|in:super_admin,admin,employee',

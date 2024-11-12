@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -137,14 +138,14 @@ class ProductsImport implements ToCollection, WithHeadingRow
 
             // Validasi data menggunakan Validator
             $validator = Validator::make($rowArray, [
-                'nama_produk' => 'required|string|max:100|unique:products,name',
+                'nama_produk' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
                 'kode_produk' => 'required|string|max:100',
                 'kategori_produk' => 'nullable|in:barang,jasa',
-                'jumlah_produk' => 'required_if:kategori_produk,barang|numeric|min:0|prohibited_if:kategori_produk,jasa',
-                'satuan_produk' => 'required_if:kategori_produk,barang|in:box,pcs,unit|prohibited_if:kategori_produk,jasa',
+                'jumlah_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|numeric|min:0',
+                'satuan_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|in:box,pcs,unit',
                 'harga_produk' => 'required|numeric|min:0|max_digits:20',
                 'deskripsi' => 'required|string',
-            ], [
+            ], [ 
                 'nama_produk.required' => 'Nama produk tidak boleh kosong.',
                 'nama_produk.string' => 'Nama produk harus berupa teks.',
                 'nama_produk.max' => 'Nama produk maksimal 100 karakter.',

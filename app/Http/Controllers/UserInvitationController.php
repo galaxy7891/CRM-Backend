@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserInvitationController extends Controller
 {
@@ -24,7 +25,7 @@ class UserInvitationController extends Controller
     public function sendInvitation(Request $request)
     {
         $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|unique:users,email|max:100',
+            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
@@ -100,12 +101,12 @@ class UserInvitationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'email' => 'required|email|unique:users,email|max:100',
+            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|min:8|same:password',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
+            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->whereNull('deleted_at'),
         ], [
             'token.required' => 'Token tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',

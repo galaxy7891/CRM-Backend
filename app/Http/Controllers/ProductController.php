@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -58,11 +59,11 @@ class ProductController extends Controller
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:products,name',
+            'name' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
             'category' => 'required|in:barang,jasa|max:100',
             'code' => 'required|string|max:100',
-            'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
-            'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
+            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -77,13 +78,13 @@ class ProductController extends Controller
             'code.required' => 'Kode tidak boleh kosong.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk harus lebih dari 0.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
@@ -171,11 +172,11 @@ class ProductController extends Controller
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => "sometimes|required|string|max:100|unique:products,name,$productId",
-            'category' => 'sometimes|required|string|max:100',
+            'name' => 'sometimes|required|string|max:100|'. Rule::unique('products', 'name')->ignore($productId)->whereNull('deleted_at'),
+            'category' => 'sometimes|required|in:barang,jasa|max:100',
             'code' => 'sometimes|required|string|max:100',
-            'quantity' => 'sometimes|required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
-            'unit' => 'sometimes|required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
+            'quantity' => 'sometimes|required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
+            'unit' => 'sometimes|required_if:category,barang|in:box,pcs,unit|prohibited_if:category,jasa',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -190,13 +191,13 @@ class ProductController extends Controller
             'code.required' => 'Kode tidak boleh kosong.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk harus lebih dari 0.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',

@@ -36,7 +36,7 @@ class CustomerSeeder extends Seeder
                 'zip_code' => '12345'
             ]);
         }
-
+        
         for ($i = 50; $i < 100; $i++) {
             Customer::create([
                 'id' => '123e4567-e89b-12d3-a456-4266141' . $i,

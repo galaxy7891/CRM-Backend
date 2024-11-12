@@ -7,6 +7,7 @@ use App\Models\UsersCompany;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UsersCompaniesController extends Controller
 {
@@ -62,10 +63,10 @@ class UsersCompaniesController extends Controller
         }
         
         $validator = Validator::make($request->all(), [
-            'name' => "sometimes|required|string|max:100|unique:users_companies,name,$userCompanyId",
+            'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->ignore($userCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|required|string|max:50',
-            'email' => "sometimes|nullable|email|unique:users_companies,email,$userCompanyId",
-            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:users_companies,phone,$userCompanyId",
+            'email' => 'sometimes|nullable|email|'.  Rule::unique('users_companies', 'email')->ignore($userCompanyId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|nullable|numeric|max_digits:15|'.  Rule::unique('users_companies', 'phone')->ignore($userCompanyId)->whereNull('deleted_at'),
             'website' => 'sometimes|nullable|string|max:255',
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',

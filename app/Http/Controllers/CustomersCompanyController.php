@@ -10,6 +10,7 @@ use App\Traits\Filter;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CustomersCompanyController extends Controller
 {   
@@ -69,11 +70,11 @@ class CustomersCompanyController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:customers_companies,name|string|max:100',
+            'name' => 'required|string|max:100|'. Rule::unique('customers_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'nullable|string|max:50',
             'status' => 'required|in:tinggi,sedang,rendah',
-            'email' => 'nullable|email|unique:customers_companies,email|max:100',
-            'phone' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
+            'email' => 'nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->whereNull('deleted_at'),
+            'phone' => 'nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->whereNull('deleted_at'),
             'website' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100',
             'province' => 'nullable|string|max:100',
@@ -211,11 +212,11 @@ class CustomersCompanyController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => "sometimes|required|unique:customers_companies,name,$customersCompanyId|string|max:100",
+            'name' => 'sometimes|required|string|max:100|'. Rule::unique('customers_companies', 'name')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|nullable|string|max:50',
             'status' => 'sometimes|required|in:tinggi,sedang,rendah',
-            'email' => "sometimes|nullable|email|unique:customers_companies,email,$customersCompanyId|max:100",
-            'phone' => "sometimes|nullable|numeric|max_digits:15|unique:customers_companies,phone,$customersCompanyId",
+            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->ignore($customersCompanyId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'website' => 'sometimes|nullable|string|max:255',
             'owner' => 'sometimes|required|email|max:100',
             'province' => 'sometimes|nullable|string|max:100',

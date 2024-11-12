@@ -9,6 +9,7 @@ use App\Http\Resources\ApiResponseResource;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -67,13 +68,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'google_id' => 'nullable|string|unique:users,google_id',
-            'email' => 'required|email|unique:users,email',
+            'google_id' => 'nullable|string|'. Rule::unique('users', 'google_id')->whereNull('deleted_at'),
+            'email' => 'required|email|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|min:8',
             'password_confirmation' => 'required|min:8|same:password',
-            'phone' => 'required|numeric|max_digits:15|unique:users,phone',
+            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->whereNull('deleted_at'),
             'job_position' => 'required|max:50',
             'name' => 'required|max:100',
             'industry' => 'required|max:50',

@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\CustomersCompany;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -155,8 +156,8 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 'deskripsi' => 'nullable|string',
                 'status' => 'required|in:tinggi,sedang,rendah',
                 'tanggal_lahir' => 'nullable|date',
-                'email' => 'nullable|email|unique:customers,email|max:100',
-                'nomor_telepon' => 'required|numeric|max_digits:15|unique:customers,phone',
+                'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
+                'nomor_telepon' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
                 'kecamatan' => 'nullable|string|max:100',

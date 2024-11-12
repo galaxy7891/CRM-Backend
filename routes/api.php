@@ -56,7 +56,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::delete('/user', [UserController::class, 'destroy']);
         
         Route::get('/users/companies', [UsersCompaniesController::class, 'index']);
-
+        
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
         Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
         Route::post('/leads', [CustomerController::class, 'storeLeads']);

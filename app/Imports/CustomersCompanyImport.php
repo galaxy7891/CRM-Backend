@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -173,12 +174,12 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
 
             // Validasi data menggunakan Validator
             $validator = Validator::make($row->toArray(), [
-                'nama_perusahaan' => 'required|unique:customers_companies,name|string|max:100',
+                'nama_perusahaan' => 'required|string|max:100|'.  Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
                 'jenis_industri' => 'nullable|string|max:50',
                 'status' => 'required|in:tinggi,sedang,rendah',
-                'email' => 'nullable|email|unique:customers_companies,email|max:100',
-                'nomor_telepon' => 'nullable|numeric|max_digits:15|unique:customers_companies,phone',
-                'website' => 'nullable|unique:customers_companies,website|string|max:255',
+                'email' => 'nullable|email|max:100|'.  Rule::unique('users_companies', 'email')->whereNull('deleted_at'),
+                'nomor_telepon' => 'nullable|numeric|max_digits:15|'. Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
+                'website' => 'nullable|string|max:255|'. Rule::unique('users_companies', 'website')->whereNull('deleted_at'),
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
                 'kecamatan' => 'nullable|string|max:100',
