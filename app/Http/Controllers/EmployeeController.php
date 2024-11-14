@@ -20,7 +20,8 @@ class EmployeeController extends Controller
     {
         try {
             $user = auth()->user();
-            $query = User::where('user_company_id', $user->user_company_id);
+            $query = User::where('user_company_id', $user->user_company_id)
+                ->where('id', '!=', $user->id);
             
             $employee = $this->applyFilters($request, $query);
             if (!$employee) {

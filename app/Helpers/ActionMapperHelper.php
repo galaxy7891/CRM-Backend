@@ -17,10 +17,10 @@ class ActionMapperHelper
             'UPDATE' => 'Perbarui',
             'DELETE' => 'Hapus',
         ];
-    
+
         return $actionMapping[$action] ?? $action;
     }
-    
+
     public static function mapActionDesc(string $action): string
     {
         $actionMapping = [
@@ -71,7 +71,7 @@ class ActionMapperHelper
             'code' => 'kode',
             'expired_at' => 'kadaluarsa',
         ];
-        
+
         $modelSpecificMapping = [
             'users_companies' => [
                 'name' => 'nama perusahaan user',
@@ -107,7 +107,7 @@ class ActionMapperHelper
                 'stage' => 'tahapan',
                 'open_date' => 'tanggal pembukaan',
                 'close_date' => 'tanggal penutupan',
-                'expected_close_date' => 'tanggal perkiraan penutupan', 
+                'expected_close_date' => 'tanggal perkiraan penutupan',
                 'value_estimated' => 'perkiraan nilai',
                 'value_actual' => 'nilai sebenarnya',
                 'payment_category' => 'kategori pembayaran',
@@ -126,11 +126,11 @@ class ActionMapperHelper
                 'image_url' => 'foto produk',
             ],
         ];
-    
+
         if (isset($modelSpecificMapping[$modelName][$propertiesName])) {
             return $modelSpecificMapping[$modelName][$propertiesName];
         }
-    
+
         return $commonMapping[$propertiesName] ?? $propertiesName;
     }
 
@@ -138,14 +138,14 @@ class ActionMapperHelper
     {
         switch ($categoryProduct) {
             case 'stuff':
-                return 'Barang';
+                return 'barang';
             case 'service':
-                return 'Jasa';
+                return 'jasa';
             default:
                 return $categoryProduct;
         }
     }
-    
+
     public static function mapCategoryProductToDatabase($categoryProduct)
     {
         switch ($categoryProduct) {
@@ -185,7 +185,7 @@ class ActionMapperHelper
                 return $status;
         }
     }
-    
+
     public static function mapRole($role)
     {
         switch ($role) {
@@ -213,7 +213,7 @@ class ActionMapperHelper
                 return $gender;
         }
     }
- 
+
     public static function mapGenderToDatabase($status)
     {
         switch ($status) {
@@ -227,7 +227,7 @@ class ActionMapperHelper
                 return $status;
         }
     }
-    
+
     public static function mapStageDeal($stage)
     {
         switch ($stage) {
@@ -245,7 +245,7 @@ class ActionMapperHelper
                 return $stage;
         }
     }
-    
+
     public static function mapStageDealToDatabase($stage)
     {
         switch ($stage) {
@@ -300,17 +300,17 @@ class ActionMapperHelper
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);
         $description = '';
-        
+
         switch ($log->action) {
             case 'CREATE':
                 $description = self::mapCreateDescription($log, $modelName, $changes, $userName);
                 break;
-            // case 'UPDATE':
-            //     $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
-            //     break;
-            // case 'DELETE':
-            //     $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
-            //     break;
+            case 'UPDATE':
+                $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
+                break;
+            case 'DELETE':
+                $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
+                break;
         }
 
         return $description;
@@ -342,7 +342,7 @@ class ActionMapperHelper
                 break;
 
             case 'deals':
-                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
 
@@ -366,7 +366,7 @@ class ActionMapperHelper
             case 'users':
                 $isSelfUpdate = $log->user->id === ($changes['id']['new'] ?? null);
                 $employeeName = User::getUserNameById($changes['id']['new']);
-                
+
                 if ($isSelfUpdate) {
                     return self::mapSelfUpdateDescription($changes, $userName);
                 } else {
@@ -377,25 +377,25 @@ class ActionMapperHelper
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Leads ' . $customerName;
                 break;
-                
+
             case 'contact':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Kontak ' . $customerName;
                 break;
 
-            case 'deals':  
+            case 'deals':
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return self::mapDealsUpdateDescription($changes, $userName, $dealsName);
 
             case 'customers_companies':
                 $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
-                return $userName . ' memperbarui data Perusahaan ' . $changes['name']['new'];
-         
-            case 'products': 
+                return $userName . ' memperbarui data Perusahaan ' . $userCompaniesName;
+
+            case 'products':
                 $productName = Product::getProductNameById($changes['id']['new']);
-                $quantityOld = $changes['quantity']['old']?? '';
-                $quantityNew = $changes['quantity']['new']?? '';
-                if (isset($quantityNew)){
+                $quantityOld = $changes['quantity']['old'] ?? '';
+                $quantityNew = $changes['quantity']['new'] ?? '';
+                if (isset($quantityNew)) {
                     return $userName . ' memperbarui data jumlah Produk ' . $productName . ' dari ' . $quantityOld . ' menjadi ' . $quantityNew;
                 }
 
@@ -414,23 +414,23 @@ class ActionMapperHelper
 
             case 'users':
                 return $userName . ' menghapus akunnya';
-            
-            // case 'customers':
-            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
-            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
 
-            //     if ($customerCategory === 'leads') {
-            //         return $userName . ' menghapus data Leads ' . $customerName;
-            //     } elseif ($customerCategory === 'contact') {
-            //         return $userName . ' menghapus data Kontak ' . $customerName;
-            //     }
-            //     break;
+                // case 'customers':
+                //     $customerCategory = $changes['customerCategory']['new'] ?? '';
+                //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
+
+                //     if ($customerCategory === 'leads') {
+                //         return $userName . ' menghapus data Leads ' . $customerName;
+                //     } elseif ($customerCategory === 'contact') {
+                //         return $userName . ' menghapus data Kontak ' . $customerName;
+                //     }
+                //     break;
 
             case 'leads':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' menghapus data Leads ' . $customerName;
                 break;
-            
+
             case 'contact':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
                 return $userName . ' menghapus data Kontak ' . $customerName;
@@ -456,10 +456,8 @@ class ActionMapperHelper
     {
         if (isset($changes['password'])) {
             return $userName . ' memperbarui passwordnya';
-
         } elseif (isset($changes['image_url'])) {
             return $userName . ' memperbarui foto profilnya';
-        
         } else {
             return $userName . ' memperbarui data dirinya';
         }
@@ -474,14 +472,12 @@ class ActionMapperHelper
             if ($stageNew !== 'won' && $stageNew !== 'lost') {
                 return $userName . ' memindahkan tahap Deals ' . $dealsName .
                     ' dari ' . $stageOld . ' menjadi ' . $stageNew;
-
             } elseif ($stageNew == 'won') {
-                $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.')?? '';
-                return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual . 
+                $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.') ?? '';
+                return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual .
                     ' berhasil tercapai oleh ' . $userName;
-
             } elseif ($stageNew == 'lost') {
-                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
                 return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
             }
         }
