@@ -41,16 +41,15 @@ class ProductController extends Controller
                 'Daftar data produk',
                 $products
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
         }
     }
-    
+
     /**
      * Store a newly created resource in storage.
      */
@@ -61,8 +60,8 @@ class ProductController extends Controller
             'name' => 'required|string|max:100|unique:products,name',
             'category' => 'required|in:barang,jasa|max:100',
             'code' => 'required|string|max:100',
-            'quantity' => 'required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
-            'unit' => 'required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
+            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
             'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -114,10 +113,9 @@ class ProductController extends Controller
                 "Data produk {$request->name} berhasil ditambahkan",
                 $product
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -128,28 +126,27 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show($productId)
-    {   
+    {
         try {
             $product = Product::find($productId);
             if (!$product) {
                 return new ApiResponseResource(
-                    false, 
+                    false,
                     'Data produk tidak ditemukan.',
                     null
                 );
             }
 
             $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
-            
+
             return new ApiResponseResource(
                 true,
                 "Data produk {$product->name}",
                 $product
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -160,16 +157,16 @@ class ProductController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $productId)
-    {   
+    {
         $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Data produk tidak ditemukan.',
                 null
             );
         }
-        
+
         $validator = Validator::make($request->all(), [
             'name' => "sometimes|required|string|max:100|unique:products,name,$productId",
             'category' => 'sometimes|required|string|max:100',
@@ -213,7 +210,7 @@ class ProductController extends Controller
                 null
             );
         }
-        
+
         $productData = $request->all();
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
@@ -226,10 +223,9 @@ class ProductController extends Controller
                 "Data produk {$updatedProduct->name} berhasil diubah",
                 $updatedProduct
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );
@@ -244,7 +240,7 @@ class ProductController extends Controller
         $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Data produk tidak ditemukan',
                 null
             );
@@ -267,14 +263,13 @@ class ProductController extends Controller
         }
 
         try {
-            $photoData = $product->updatePhotoProduct($request->file('photo'), $productId); 
+            $photoData = $product->updatePhotoProduct($request->file('photo'), $productId);
 
             return new ApiResponseResource(
                 true,
                 "Foto produk {$product->name} berhasil diperbarui",
                 $photoData
             );
-        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -288,7 +283,7 @@ class ProductController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request)
-    { 
+    {
         $ids = $request->input('id', []);
         if (empty($ids)) {
             return new ApiResponseResource(
@@ -297,11 +292,11 @@ class ProductController extends Controller
                 null
             );
         }
-        
+
         $productsWithDeals = [];
         $productsWithoutDeals = [];
         $productsWithDealsNames = [];
-    
+
         foreach ($ids as $productId) {
             $product = Product::find($productId);
             if (!$product) {
@@ -311,7 +306,6 @@ class ProductController extends Controller
             if ($product && $product->deals()->exists()) {
                 $productsWithDeals[] = $product->id;
                 $productsWithDealsNames[] = ucfirst($product->name);
-                
             } else {
                 $productsWithoutDeals[] = $product->id;
             }
@@ -330,7 +324,6 @@ class ProductController extends Controller
                 $message,
                 $productsWithDealsNames
             );
- 
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

@@ -103,7 +103,7 @@ class UserController extends Controller
                 null
             );
         }
-        
+
         $data = $request->all();
         if (isset($data['gender'])) {
             $data['gender'] = ActionMapperHelper::mapGenderToDatabase($data['gender']);
@@ -160,8 +160,8 @@ class UserController extends Controller
         try {
             if (!Hash::check($request->password, $user->password)) {
                 return new ApiResponseResource(
-                    true,
-                    'Password tidak sesuai',
+                    false,
+                    ['password' => ['Kata sandi lama tidak sesuai']],
                     null
                 );
             }
@@ -418,15 +418,15 @@ class UserController extends Controller
      * @return \Illuminate\Http\JsonResponse 
      */
     public function getSummary()
-    {   
+    {
         $user = auth()->user();
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
-        
+
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
 
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
-        
+
         $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');

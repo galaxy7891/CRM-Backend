@@ -393,8 +393,8 @@ class ActionMapperHelper
 
             case 'products':
                 $productName = Product::getProductNameById($changes['id']['new']);
-                $quantityOld = $changes['quantity']['old'] ?? '';
-                $quantityNew = $changes['quantity']['new'] ?? '';
+                $quantityOld = $changes['quantity']['old'] ?? null;
+                $quantityNew = $changes['quantity']['new'] ?? null;
                 if (isset($quantityNew)) {
                     return $userName . ' memperbarui data jumlah Produk ' . $productName . ' dari ' . $quantityOld . ' menjadi ' . $quantityNew;
                 }
