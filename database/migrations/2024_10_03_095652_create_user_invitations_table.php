@@ -10,7 +10,7 @@ Class CreateUserInvitationsTable extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+    {   
         Schema::create('user_invitations', function (Blueprint $table) {
             $table->string('email', 100)->primary();
             $table->string('token', 255)->unique();
@@ -20,7 +20,7 @@ Class CreateUserInvitationsTable extends Migration
             $table->timestamps();
 
             // Foreign Key Constraints
-            $table->foreign('invited_by')->references('email')->on('users')->onDelete('cascade');
+            $table->foreign('invited_by')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

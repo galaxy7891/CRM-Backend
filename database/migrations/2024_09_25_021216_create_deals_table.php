@@ -8,10 +8,12 @@ class CreateDealsTable extends Migration
 {
 
     public function up()
-    {
+    {   
         Schema::create('deals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('customer_id');
+            $table->enum('category', ['customers', 'customers_company']);
+            $table->uuid('customer_id')->nullable();
+            $table->uuid('customers_company_id')->nullable();
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->string('tag', 255)->nullable();
@@ -22,15 +24,16 @@ class CreateDealsTable extends Migration
             $table->date('expected_close_date');
             $table->decimal('value_estimated', 20, 2);
             $table->decimal('value_actual', 20, 2)->nullable();
-            $table->enum('payment_category', ['once', 'daily', 'monthly', 'yearly']); 
+            $table->enum('payment_category', ['once', 'daily', 'monthly', 'yearly']);
             $table->integer('payment_duration')->nullable();
             $table->string('owner', 100);
             $table->timestamps();
-            $table->softDeletes();
+            $table-> softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('customer_id')->references('id')->on('customers');
-            $table->foreign('owner')->references('email')->on('users');
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            $table->foreign('customers_company_id')->references('id')->on('customers_companies')->onDelete('cascade');
+            $table->foreign('owner')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

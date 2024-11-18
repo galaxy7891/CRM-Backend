@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Helpers\ModelChangeLoggerHelper;
 use App\Models\ActivityLog;
 use App\Models\Customer;
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CustomerObserver
@@ -44,9 +44,14 @@ class CustomerObserver
      * Handle the Customer "deleted" event.
      */
     public function deleted(Customer $customer): void
-    {
+    {   
         $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'DELETE');
 
+        $customer->update([
+            'email' => time() . '::' . $customer->email,
+            'phone' => time() . '::' . $customer->phone,
+        ]);
+        
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'customers',

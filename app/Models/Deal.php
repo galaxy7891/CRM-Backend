@@ -19,7 +19,9 @@ class Deal extends Model
      */
     protected $fillable = [
         'id',
+        'category',
         'customer_id',
+        'customers_company_id',
         'name',
         'description',
         'tag',
@@ -57,6 +59,7 @@ class Deal extends Model
     /**
      * Get the customer that owns the deal.
      * Get the user that owns the deal.
+     * Get the customers company that owns the deal.
      * 
      * 
      * This defines a many-to-one relationship where the user belongs to a company.
@@ -73,9 +76,14 @@ class Deal extends Model
         return $this->belongsTo(User::class, 'owner', 'email');
     }
 
-    /**
+    public function customersCompany()
+    {
+        return $this->belongsTo(CustomersCompany::class, 'customers_company_id', 'id');
+    }
+
+    /** 
      * Get the deals's by ID.
-     *
+     * 
      * @param  int  $id
      * @return self
      */

@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -83,8 +84,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Cari duplikat menggunakan hash map
-            // Cek jika baris secara keseluruhan duplikat
+            // check duplicate data
             $rowKey = json_encode($rowArray); 
             if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
                 $this->failedData[] = [
@@ -101,7 +101,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 $rowMap[$rowKey] = $index;
             }
             
-            // Pengecekan nama duplikat
+            // check duplicate name
             if (!empty($rowArray['nama_produk'])) {
                 if (isset($nameMap[$rowArray['nama_produk']])) {
                     $property[] = 'Nama Produk';
@@ -111,7 +111,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Pengecekan kode produk duplikat
+            // check duplicate code product
             if (!empty($rowArray['kode_produk'])) {
                 if (isset($codeMap[$rowArray['kode_produk']])) {
                     $property[] = 'Kode Produk';
@@ -121,7 +121,6 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Jika ada error
             if (!empty($errorMessages)) {
                 $this->failedData[] = [
                     'row' => $index + 2,
@@ -135,16 +134,15 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Validasi data menggunakan Validator
             $validator = Validator::make($rowArray, [
-                'nama_produk' => 'required|string|max:100|unique:products,name',
-                'kode_produk' => 'required|string|max:100',
+                'nama_produk' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
+                'kode_produk' => 'required|string|max:100|'.  Rule::unique('products', 'code')->whereNull('deleted_at'),
                 'kategori_produk' => 'nullable|in:barang,jasa',
-                'jumlah_produk' => 'required_if:kategori_produk,barang|numeric|min:0|prohibited_if:kategori_produk,jasa',
-                'satuan_produk' => 'required_if:kategori_produk,barang|in:box,pcs,unit|prohibited_if:kategori_produk,jasa',
+                'jumlah_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|numeric|min:0',
+                'satuan_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|in:box,pcs,unit',
                 'harga_produk' => 'required|numeric|min:0|max_digits:20',
                 'deskripsi' => 'required|string',
-            ], [
+            ], [ 
                 'nama_produk.required' => 'Nama produk tidak boleh kosong.',
                 'nama_produk.string' => 'Nama produk harus berupa teks.',
                 'nama_produk.max' => 'Nama produk maksimal 100 karakter.',
@@ -209,11 +207,11 @@ class ProductsImport implements ToCollection, WithHeadingRow
         ];
     }
 
-    private function isEmptyRow($row)
+    private function isEmptyRow($row) 
     {
-        return empty(array_filter($row->toArray(), function ($value) {
-            return !is_null($value) && $value !== '';
-        }));
+        return collect($row->toArray())->filter(function ($value) {
+            return !is_null($value) && trim($value) !== '';
+        })->isEmpty();
     }
 
     public function headingRowValidator($row)
@@ -229,8 +227,13 @@ class ProductsImport implements ToCollection, WithHeadingRow
         ];
         $fileHeadings = array_keys($row->toArray());
 
-        if ($fileHeadings !== $expectedHeadings) {
-            throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
+        $missingColumns = array_diff($expectedHeadings, $fileHeadings);
+        $extraColumns = array_diff($fileHeadings, $expectedHeadings);
+
+        if (!empty($missingColumns) || !empty($extraColumns)) {
+            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan. Kolom berikut hilang: ' . implode(", ", $missingColumns);
+            
+            throw new \Exception($errorMessage);
         }
     }
 }

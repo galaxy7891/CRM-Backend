@@ -3,7 +3,9 @@
 namespace App\Imports;
 
 use App\Models\CustomersCompany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -81,7 +83,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
             $rowArray = $row->toArray();
             $property = [];
             $errorMessages = [];
-
+            
             if ($this->isEmptyRow($row)) {
                 continue;
             }
@@ -95,8 +97,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Cari duplikat menggunakan hash map
-            // Cek jika baris secara keseluruhan duplikat
+            // Check duplicate data 
             $rowKey = json_encode($rowArray); 
             if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
                 $this->failedData[] = [
@@ -113,7 +114,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 $rowMap[$rowKey] = $index;
             }
 
-            // Pengecekan email duplikat
+            // check duplicate email 
             if (!empty($rowArray['email'])) {
                 if (isset($emailMap[$rowArray['email']])) {
                     $property[] = 'Email';
@@ -123,7 +124,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Pengecekan nomor telepon duplikat
+            // check duplicate phone
             if (!empty($rowArray['nomor_telepon'])) {
                 if (isset($phoneMap[$rowArray['nomor_telepon']])) {
                     $property[] = 'Nomor Telepon';
@@ -133,7 +134,6 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Jika ada error
             if (!empty($errorMessages)) {
                 $this->failedData[] = [
                     'row' => $index + 2,
@@ -147,7 +147,6 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Validasi data menggunakan Validator
             $validator = Validator::make($rowArray, [
                 'nama_depan' => 'required|string|max:50',
                 'nama_belakang' => 'nullable|string|max:50',
@@ -155,8 +154,8 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 'deskripsi' => 'nullable|string',
                 'status' => 'required|in:tinggi,sedang,rendah',
                 'tanggal_lahir' => 'nullable|date',
-                'email' => 'nullable|email|unique:customers,email|max:100',
-                'nomor_telepon' => 'required|numeric|max_digits:15|unique:customers,phone',
+                'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
+                'nomor_telepon' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
                 'kecamatan' => 'nullable|string|max:100',
@@ -264,12 +263,13 @@ class CustomersImport implements ToCollection, WithHeadingRow
         ];
     }
 
-    private function isEmptyRow($row)
+    private function isEmptyRow($row) 
     {
-        return empty(array_filter($row->toArray(), function ($value) {
-            return !is_null($value) && $value !== '';
-        }));
+        return collect($row->toArray())->filter(function ($value) {
+            return !is_null($value) && trim($value) !== '';
+        })->isEmpty();
     }
+
 
     public function headingRowValidator($row)
     {
@@ -296,8 +296,11 @@ class CustomersImport implements ToCollection, WithHeadingRow
 
         $fileHeadings = array_keys($row->toArray());
 
-        if ($fileHeadings !== $expectedHeadings) {
-            throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
+        $missingColumns = array_diff($expectedHeadings, $fileHeadings);
+        if (!empty($missingColumns)) {
+            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan. Kolom berikut hilang: ' . implode(", ", $missingColumns);
+            
+            throw new \Exception($errorMessage);
         }
     }
 }

@@ -56,7 +56,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::delete('/user', [UserController::class, 'destroy']);
         
         Route::get('/users/companies', [UsersCompaniesController::class, 'index']);
-
+        
         Route::get('/leads', [CustomerController::class, 'indexLeads']);
         Route::get('/leads/{leads}', [CustomerController::class, 'showLeads']);
         Route::post('/leads', [CustomerController::class, 'storeLeads']);
@@ -88,16 +88,16 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/deals', [DealController::class, 'store']);
         Route::post('/deals/{dealsId}', [DealController::class, 'update']);
         Route::delete('/deals', [DealController::class, 'destroy']); 
-
+        
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
             Route::post('/employee/{employeeId}', [EmployeeController::class, 'update']);
             Route::delete('/employee', [EmployeeController::class, 'destroy']);
 
             Route::post('/users/companies', [UsersCompaniesController::class, 'update']);
-            Route::post('/users/companies/logo/{companyId}', [UsersCompaniesController::class, 'updateLogo']);
+            Route::post('/users/companies/logo', [UsersCompaniesController::class, 'updateLogo']);
         });
         
-        Route::group(['middleware' => RoleMiddleware::class . ':super_admin, admin'], function () {
+        Route::group(['middleware' => RoleMiddleware::class . ':super_admin,admin'], function () {
             Route::post('/invitation/send', [UserInvitationController::class, 'sendInvitation']);
             Route::get('/employee', [EmployeeController::class, 'index']);
             Route::get('/employee/{id}', [EmployeeController::class, 'show']);

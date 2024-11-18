@@ -47,20 +47,26 @@ class CustomersCompany extends Model
     /**
      * Get the user that owns the CustomersCompany.
      * Get the customers associated with the CustomersCompany.
+     * Get the deals associated with the CustomersCompany.
      * 
      * This defines a one-to-many relationship where the user can have multiple customers.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     
-     public function user()
-     {
-         return $this->belongsTo(User::class, 'owner', 'email');
-     }
-
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'owner', 'email');
+    }
+    
     public function customers()
     {
         return $this->hasMany(Customer::class, 'customers_company_id', 'id');
+    }
+
+    public function deals()
+    {
+        return $this->hasMany(Deal::class, 'customers_company_id', 'id');
     }
 
     /**

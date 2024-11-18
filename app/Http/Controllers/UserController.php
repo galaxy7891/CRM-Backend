@@ -54,9 +54,9 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     */
+     */ 
     public function update(Request $request)
-    {
+    {   
         $user = auth()->user();
         $id = $user->id;
         if (!$user) {
@@ -69,12 +69,11 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'user_company_id' => 'sometimes|nullable|uuid',
-            'email' => "sometimes|required|email|unique:users,email,$id",
+            'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($id)->whereNull('deleted_at'),
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$id",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($id)->whereNull('deleted_at'),
             'job_position' => 'sometimes|required|max:50',
-            'role' => 'sometimes|required|in:super_admin,admin,employee',
             'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
         ], [
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
@@ -92,8 +91,6 @@ class UserController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
-            'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
             'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
         ]);
         if ($validator->fails()) {
@@ -114,7 +111,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                "Data user {$updatedUser->first_name} " . strtolower($updatedUser->last_name) . " berhasil diubah",
+                "Data pengguna {$updatedUser->first_name} " . strtolower($updatedUser->last_name) . " berhasil diubah",
                 $updatedUser
             );
         } catch (\Exception $e) {
@@ -173,6 +170,7 @@ class UserController extends Controller
                 'Password berhasil diubah',
                 null
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -181,7 +179,7 @@ class UserController extends Controller
             );
         }
     }
-
+    
     /**
      * Update photo profile in cloudinary.
      */
@@ -218,7 +216,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                "Foto profil user {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
+                "Foto profil pengguna {$user->first_name} " . strtolower($user->last_name) . "berhasil diubah",
                 $photoData
             );
         } catch (\Exception $e) {
@@ -251,7 +249,7 @@ class UserController extends Controller
 
             return new ApiResponseResource(
                 true,
-                "Data user {$first_name} " . strtolower($last_name) . "berhasil dihapus",
+                "Data pengguna {$first_name} " . strtolower($last_name) . "berhasil dihapus",
                 null
             );
         } catch (\Exception $e) {
@@ -272,17 +270,15 @@ class UserController extends Controller
      */
     public function sendResetLink(Request $request)
     {
-        // Inisialisasi variabel
         $email = '';
         $frontendPath = '';
 
-        // Cek apakah pengguna terautentikasi
         if (auth()->check()) {
             $user = auth()->user();
             $email = $user->email;
             $frontendPath = '/change-password-email?email=';
+
         } else {
-            // Validasi email jika pengguna tidak terautentikasi
             $validator = Validator::make($request->only('email'), [
                 'email' => 'required|email|exists:users,email|max:100'
             ], [
@@ -301,9 +297,8 @@ class UserController extends Controller
                 );
             }
 
-            // Ambil email dari permintaan
             $email = $request->email;
-            $frontendPath = '/reset-password?email='; // Path untuk pengguna tidak terautentikasi
+            $frontendPath = '/reset-password?email=';
         }
 
         $recentResetPassword = PasswordResetToken::getRecentResetPasswordToken($email);
@@ -317,11 +312,10 @@ class UserController extends Controller
             );
         }
 
-        // Jika tidak ada token yang masih valid, lanjutkan dengan pembuatan token baru
         try {
-            $token = Str::uuid()->toString(); // Buat token baru
-            $user = User::findByEmail($email); // Cari pengguna berdasarkan email
-            $nama = $user->first_name . ' ' . $user->last_name; // Ambil nama pengguna
+            $token = Str::uuid()->toString(); 
+            $user = User::findByEmail($email); 
+            $nama = $user->first_name . ' ' . $user->last_name;
 
             $dataUser = [
                 'email' => $email,
@@ -329,10 +323,10 @@ class UserController extends Controller
             ];
 
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token; // URL untuk reset password
-            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama)); // Kirim email reset password
+            $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token; 
+            Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama)); 
 
-            PasswordResetToken::createPasswordResetToken($dataUser); // Simpan token reset password
+            PasswordResetToken::createPasswordResetToken($dataUser);
 
             return new ApiResponseResource(
                 true,
@@ -430,7 +424,7 @@ class UserController extends Controller
         $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
-
+        
         $dealsProposal = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'proposal');
 
         $dealsNegotiation = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'negotiate');

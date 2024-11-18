@@ -37,7 +37,7 @@ class PasswordResetToken extends Model
     public static function getRecentResetPasswordToken(string $email): ?self
     {
         return self::where('email', $email)
-            ->where('created_at', '>=', now()->subMinutes(1))
+            ->where('created_at', '>=', now()->subMinutes(3))
             ->first();
     }
 

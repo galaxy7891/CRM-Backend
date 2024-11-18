@@ -326,7 +326,7 @@ class CustomerSeeder extends Seeder
             'description' => 'Bidan berpengalaman di klinik.',
             'status' => 'warm',
             'email' => 'rina.sulastri@gmail.com',
-            'phone' => '08578900956',
+            'phone' => '085783300956',
             'owner' => 'user_satu@gmail.com',
             'address' => 'Jl Pondok Indah',
             'province' => 'Jakarta',

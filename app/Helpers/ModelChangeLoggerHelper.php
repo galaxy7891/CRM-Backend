@@ -10,10 +10,10 @@ class ModelChangeLoggerHelper
      * Get change attribute of model
      */
     public static function getModelChanges(Model $model, ?string $modelName, string $action): array
-    {
+    {   
         $originalAttributes = $model->getOriginal();
         $changes = [];
-
+        
         if ($action === 'DELETE') {
             foreach ($originalAttributes as $attribute => $oldValue) {
                 $changes[$attribute] = [
@@ -29,7 +29,7 @@ class ModelChangeLoggerHelper
                         'new' => $model->getKey(),
                     ];
                 }
-    
+                
                 if ($modelName === 'customers' && isset($originalAttributes['customerCategory'])) {
                     $changes['customerCategory'] = [
                         'old' => $originalAttributes['customerCategory'],
@@ -48,7 +48,7 @@ class ModelChangeLoggerHelper
                     ];
                 }
             }
-        }
+        }   
 
         return $changes;
     }

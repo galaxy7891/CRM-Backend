@@ -53,7 +53,7 @@ class DealController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|max:100',
@@ -87,9 +87,9 @@ class DealController extends Controller
             'expected_close_date.required' => 'Perkiraan tanggal tutup tidak boleh kosong.',
             'expected_close_date.date' => 'Perkiraan tanggal tutup harus berupa tanggal.',
             'value_estimated.numeric' => 'Perkiraan pembayaran harus berupa angka.',
-            'value_estimated.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.',
+            'value_estimated.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.', 
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong.',
-            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: sekali, harian, bulanan, tahunan.',
+            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: sekali, hari, bulan, tahun.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
             'owner.required' => 'Penanggung jawab tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab harus berupa email.',
@@ -112,7 +112,7 @@ class DealController extends Controller
         if (isset($dataDeals['payment_category'])) {
             $dataDeals['payment_category'] = ActionMapperHelper::mapPaymentCategoryToDatabase($dataDeals['payment_category']);
         }
-
+        
         try {
             $deal = Deal::createDeal($dataDeals);
             return new ApiResponseResource(
@@ -120,7 +120,7 @@ class DealController extends Controller
                 'Data deals berhasil ditambahkan',
                 $deal 
             );
-
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -215,7 +215,7 @@ class DealController extends Controller
             'value_estimated.numeric' => 'Perkiraan pembayaran harus berupa angka.',
             'value_estimated.max_digits' => 'Perkiraan pembayaran maksimal 20 digit.',
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong.',
-            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: once,daily,monthly,yearly.',
+            'payment_category.in' => 'Kategori pembayaran harus pilih salah satu: sekali, hari, bulan, tahun.',
             'payment_duration.integer' => 'Durasi pembayaran harus berupa angka.',
             'owner.required' => 'Penanggung jawab tidak boleh kosong.', 
             'owner.email' => 'Penanggung jawab harus berupa email.',

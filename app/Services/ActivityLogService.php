@@ -76,11 +76,11 @@ class ActivityLogService
                 if ($modelToUse === 'customers') {
                     $modelToUse = $changes['customerCategory']['new'] ?? $changes['customerCategory']['old'];
                 }
-
+                
                 $description = ActionMapperHelper::mapDescription($log, $changes, $modelToUse);
                 $actionTitle = ActionMapperHelper::mapActionTitle($log->action);
                 $modelTitle = ActionMapperHelper::mapModels($modelToUse);
-
+                
                 return [
                     'title' => $actionTitle . " Data - " . ucfirst($modelTitle),
                     'description' => $description,

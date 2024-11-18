@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -54,17 +55,16 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:products,name',
+            'name' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
             'category' => 'required|in:barang,jasa|max:100',
             'code' => 'required|string|max:100',
             'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
             'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
-            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -76,21 +76,18 @@ class ProductController extends Controller
             'code.required' => 'Kode tidak boleh kosong.',
             'code.string' => 'Kode harus berupa string.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk harus lebih dari 0.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
             'description.string' => 'Harga maksimal 20 digit.',
-            'photo_product.image' => 'Foto produk harus berupa gambar.',
-            'photo_product.max' => 'Foto produk tidak sesuai format.',
-            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -174,8 +171,7 @@ class ProductController extends Controller
             'quantity' => 'sometimes|required_if:category,stuff|numeric|min:0|prohibited_if:category,services',
             'unit' => 'sometimes|required_if:category,stuff|in:box,pcs,unit|prohibited_if:category,services',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
-            'description' => 'nullable|string',
-            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'description' => 'sometimes|nullable|string',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -185,23 +181,21 @@ class ProductController extends Controller
             'category.string' => 'Kategori produk harus berupa teks.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode tidak boleh kosong.',
-            'code.string' => 'Kode harus berupa string.',
+            'code.string' => 'Kode harus berupa teks.',
             'code.max' => 'Kode terlalu panjang.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong.',
+            'code.unique' => 'Kode sudah terdaftar.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk harus lebih dari 0.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya services.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya services.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
-            'description.string' => 'Harga maksimal 20 digit.',
-            'photo_product.image' => 'Foto produk harus berupa gambar.',
-            'photo_product.max' => 'Foto produk tidak sesuai format.',
-            'photo_product.max' => 'Foto produk maksimal 2 mb.',
+            'description.string' => 'Deskripsi harus berupa teks',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -296,7 +290,6 @@ class ProductController extends Controller
         $productsWithDeals = [];
         $productsWithoutDeals = [];
         $productsWithDealsNames = [];
-
         foreach ($ids as $productId) {
             $product = Product::find($productId);
             if (!$product) {

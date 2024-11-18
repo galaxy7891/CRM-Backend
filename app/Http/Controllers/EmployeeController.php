@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -31,7 +32,7 @@ class EmployeeController extends Controller
                     null
                 );
             }
-
+            
             return new ApiResponseResource(
                 true,
                 'Daftar Karyawan',
@@ -92,16 +93,16 @@ class EmployeeController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:users,phone,$employeeId",
-            'email' => "sometimes|required|email|unique:users,email,$employeeId",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($employeeId)->whereNull('deleted_at'),
+            'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($employeeId)->whereNull('deleted_at'),
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
-            'role' => 'sometimes|required|in:super_admin,admin,employee',
-            'gender' => 'sometimes|nullable|in:male,female,other',
+            'role' => 'sometimes|required|in:super admin,admin,karyawan',
+            'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
@@ -120,8 +121,8 @@ class EmployeeController extends Controller
             'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus pilih salah satu: rendah, sedang, atau tinggi.',
-            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lain-lain.',
+            'role.in' => 'Akses harus pilih salah satu: super admin, admin, atau karyawan.',
+            'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -134,6 +135,9 @@ class EmployeeController extends Controller
         $data = $request->all();
         if (isset($data['gender'])) {
             $data['gender'] = ActionMapperHelper::mapGenderToDatabase($data['gender']);
+        }
+        if (isset($data['role'])) {
+            $data['role'] = ActionMapperHelper::mapRoleToDatabase($data['role']);
         }
         
         try {

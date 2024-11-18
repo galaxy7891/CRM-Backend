@@ -14,7 +14,7 @@ class CreateProductsTable extends Migration
             $table->string('name', 100)->unique();
             $table->uuid('user_company_id');
             $table->enum('category', ['stuff', 'service']);
-            $table->string('code', 100)->nullable();
+            $table->string('code', 100)->unique();
             $table->integer('quantity')->nullable();
             $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
             $table->decimal('price', 20, 2);
@@ -28,7 +28,7 @@ class CreateProductsTable extends Migration
             $table->foreign('user_company_id')->references('id')->on('users_companies')->onDelete('cascade');
         });
     }
-
+            
     public function down()
     {
         Schema::dropIfExists('products');

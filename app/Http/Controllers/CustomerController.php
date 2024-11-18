@@ -9,16 +9,17 @@ use App\Http\Resources\ApiResponseResource;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
     use Filter;
-
+    
     /** 
-     * Display a listing of the resource.
-     *  
-     * @return \Illuminate\Http\Response
-     */
+     * Display a listing of the resource. 
+     * 
+     * @return \Illuminate\Http\Response 
+     */ 
 
     public function indexLeads(Request $request)
     {
@@ -115,12 +116,12 @@ class CustomerController extends Controller
      * Store a newly created resource in storage.
      */
     public function storeLeads(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:customers,phone',
-            'email' => 'nullable|email|unique:customers,email|max:100',
+            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
+            'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
             'status' => 'required|in:tinggi,sedang,rendah',
             'birthdate' => 'nullable|date',
             'job' => 'nullable|string|max:100',
@@ -205,10 +206,10 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique:customers,phone',
+            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
             'status' => 'required|in:tinggi,sedang,rendah',
             'birthdate' => 'nullable|date',
-            'email' => 'nullable|email|unique:customers,email|max:100',
+            'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
             'job' => 'nullable|string|max:100',
             'customers_company_id' => 'nullable|uuid',
             'owner' => 'required|email|max:100',
@@ -289,7 +290,7 @@ class CustomerController extends Controller
      * Display the specified resource.
      */
     public function showLeads($leadsId)
-    {
+    {   
         try {
             $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
 
@@ -300,7 +301,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-
+            
             $user = auth()->user();
             if ($user->role == 'employee' && $leads->owner !== $user->email) {
                 return new ApiResponseResource(
@@ -390,12 +391,12 @@ class CustomerController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$leadsId",
-            'email' => "sometimes|nullable|email|unique:customers,email,$leadsId|max:100",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers','phone')->ignore($leadsId)->whereNull('deleted_at'),
+            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
             'status' => 'sometimes|required|in:tinggi,sedang,rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -454,7 +455,7 @@ class CustomerController extends Controller
         if (isset($dataLeads['status'])) {
             $dataLeads['status'] = ActionMapperHelper::mapStatusToDatabase($dataLeads['status']);
         }
-
+        
         try {
             $leads = Customer::updateCustomer($dataLeads, $leadsId);
             return new ApiResponseResource(
@@ -498,8 +499,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$contactId",
-            'email' => "sometimes|nullable|email|unique:customers,email,$contactId|max:100",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($contactId)->whereNull('deleted_at'),
+            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($contactId)->whereNull('deleted_at'),
             'status' => 'sometimes|required|in:tinggi,sedang,rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -525,7 +526,7 @@ class CustomerController extends Controller
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggo, sedang, atau rendah.',
+            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
@@ -602,8 +603,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => "sometimes|required|numeric|max_digits:15|unique:customers,phone,$leadsId",
-            'email' => "sometimes|nullable|email|unique:customers,email,$leadsId|max:100",
+            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($leadsId)->whereNull('deleted_at'),
+            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
             'status' => 'sometimes|required|in:tinggi,sedang,rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -694,7 +695,7 @@ class CustomerController extends Controller
                 null
             );
         }
-
+        
         try {
             $deletedCount = Customer::whereIn('id', $id)->delete();
             if ($deletedCount > 0) {
@@ -774,4 +775,5 @@ class CustomerController extends Controller
             );
         }
     }
+
 }

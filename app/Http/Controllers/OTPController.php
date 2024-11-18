@@ -8,6 +8,7 @@ use App\Services\SendOTPService;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class OtpController extends Controller
 {
@@ -24,7 +25,7 @@ class OtpController extends Controller
     {
 
         $validator = Validator::make($request->only('email'), [
-            'email' => 'required|email|unique:users,email|max:100',
+            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
@@ -94,9 +95,9 @@ class OtpController extends Controller
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.email' => 'Email maksimal 100 karakter',
-            'code.required' => 'Code OTP tidak boleh kosong',
-            'code.numeric' => 'Code OTP harus berupa angka',
-            'code.digits' => 'Code OTP harus 6 digit'
+            'code.required' => 'Kode OTP tidak boleh kosong',
+            'code.numeric' => 'Kode OTP harus berupa angka',
+            'code.digits' => 'Kode OTP harus 6 digit'
         ]);
 
         if ($validator->fails()) {
