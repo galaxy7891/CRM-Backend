@@ -34,7 +34,7 @@ class ImportController extends Controller
                     $import = new CustomersImport($user->email, 'leads');
                     $model = 'customer';
                     break;
-
+                    
                 case 'contact':
                     $import = new CustomersImport($user->email, 'contact');
                     $model = 'customer';

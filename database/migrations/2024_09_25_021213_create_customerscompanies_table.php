@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateCustomersCompaniesTable extends Migration
 {
     public function up()
-    {
+    {   
         Schema::create('customers_companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
@@ -16,7 +16,6 @@ class CreateCustomersCompaniesTable extends Migration
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->string('phone', 15)->nullable();
             $table->string('owner', 100);
-            $table->text('description')->nullable();
             $table->string('website', 255)->nullable();
             $table->string('address', 100)->nullable();
             $table->string('province', 100)->nullable();
@@ -24,11 +23,12 @@ class CreateCustomersCompaniesTable extends Migration
             $table->string('subdistrict', 100)->nullable();
             $table->string('village', 100)->nullable();
             $table->string('zip_code', 5)->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('owner')->references('email')->on('users')->onDelete('cascade');
+            $table->foreign('owner')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

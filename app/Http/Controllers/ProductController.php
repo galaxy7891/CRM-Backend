@@ -56,7 +56,7 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
@@ -66,7 +66,6 @@ class ProductController extends Controller
             'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
-            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -90,9 +89,6 @@ class ProductController extends Controller
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
             'description.string' => 'Harga maksimal 20 digit.',
-            'photo_product.image' => 'Foto produk harus berupa gambar.',
-            'photo_product.max' => 'Foto produk tidak sesuai format.',
-            'photo_product.max' => 'Foto produk maksimal 2 mb.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -160,7 +156,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $productId)
+    public function update(Request $request, $productId)                
     {   
         $product = Product::find($productId);
         if (!$product) {
@@ -171,15 +167,20 @@ class ProductController extends Controller
             );
         }
         
-        $validator = Validator::make($request->all(), [
+        $productData = $request->all();
+        if (isset($productData['category']) && $productData['category'] === 'jasa') {
+            $productData['quantity'] = null;
+            $productData['unit'] = null;
+        }
+
+        $validator = Validator::make($productData, [
             'name' => 'sometimes|required|string|max:100|'. Rule::unique('products', 'name')->ignore($productId)->whereNull('deleted_at'),
             'category' => 'sometimes|required|in:barang,jasa|max:100',
-            'code' => 'sometimes|required|string|max:100',
-            'quantity' => 'sometimes|required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
-            'unit' => 'sometimes|required_if:category,barang|in:box,pcs,unit|prohibited_if:category,jasa',
+            'code' => 'sometimes|required|string|max:100|'. Rule::unique('products', 'code')->ignore($productId)->whereNull('deleted_at'),
+            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
-            'description' => 'nullable|string',
-            'photo_product' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'description' => 'sometimes|nullable|string',
         ], [
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
@@ -189,8 +190,9 @@ class ProductController extends Controller
             'category.string' => 'Kategori produk harus berupa teks.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode tidak boleh kosong.',
-            'code.string' => 'Kode harus berupa string.',
+            'code.string' => 'Kode harus berupa teks.',
             'code.max' => 'Kode terlalu panjang.',
+            'code.unique' => 'Kode sudah terdaftar.',
             'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk harus lebih dari 0.',
@@ -202,10 +204,7 @@ class ProductController extends Controller
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga harus lebih dari 0.',
             'price.max_digits' => 'Harga maksimal 20 digit.',
-            'description.string' => 'Harga maksimal 20 digit.',
-            'photo_product.image' => 'Foto produk harus berupa gambar.',
-            'photo_product.max' => 'Foto produk tidak sesuai format.',
-            'photo_product.max' => 'Foto produk maksimal 2 mb.',
+            'description.string' => 'Deskripsi harus berupa teks',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -215,7 +214,6 @@ class ProductController extends Controller
             );
         }
         
-        $productData = $request->all();
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
         }
@@ -289,7 +287,7 @@ class ProductController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request)
-    { 
+    {
         $ids = $request->input('id', []);
         if (empty($ids)) {
             return new ApiResponseResource(
@@ -302,7 +300,7 @@ class ProductController extends Controller
         $productsWithDeals = [];
         $productsWithoutDeals = [];
         $productsWithDealsNames = [];
-    
+        
         foreach ($ids as $productId) {
             $product = Product::find($productId);
             if (!$product) {
@@ -312,7 +310,7 @@ class ProductController extends Controller
             if ($product && $product->deals()->exists()) {
                 $productsWithDeals[] = $product->id;
                 $productsWithDealsNames[] = ucfirst($product->name);
-                
+            
             } else {
                 $productsWithoutDeals[] = $product->id;
             }
@@ -331,7 +329,7 @@ class ProductController extends Controller
                 $message,
                 $productsWithDealsNames
             );
- 
+                    
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

@@ -48,7 +48,7 @@ class CustomersCompanySeeder extends Seeder
             'village' => 'Cibadak',
             'zip_code' => '40121'
         ]);
-
+            
         CustomersCompany::create([
             'id' => '123e4567-e89b-12d3-a456-426614174006',
             'name' => 'PT Bumi Resources',

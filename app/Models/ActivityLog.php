@@ -53,19 +53,6 @@ class ActivityLog extends Model
             ->paginate(5);
     }
 
-    public static function getLogsGroupedByMonth()
-    {
-        $paginatedLogs = self::getPaginatedLogs();
-        $logs = $paginatedLogs->getCollection()->groupBy(function ($log) {
-            return Carbon::parse($log->updated_at)->format('F Y');
-        });
-
-        return [
-            'paginatedLogs' => $paginatedLogs,
-            'logs' => $logs
-        ];
-    }
-
     public static function getPaginatedLogsForModel(string $modelName = null, string $id = null)
     {
         $query = self::with('user:id,first_name,last_name,email')
@@ -84,7 +71,7 @@ class ActivityLog extends Model
             }
         }
 
-        return $query->paginate(10);
+        return $query->paginate(5);
     }
 
     public static function getLogsGroupedByMonthForModel(?string $modelName, string $id = null): array

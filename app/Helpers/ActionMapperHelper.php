@@ -138,14 +138,14 @@ class ActionMapperHelper
     {
         switch ($categoryProduct) {
             case 'stuff':
-                return 'Barang';
+                return 'barang';
             case 'service':
-                return 'Jasa';
+                return 'jasa';
             default:
                 return $categoryProduct;
         }
     }
-    
+
     public static function mapCategoryProductToDatabase($categoryProduct)
     {
         switch ($categoryProduct) {
@@ -162,11 +162,11 @@ class ActionMapperHelper
     {
         switch ($status) {
             case 'cold':
-                return 'Rendah';
+                return 'rendah';
             case 'warm':
-                return 'Sedang';
+                return 'sedang';
             case 'hot':
-                return 'Tinggi';
+                return 'tinggi';
             default:
                 return $status;
         }
@@ -185,35 +185,49 @@ class ActionMapperHelper
                 return $status;
         }
     }
-    
+      
     public static function mapRole($role)
     {
         switch ($role) {
             case 'super_admin':
-                return 'Super Admin';
+                return 'super admin';
             case 'admin':
-                return 'Admin';
+                return 'admin';
             case 'employee':
-                return 'Karyawan';
+                return 'karyawan';
             default:
                 return $role;
         }
     }
-
+    
+    public static function mapRoleToDatabase($role)
+    {
+        switch ($role) {
+            case 'super admin':
+                return 'super_admin';
+            case 'admin':
+                return 'admin';
+            case 'karyawan':
+                return 'employee';
+            default:
+                return $role;
+        }
+    }
+    
     public static function mapGender($gender)
     {
         switch ($gender) {
             case 'male':
-                return 'Laki-laki';
+                return 'laki-laki';
             case 'female':
-                return 'Perempuan';
+                return 'perempuan';
             case 'other':
-                return 'Lainnya';
+                return 'lainnya';
             default:
                 return $gender;
         }
     }
- 
+    
     public static function mapGenderToDatabase($status)
     {
         switch ($status) {
@@ -232,20 +246,20 @@ class ActionMapperHelper
     {
         switch ($stage) {
             case 'qualificated':
-                return 'Kualifikasi';
+                return 'kualifikasi';
             case 'proposal':
-                return 'Proposal';
+                return 'proposal';
             case 'negotiate':
-                return 'Negosisasi';
+                return 'negosiasi';
             case 'won':
-                return 'Tercapai';
+                return 'tercapai';
             case 'lose':
-                return 'Gagal';
+                return 'gagal';
             default:
                 return $stage;
         }
     }
-    
+
     public static function mapStageDealToDatabase($stage)
     {
         switch ($stage) {
@@ -268,13 +282,13 @@ class ActionMapperHelper
     {
         switch ($paymentCategory) {
             case 'once':
-                return 'Sekali';
+                return 'sekali';
             case 'daily':
-                return 'Harian';
+                return 'hari';
             case 'monthly':
-                return 'Bulanan';
+                return 'bulan';
             case 'yearly':
-                return 'Tahunan';
+                return 'tahun';
             default:
                 return $paymentCategory;
         }
@@ -285,11 +299,11 @@ class ActionMapperHelper
         switch ($paymentCategory) {
             case 'sekali':
                 return 'once';
-            case 'harian':
+            case 'hari':
                 return 'daily';
-            case 'bulanan':
+            case 'bulan':
                 return 'monthly';
-            case 'tahunan':
+            case 'tahun':
                 return 'yearly';
             default:
                 return $paymentCategory;
@@ -300,17 +314,17 @@ class ActionMapperHelper
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);
         $description = '';
-        
+
         switch ($log->action) {
             case 'CREATE':
                 $description = self::mapCreateDescription($log, $modelName, $changes, $userName);
                 break;
-            // case 'UPDATE':
-            //     $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
-            //     break;
-            // case 'DELETE':
-            //     $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
-            //     break;
+            case 'UPDATE':
+                $description = self::mapUpdateDescription($log, $modelName, $changes, $userName);
+                break;
+            case 'DELETE':
+                $description = self::mapDeleteDescription($log, $modelName, $changes, $userName);
+                break;
         }
 
         return $description;
@@ -345,7 +359,7 @@ class ActionMapperHelper
                 $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
-
+                
             case 'customers_companies':
                 return $userName . ' menambahkan data Perusahaan ' . $changes['name']['new'];
 
@@ -389,12 +403,12 @@ class ActionMapperHelper
 
             case 'customers_companies':
                 $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
-                return $userName . ' memperbarui data Perusahaan ' . $changes['name']['new'];
-         
+                return $userName . ' memperbarui data Perusahaan ' . $userCompaniesName;
+                
             case 'products': 
                 $productName = Product::getProductNameById($changes['id']['new']);
-                $quantityOld = $changes['quantity']['old']?? '';
-                $quantityNew = $changes['quantity']['new']?? '';
+                $quantityOld = $changes['quantity']['old']?? null;
+                $quantityNew = $changes['quantity']['new']?? null;
                 if (isset($quantityNew)){
                     return $userName . ' memperbarui data jumlah Produk ' . $productName . ' dari ' . $quantityOld . ' menjadi ' . $quantityNew;
                 }
@@ -414,17 +428,6 @@ class ActionMapperHelper
 
             case 'users':
                 return $userName . ' menghapus akunnya';
-            
-            // case 'customers':
-            //     $customerCategory = $changes['customerCategory']['new'] ?? '';
-            //     $customerName = Customer::getCustomerNameById($changes['id']['new']);
-
-            //     if ($customerCategory === 'leads') {
-            //         return $userName . ' menghapus data Leads ' . $customerName;
-            //     } elseif ($customerCategory === 'contact') {
-            //         return $userName . ' menghapus data Kontak ' . $customerName;
-            //     }
-            //     break;
 
             case 'leads':
                 $customerName = Customer::getCustomerNameById($changes['id']['new']);
@@ -467,11 +470,11 @@ class ActionMapperHelper
 
     private static function mapDealsUpdateDescription(array $changes, string $userName, string $dealsName): string
     {
-        $stageOld = $changes['stage']['old'] ?? '';
-        $stageNew = $changes['stage']['new'] ?? '';
+        $stageOld = $changes['stage']['old'] ?? null;
+        $stageNew = $changes['stage']['new'] ?? null;
 
         if (isset($stageNew)) {
-            if ($stageNew !== 'won' && $stageNew !== 'lost') {
+            if ($stageNew !== 'won' && $stageNew !== 'lose') {
                 return $userName . ' memindahkan tahap Deals ' . $dealsName .
                     ' dari ' . $stageOld . ' menjadi ' . $stageNew;
 
@@ -480,7 +483,7 @@ class ActionMapperHelper
                 return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual . 
                     ' berhasil tercapai oleh ' . $userName;
 
-            } elseif ($stageNew == 'lost') {
+            } elseif ($stageNew == 'lose') {
                 $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
                 return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
             }

@@ -88,7 +88,7 @@ class Customer extends Model
             ->where('id', $id)
             ->first();
 
-        return $customer ? trim($customer->first_name . ' ' . $customer->last_name) : null;
+        return $customer? trim($customer->first_name . ' ' . $customer->last_name) : null;
     }
 
     /**

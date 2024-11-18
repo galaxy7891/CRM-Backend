@@ -295,7 +295,7 @@ class CustomersCompanyController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request)
-    {   
+    {
         $id = $request->input('id', []);
         if (empty($id)) {
             return new ApiResponseResource(
@@ -304,25 +304,48 @@ class CustomersCompanyController extends Controller
                 null
             );
         }
-        
-        try {
-            Customer::nullifyCompanyAssociation($id);
 
-            $deletedCount = CustomersCompany::whereIn('id', $id)->delete();
-            if ($deletedCount > 0) {
-                return new ApiResponseResource(
-                    true,
-                    $deletedCount . ' data perusahaan pelanggan berhasil dihapus',
-                    null
-                );
+        $companiesWithDeals = [];
+        $companiesWithoutDeals = [];
+        $companiesToNullifyContacts = [];
+        $companiesWithDealsNames = [];
+
+        foreach ($id as $companyId) {
+            $company = CustomersCompany::find($companyId);
+            if (!$company) {
+                continue;
             }
-            
+
+            if ($company->deals()->exists()) {
+                $companiesWithDeals[] = $company->id;
+                $companiesWithDealsNames[] = $company->name;
+            } 
+            elseif ($company->customers()->exists()) {
+                $companiesToNullifyContacts[] = $company->id;
+            } 
+            else {
+                $companiesWithoutDeals[] = $company->id;
+            }
+        }
+
+        try {
+            if (!empty($companiesToNullifyContacts)) {
+                Customer::nullifyCompanyAssociation($companiesToNullifyContacts);
+            }
+
+            $deletedCount = CustomersCompany::whereIn('id', $companiesWithoutDeals)->delete();
+
+            $message = $deletedCount . " data perusahaan pelanggan berhasil dihapus. ";
+            if (count($companiesWithDeals) > 0) {
+                $message .= count($companiesWithDeals) . " data perusahaan pelanggan tidak dapat dihapus karena terhubung dengan data deals.";
+            }
+
             return new ApiResponseResource(
-                false,
-                'Data perusahaan pelanggan tidak ditemukan',
-                null
+                true,
+                $message,
+                $companiesWithDealsNames
             );
-            
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

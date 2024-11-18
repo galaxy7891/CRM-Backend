@@ -177,7 +177,6 @@ class User extends Authenticatable implements JWTSubject
     public static function updateUser(array $dataUser, string $userId): self
     {
         $user = self::findOrFail($userId);
-
         $user->update([
             'user_company_id' => $dataUser['user_company_id'] ?? $user->user_company_id,
             'email' => $dataUser['email'] ?? $user->email,

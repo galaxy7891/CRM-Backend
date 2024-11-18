@@ -45,6 +45,11 @@ class ProductObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'DELETE');
 
+        $product->update([
+            'name' => time() . '::' . $product->name,
+            'code' => time() . '::' . $product->code,
+        ]);
+
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'products',

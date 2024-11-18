@@ -100,8 +100,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Cari duplikat menggunakan hash map
-            // Cek jika baris secara keseluruhan duplikat
+            // check duplicate data
             $rowKey = json_encode($rowArray); 
             if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
                 $this->failedData[] = [
@@ -118,7 +117,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 $rowMap[$rowKey] = $index;
             }
 
-            // Pengecekan nama perusahaan duplikat
+            // check duplicate company name
             if (!empty($rowArray['nama_perusahaan'])) {
                 if (isset($nameMap[$rowArray['nama_perusahaan']])) {
                     $property[] = 'Nama Perusahaan';
@@ -128,7 +127,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Pengecekan email duplikat
+            // check duplicate email 
             if (!empty($rowArray['email'])) {
                 if (isset($emailMap[$rowArray['email']])) {
                     $property[] = 'Email';
@@ -138,7 +137,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Pengecekan nomor telepon duplikat
+            // check duplicate phone
             if (!empty($rowArray['nomor_telepon'])) {
                 if (isset($phoneMap[$rowArray['nomor_telepon']])) {
                     $property[] = 'Nomor Telepon';
@@ -148,7 +147,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 }
             }
             
-            // Pengecekan website duplikat
+            // check duplicate website
             if (!empty($rowArray['website'])) {
                 if (isset($websiteMap[$rowArray['website']])) {
                     $property[] = 'Website';
@@ -158,7 +157,6 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Jika ada error
             if (!empty($errorMessages)) {
                 $this->failedData[] = [
                     'row' => $index + 2,
@@ -172,9 +170,8 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Validasi data menggunakan Validator
             $validator = Validator::make($row->toArray(), [
-                'nama_perusahaan' => 'required|string|max:100|'.  Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
+                'nama_perusahaan' => 'required|string|max:100|'.  Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
                 'jenis_industri' => 'nullable|string|max:50',
                 'status' => 'required|in:tinggi,sedang,rendah',
                 'email' => 'nullable|email|max:100|'.  Rule::unique('users_companies', 'email')->whereNull('deleted_at'),
@@ -237,7 +234,6 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Simpan data valid
             $this->validData[] = [
                 'name' => $row['nama_perusahaan'],
                 'industry' => $row['jenis_industri'],
@@ -266,11 +262,11 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
         ];
     }
 
-    private function isEmptyRow($row)
+    private function isEmptyRow($row) 
     {
-        return empty(array_filter($row->toArray(), function ($value) {
-            return !is_null($value) && $value !== '';
-        }));
+        return collect($row->toArray())->filter(function ($value) {
+            return !is_null($value) && trim($value) !== '';
+        })->isEmpty();
     }
     
     public function headingRowValidator($row)
@@ -291,9 +287,13 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
         ];
         $fileHeadings = array_keys($row->toArray());
 
-        // Cek apakah semua heading sesuai dengan yang diharapkan
-        if ($fileHeadings !== $expectedHeadings) {
-            throw new \Exception('Dokumen tidak sesuai dengan template yang diberikan.');
+        $missingColumns = array_diff($expectedHeadings, $fileHeadings);
+        $extraColumns = array_diff($fileHeadings, $expectedHeadings);
+
+        if (!empty($missingColumns) || !empty($extraColumns)) {
+            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan. Kolom berikut hilang: ' . implode(", ", $missingColumns);
+            
+            throw new \Exception($errorMessage);
         }
     }
 }

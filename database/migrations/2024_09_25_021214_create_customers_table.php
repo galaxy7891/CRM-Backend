@@ -19,7 +19,7 @@ class CreateCustomersTable extends Migration
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->date('birthdate')->nullable();
             $table->string('email', 100)->nullable();
-            $table->string('phone', 15);
+            $table->string('phone', 15)->unique();
             $table->string('owner', 100);
             $table->string('address', 100)->nullable();
             $table->string('province', 100)->nullable();
@@ -31,9 +31,9 @@ class CreateCustomersTable extends Migration
             $table->softDeletes();
 
             // Foreign Key Constraints
-            $table->foreign('owner')->references('email')->on('users')->onDelete('cascade');
+            $table->foreign('owner')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('customers_company_id')->references('id')->on('customers_companies')->onDelete('cascade');
-        });
+        }); 
     }
 
     public function down()

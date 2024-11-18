@@ -10,11 +10,11 @@ class CreateUsersCompaniesTable extends Migration
     {
         Schema::create('users_companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name', 100);
+            $table->string('name', 100)->unique();
             $table->string('industry', 50);
+            $table->string('email', 100)->nullable();
             $table->string('image_url', 255)->nullable();
             $table->string('image_public_id', 255)->nullable();
-            $table->string('email', 100)->nullable();
             $table->string('phone', 15)->nullable();
             $table->string('website', 255)->nullable();
             $table->timestamps();

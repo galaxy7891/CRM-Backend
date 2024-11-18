@@ -50,7 +50,7 @@ class UsersCompaniesController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request)
-    {
+    {       
         $user = auth()->user();
         $userCompanyId = $user->user_company_id;
         $userCompany = UsersCompany::where('id', $userCompanyId)->first();
@@ -60,14 +60,14 @@ class UsersCompaniesController extends Controller
                 'Data perusahaan user tidak ditemukan.',
                 null
             );
-        }
-        
+        }   
+            
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->ignore($userCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|required|string|max:50',
             'email' => 'sometimes|nullable|email|'.  Rule::unique('users_companies', 'email')->ignore($userCompanyId)->whereNull('deleted_at'),
             'phone' => 'sometimes|nullable|numeric|max_digits:15|'.  Rule::unique('users_companies', 'phone')->ignore($userCompanyId)->whereNull('deleted_at'),
-            'website' => 'sometimes|nullable|string|max:255',
+            'website' => 'sometimes|nullable|string|max:255|'.  Rule::unique('users_companies', 'website')->ignore($userCompanyId)->whereNull('deleted_at'),
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',
             'name.string' => 'Nama perusahaan harus berupa teks.',
@@ -82,6 +82,7 @@ class UsersCompaniesController extends Controller
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter',
+            'website.unique' => 'Website sudah terdaftar',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -111,13 +112,15 @@ class UsersCompaniesController extends Controller
     /**
      * Update logo profile in cloudinary.
      */
-    public function updateLogo(Request $request, $userCompanyId)
+    public function updateLogo(Request $request)
     {
-        $userCompany = UsersCompany::find($userCompanyId);
+        $user = auth()->user();
+        $userCompanyId = $user->user_company_id;
+        $userCompany = UsersCompany::where('id', $userCompanyId)->first();
         if (!$userCompany) {
             return new ApiResponseResource(
                 false, 
-                'Data perusahaan karyawan tidak ditemukan',
+                'Data perusahaan user tidak ditemukan.',
                 null
             );
         }
@@ -154,6 +157,5 @@ class UsersCompaniesController extends Controller
                 null
             );
         }
-        
     }
 }

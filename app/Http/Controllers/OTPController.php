@@ -49,7 +49,7 @@ class OtpController extends Controller
             return new ApiResponseResource(
                 false,
                 "OTP dapat dikirim kembali dalam {$remainingTime['minutes']} menit,  {$remainingTime['seconds']} detik.",
-                $remainingTime['minutes'] .':'. $remainingTime['second'],
+                $remainingTime['minutes'] .':'. $remainingTime['seconds'],
             );
         }
 
@@ -95,9 +95,9 @@ class OtpController extends Controller
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.email' => 'Email maksimal 100 karakter',
-            'code.required' => 'Code OTP tidak boleh kosong',
-            'code.numeric' => 'Code OTP harus berupa angka',
-            'code.digits' => 'Code OTP harus 6 digit'
+            'code.required' => 'Kode OTP tidak boleh kosong',
+            'code.numeric' => 'Kode OTP harus berupa angka',
+            'code.digits' => 'Kode OTP harus 6 digit'
         ]);
 
         if ($validator->fails()) {

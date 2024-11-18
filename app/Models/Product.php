@@ -63,7 +63,7 @@ class Product extends Model
     {
         return $this->belongsTo(UsersCompany::class, 'user_company_id', 'id');
     }
-
+    
     /**
      * Get the product's full name by ID.
      *
@@ -104,16 +104,6 @@ class Product extends Model
 
     public static function createProduct(array $data): self
     {
-        if (isset($data['photo_product'])) {
-            $product = new Product();
-            $uploadResult = $product->uploadPhoto($data['photo_product']);
-            $photoUrl = $uploadResult['image_url'];
-            $publicId = $uploadResult['image_public_id'];
-        } else {
-            $photoUrl = null;
-            $publicId = null;
-        }
-
         return self::create([
             'name' => $data['name'],
             'user_company_id' => $data['user_company_id'],
@@ -123,8 +113,6 @@ class Product extends Model
             'unit' => $data['unit'] ?? null,
             'price' => $data['price'],
             'description' => $data['description'] ?? null,
-            'image_url' => $photoUrl ?? null,
-            'image_public_id' => $publicId ?? null,
         ]);
     }
 
@@ -132,30 +120,26 @@ class Product extends Model
     {
         $product = self::findOrFail($productId);
 
-        if (isset($dataProduct['photo_product'])) {
-            $uploadResult = $product->uploadPhoto($dataProduct['photo_product']);
-            $photoUrl = $uploadResult['image_url'];
-            $publicId = $uploadResult['image_public_id'];
-
-            $product->update([
-                'image_url' => $photoUrl,
-                'image_public_id' => $publicId,
-            ]);
+        if (isset($dataProduct['category']) && $dataProduct['category'] === 'service'){
+            $quantity = null;
+            $unit = null;
+        } else {
+            $quantity = $dataProduct['quantity'] ?? $product->quantity;
+            $unit = $dataProduct['unit'] ?? $product->unit;
         }
 
         $product->update([
             'name' => $dataProduct['name'] ?? $product->name,
             'category' => $dataProduct['category'] ?? $product->category,
             'code' => $dataProduct['code'] ?? $product->code,
-            'quantity' => $dataProduct['quantity'] ?? $product->quantity,
-            'unit' => $dataProduct['unit'] ?? $product->unit,
+            'quantity' => $quantity,
+            'unit' => $unit,
             'price' => $dataProduct['price'] ?? $product->price,
             'description' => $dataProduct['description'] ?? $product->description,
         ]);
-
+        
         return $product;
     }
-
 
     /**
      * Update the photo product URL and public_id of the product.
