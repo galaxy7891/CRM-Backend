@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use SoftDeletes, HasUuid;
+    use SoftDeletes, HasUuid, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -38,7 +39,7 @@ class Customer extends Model
         'updated_at',
         'deleted_at',
     ];
-    
+
     /**
      * The attributes that should be cast to date instances.
      * 
@@ -123,21 +124,21 @@ class Customer extends Model
      * @param string $email
      * @param string $category
      * @return int
-     */ 
+     */
     public static function countCustomerSummary($email, $category, $role, $userCompanyIds)
-    {   
+    {
         $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyIds) {
             $ownerQuery->where('user_company_id', $userCompanyIds);
-        }); 
-        
+        });
+
         $query->where('customerCategory', $category);
 
         if ($role !== 'super_admin' && $role !== 'admin') {
             $query->where('owner', $email);
         }
-        
+
         return $query->count();
-    }   
+    }
 
     public static function createCustomer(array $dataCustomer): self
     {
@@ -165,7 +166,7 @@ class Customer extends Model
     public static function updateCustomer(array $dataCustomer, string $customerId): self
     {
         $customer = self::findOrFail($customerId);
-        
+
         $customer->update([
             'customers_company_id' => $dataCustomer['customers_company_id'] ?? $customer->customers_company_id,
             'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
@@ -192,7 +193,7 @@ class Customer extends Model
     public static function convert(array $dataCustomer, string $customerId): self
     {
         $customer = self::findOrFail($customerId);
-        
+
         $customer->update([
             'customers_company_id' => $dataCustomer['customers_company_id'] ?? $customer->customers_company_id,
             'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
@@ -212,8 +213,7 @@ class Customer extends Model
             'village' => $dataCustomer['village'] ?? $customer->village,
             'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
         ]);
-    
+
         return $customer;
     }
-}   
-                                                                        
+}

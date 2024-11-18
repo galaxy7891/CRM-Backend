@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+
 use App\Models\Customer;
 use PharIo\Manifest\Email;
 use Illuminate\Support\Arr;
@@ -15,50 +16,7 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 0; $i < 50; $i++) {
-            Customer::create([
-                'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
-                'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
-                'first_name' => 'Customer',
-                'last_name' => 'Number' . $i,
-                'customerCategory' => 'leads',
-                'job' => 'PNS',
-                'description' => 'Lorem ipsum dolor sit amet.',
-                'status' => Arr::random(['warm', 'cold', 'hot']),
-                'email' => 'customer' . $i . '@gmail.com',
-                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                'owner' => 'user_satu@gmail.com',
-                'address' => 'Jl Kemayoran Baru',
-                'province' => 'Jawa Tengah',
-                'city' => 'Kota Semarang',
-                'subdistrict' => 'Semarang Tengah',
-                'village' => 'Pendikan Kidul',
-                'zip_code' => '12345'
-            ]);
-        }
-
-        for ($i = 50; $i < 100; $i++) {
-            Customer::create([
-                'id' => '123e4567-e89b-12d3-a456-4266141' . $i,
-                'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
-                'first_name' => 'Customer',
-                'last_name' => 'Number' . $i,
-                'customerCategory' => 'contact',
-                'job' => 'PNS',
-                'description' => 'Lorem ipsum dolor sit amet.',
-                'status' => Arr::random(['warm', 'cold', 'hot']), // Same status
-                'email' => 'customer' . $i . '@gmail.com', // Unique email
-                'phone' => '08123456' . str_pad($i, 2, '0', STR_PAD_LEFT), // Unique phone
-                'owner' => 'user_satu@gmail.com', // Same owner
-                'address' => 'Jl Kemayoran Baru',
-                'province' => 'Jawa Tengah',
-                'city' => 'Kota Semarang',
-                'subdistrict' => 'Semarang Tengah',
-                'village' => 'Pendikan Kidul',
-                'zip_code' => '12345'
-            ]);
-        }
-
+        Customer::factory()->count(100)->create();
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174001',
             'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
@@ -70,7 +28,7 @@ class CustomerSeeder extends Seeder
             'status' => 'hot',
             'email' => 'tejowijaya1@gmail.com',
             'phone' => '085789001231',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'address' => 'Jl Kemayoran Baru',
             'province' => 'Jakarta',
             'city' => 'Jakarta',
@@ -78,7 +36,7 @@ class CustomerSeeder extends Seeder
             'village' => 'Kemayoran Baru',
             'zip_code' => '12345'
         ]);
-        
+
         Customer::create([
             'id' => '123e4567-e89b-12d3-a456-426614174002',
             'customers_company_id' => '123e4567-e89b-12d3-a456-426614174004',
@@ -110,7 +68,7 @@ class CustomerSeeder extends Seeder
             'status' => 'cold',
             'email' => 'andi.saputra@gmail.com',
             'phone' => '08578900345',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'address' => 'Jl Bintaro',
             'province' => 'Jakarta',
             'city' => 'Jakarta',
@@ -190,7 +148,7 @@ class CustomerSeeder extends Seeder
             'status' => 'cold',
             'email' => 'agus.slamet@gmail.com',
             'phone' => '08578900789',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'address' => 'Jl Gatot Subroto',
             'province' => 'Jakarta',
             'city' => 'Jakarta',
@@ -289,7 +247,7 @@ class CustomerSeeder extends Seeder
             'status' => 'warm',
             'email' => 'dewi.lestari@gmail.com',
             'phone' => '08578900923',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'address' => 'Jl Ciputat Raya',
             'province' => 'Jakarta',
             'city' => 'Jakarta',
@@ -309,7 +267,7 @@ class CustomerSeeder extends Seeder
             'status' => 'cold',
             'email' => 'irwan.prakoso@gmail.com',
             'phone' => '08578900934',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'address' => 'Jl Fatmawati Raya',
             'province' => 'Jakarta',
             'city' => 'Jakarta',

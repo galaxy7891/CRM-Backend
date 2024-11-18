@@ -13,6 +13,7 @@ class CustomersCompanySeeder extends Seeder
      */
     public function run(): void
     {
+        CustomersCompany::factory()->count(100)->create();
         CustomersCompany::create([
             'id' => '123e4567-e89b-12d3-a456-426614174004',
             'name' => 'PT Sumber Kencana',
@@ -20,7 +21,7 @@ class CustomersCompanySeeder extends Seeder
             'email' => 'info@sumberkencana.com',
             'status' => 'hot',
             'phone' => '021-12345678',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'description' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eveniet, dolorum',
             'website' => 'https://sumberkencana.com',
             'address' => 'Jl. Jend. Sudirman No. 10',
@@ -38,7 +39,7 @@ class CustomersCompanySeeder extends Seeder
             'email' => 'contact@majujaya.com',
             'status' => 'hot',
             'phone' => '021-23456789',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'description' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eveniet, dolorum',
             'website' => 'https://majujaya.com',
             'address' => 'Jl. Anggrek No. 15',
@@ -56,7 +57,7 @@ class CustomersCompanySeeder extends Seeder
             'email' => 'info@bumiresources.com',
             'status' => 'hot',
             'phone' => '021-34567890',
-            'owner' => 'user_admin@gmail.com',
+            'owner' => 'raafi.sdmsib7@gmail.com',
             'description' => 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eveniet, dolorum',
             'website' => 'https://bumiresources.com',
             'address' => 'Jl. Raya Kebayoran No. 5',

@@ -320,7 +320,7 @@ class ProductController extends Controller
             }
 
             return new ApiResponseResource(
-                true,
+                false,
                 $message,
                 $productsWithDealsNames
             );
