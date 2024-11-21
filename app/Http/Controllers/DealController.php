@@ -21,15 +21,15 @@ class DealController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {   
+    {
         try {
             $user = auth()->user();
             $query = Deal::whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             });
-            
+
+            $query = $this->applyFiltersDeals($request, $query);
             $deals = $this->applyFilters($request, $query);
-            
             $deals->getCollection()->transform(function ($deal) {
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
@@ -53,75 +53,6 @@ class DealController extends Controller
                 'Daftar deals', 
                 $deals 
             );
-
-        } catch (\Exception $e) {
-            return new ApiResponseResource(
-                false,
-                $e->getMessage(),
-                null
-            );
-        }
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function indexCard(Request $request)
-    {
-        try {
-            $user = auth()->user();
-            $query = Deal::whereHas('user', function ($ownerQuery) use ($user) {
-                $ownerQuery->where('user_company_id', $user->user_company_id);
-            });
-
-            $deals = $this->applyFilters($request, $query);
-
-            $groupedDeals = $deals->getCollection()->transform(function ($deal) {
-                $deal->status = ActionMapperHelper::mapStatus($deal->status);
-                $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
-                $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
-
-                $deal->products = $deal->products->map(function ($product) {
-                    return [
-                        'product_id' => $product->id,
-                        'name' => $product->name,
-                        'price' => $product->price,
-                        'quantity' => $product->pivot->quantity,
-                        'unit' => $product->pivot->unit,
-                    ];
-                });
-
-                return $deal;
-            })->groupBy('stage');
-
-            $groupedDeals->map(function ($deals, $stage) {
-                return [
-                    'stage' => $stage,
-                    'deals' => $deals->values(),
-                ];
-            })->values(); 
-
-            $dataDeals = [
-                'current_page' => $deals->currentPage(),
-                'data' => $groupedDeals,
-                'first_page_url' => $deals->url(1),
-                'from' => $deals->firstItem(),
-                'last_page' => $deals->lastPage(),
-                'last_page_url' => $deals->url($deals->lastPage()),
-                'links' => $deals->linkCollection(),
-                'next_page_url' => $deals->nextPageUrl(),
-                'path' => $deals->path(),
-                'per_page' => $deals->perPage(),
-                'prev_page_url' => $deals->previousPageUrl(),
-                'to' => $deals->lastItem(),
-                'total' => $deals->total(),
-            ];
-    
-            return new ApiResponseResource(
-                true, 
-                'Daftar deals', 
-                $dataDeals
-            ); 
 
         } catch (\Exception $e) {
             return new ApiResponseResource(
@@ -522,6 +453,67 @@ class DealController extends Controller
         }
     }
     
+    /**
+     * Update only the stage of the specified deal.
+     */
+    public function updateStage(Request $request, $dealsId)
+    {
+        $deal = Deal::findDealsById($dealsId);
+        if (!$deal) {
+            return new ApiResponseResource(
+                false, 
+                'Deal tidak ditemukan',
+                null
+            );
+        }
+
+        $validator = Validator::make($request->all(), [
+            'stage' => 'required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
+        ], [
+            'stage.required' => 'Tahapan tidak boleh kosong',
+            'stage.in' => 'Tahapan harus berupa salah satu: kualifikasi, proposal, negosiasi, tercapai, atau gagal',
+        ]);
+
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false, 
+                $validator->errors(), 
+                null
+            ); 
+        } 
+
+        $validatedData = $validator->validated();
+
+        try {
+            if ($validatedData['stage'] === 'tercapai') {
+            $deal->update([
+                    'stage' => ActionMapperHelper::mapStageDealToDatabase($validatedData['stage']),
+                    'close_date' => now()->format('Y-m-d'),
+                    'value_actual' => $deal->value_estimated,
+                ]);
+
+            } else {
+                $deal->update([
+                    'stage' => ActionMapperHelper::mapStageDealToDatabase($validatedData['stage']),
+                ]);
+            }
+
+            return new ApiResponseResource(
+                true,
+                'Tahapan deals berhasil diperbarui',
+                null
+            );
+
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false, 
+                'Terjadi kesalahan saat memperbarui tahapan: ' . $e->getMessage(),
+                null
+            );
+        }
+    }
+
+
     /**
      * Remove the specified resource from storage.
      */

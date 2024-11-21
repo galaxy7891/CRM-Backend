@@ -84,9 +84,9 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']); 
         
         Route::get('/deals', [DealController::class, 'index']);
-        Route::get('/deals/card', [DealController::class, 'indexCard']);
         Route::get('/deals/{dealsId}', [DealController::class, 'show']);
         Route::post('/deals', [DealController::class, 'store']);
+        Route::post('/deals/stage/{dealsId}', [DealController::class, 'updateStage']);
         Route::post('/deals/{dealsId}', [DealController::class, 'update']);
         Route::delete('/deals', [DealController::class, 'destroy']); 
         

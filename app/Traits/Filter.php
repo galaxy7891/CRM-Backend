@@ -6,6 +6,32 @@ use Illuminate\Http\Request;
 
 trait Filter
 {
+    public function applyFiltersDeals(Request $request, $query)
+    {
+        $stage = $request->input('tahapan');
+        if ($stage) {
+            switch ($stage) {
+                case 'kualifikasi':
+                    $query->where('stage', 'qualificated');
+                    break;
+                case 'proposal':
+                    $query->where('stage', 'proposal');
+                    break;
+                case 'negosiasi':
+                    $query->where('stage', 'negotiate');
+                    break;
+                case 'gagal':
+                    $query->where('stage', 'lose');
+                    break;
+                case 'tercapai':
+                    $query->where('stage', 'won');
+                    break;
+            }
+        }
+        
+        return $query;
+    }
+    
     public function applyFilters(Request $request, $query)
     {
         $sort = $request->input('sort', 'terbaru');
@@ -35,4 +61,6 @@ trait Filter
 
         return $query->paginate($perPage);
     }
+
+
 }
