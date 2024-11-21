@@ -158,6 +158,30 @@ class ActionMapperHelper
         }
     }
 
+    public static function mapCategoryDeals($categoryDeals)
+    {
+        switch ($categoryDeals) {
+            case 'customers':
+                return 'pelanggan';
+            case 'customers_companies':
+                return 'perusahaan';
+            default:
+                return $categoryDeals;
+        }
+    }
+
+    public static function mapCategoryDealsToDatabase($categoryDeals)
+    {
+        switch ($categoryDeals) {
+            case 'pelanggan':
+                return 'customers';
+            case 'perusahaan':
+                return 'customers_companies';
+            default:
+                return $categoryDeals;
+        }
+    }
+
     public static function mapStatus($status)
     {
         switch ($status) {

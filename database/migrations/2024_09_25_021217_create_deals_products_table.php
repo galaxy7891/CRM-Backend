@@ -14,6 +14,8 @@ class CreateDealsProductsTable extends Migration
             $table->uuid('deals_id');
             $table->integer('quantity')->nullable();
             $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
+            $table->timestamps();
+            $table->softDeletes();
             
             // Foreign Key Constraints
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

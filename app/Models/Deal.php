@@ -53,7 +53,7 @@ class Deal extends Model
     {
         return $this->belongsToMany(Product::class, 'deals_products', 'deals_id', 'product_id')
                     ->withPivot('quantity', 'unit')
-                    ->withTimestamps();
+                    ->select(['products.id', 'products.name', 'products.price']);
     }
 
     /**
@@ -164,42 +164,48 @@ class Deal extends Model
     }
 
 
-    public static function createDeal(array $dataDeal): self
+    public static function createDeal(array $dataDeals): self
     {
         return self::create([
-            'customer_id' => $dataDeal['customer_id'],
-            'name' => $dataDeal['name'],
-            'description' => $dataDeal['description'] ?? null,
-            'tag' => $dataDeal['tag'] ?? null,
-            'stage' => $dataDeal['stage'],
-            'open_date' => $dataDeal['open_date'],
-            'close_date' => $dataDeal['close_date'] ?? null,
-            'expected_close_date' => $dataDeal['expected_close_date'],
-            'value_estimated' => $dataDeal['value_estimated'] ?? null,
-            'payment_category' => $dataDeal['payment_category'],
-            'payment_duration' => $dataDeal['payment_duration'] ?? null,
-            'owner' => $dataDeal['owner'],
+            'name' => $dataDeals['name'] ?? null,
+            'category' => $dataDeals['category'] ?? null,
+            'customer_id' => $dataDeals['customer_id'] ?? null,
+            'customers_company_id' => $dataDeals['customers_company_id'] ?? null, 
+            'payment_category' => $dataDeals['payment_category'] ?? null,
+            'payment_duration' => $dataDeals['payment_duration'] ?? null,
+            'value_estimated' => $dataDeals['value_estimated'] ?? null,
+            'value_actual' => $dataDeals['value_actual'] ?? null,
+            'stage' => $dataDeals['stage'] ?? null,
+            'open_date' => $validatedData['open_date'] ?? now()->format('Y-m-d'),
+            'expected_close_date' => $dataDeals['expected_close_date'] ?? null,
+            'close_date' => $dataDeals['close_date'] ?? null,
+            'status' => $dataDeals['status'] ?? null,
+            'tag' => $dataDeals['tag'] ?? null,
+            'owner' => $dataDeals['owner'] ?? null ,
+            'description' => $dataDeals['description'] ?? null,
         ]);
     }
 
-    public static function updateDeal(array $dataDeal, string $dealId): self
+    public static function updateDeal(array $dataDeals, string $dealsId): self
     {
-        $deal = self::findOrFail($dealId);
-        $deal->update([
-            'customer_id' => $dataDeal['customer_id'] ?? $deal->customer_id,
-            'name' => $dataDeal['name'] ?? $deal->name,
-            'description' => $dataDeal['description'] ?? $deal->description,
-            'tag' => $dataDeal['tag'] ?? $deal->tag,
-            'stage' => $dataDeal['stage'] ?? $deal->stage,
-            'open_date' => $dataDeal['open_date'] ?? $deal->open_date,
-            'close_date' => $dataDeal['close_date'] ?? $deal->close_date,
-            'expected_close_date' => $dataDeal['expected_close_date'] ?? $deal->expected_close_date,
-            'value_estimated' => $dataDeal['value_estimated'] ?? $deal->value_estimated,
-            'payment_category' => $dataDeal['payment_category'] ?? $deal->payment_category,
-            'payment_duration' => $dataDeal['payment_duration'] ?? $deal->payment_duration,
-            'owner' => $dataDeal['owner'] ?? $deal->owner,
+        $deals = self::findOrFail($dealsId);
+        $deals->update([
+            'name' => $dataDeals['name'] ?? $deals->name,
+            'category' => $datadeal['category'] ?? $deals->category,
+            'customer_id' => $dataDeals['customer_id'] ?? $deals->customer_id,
+            'customers_company_id' => $dataDeals['customers_company_id'] ?? $deals->customers_company_id,
+            'payment_category' => $dataDeals['payment_category'] ?? $deals->payment_category,
+            'payment_duration' => $dataDeals['payment_duration'] ?? $deals->payment_duration,
+            'value_estimated' => $dataDeals['value_estimated'] ?? $deals->value_estimated,
+            'value_actual' => $dataDeals['value_actual'] ?? $deals->value_actual,
+            'stage' => $dataDeals['stage'] ?? $deals->stage,
+            'expected_close_date' => $dataDeals['expected_close_date'] ?? $deals->expected_close_date,
+            'close_date' => $dataDeals['close_date'] ?? $deals->close_date,
+            'tag' => $dataDeals['tag'] ?? $deals->tag,
+            'owner' => $dataDeals['owner'] ?? $deals->owner,
+            'description' => $dataDeals['description'] ?? $deals->description,
         ]);
 
-        return $deal;
+        return $deals;
     }
 }

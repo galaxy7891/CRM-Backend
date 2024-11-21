@@ -11,7 +11,7 @@ class CreateDealsTable extends Migration
     {   
         Schema::create('deals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->enum('category', ['customers', 'customers_company']);
+            $table->enum('category', ['customers', 'customers_companies']);
             $table->uuid('customer_id')->nullable();
             $table->uuid('customers_company_id')->nullable();
             $table->string('name', 100);
@@ -29,7 +29,7 @@ class CreateDealsTable extends Migration
             $table->string('owner', 100);
             $table->timestamps();
             $table-> softDeletes();
-
+            
             // Foreign Key Constraints
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->foreign('customers_company_id')->references('id')->on('customers_companies')->onDelete('cascade');

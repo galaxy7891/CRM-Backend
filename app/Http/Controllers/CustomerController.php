@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
 class CustomerController extends Controller
 {
     use Filter;
-    
+
     /** 
      * Display a listing of the resource. 
      * 
@@ -79,7 +79,7 @@ class CustomerController extends Controller
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             });
-
+            
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
             }
@@ -310,7 +310,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-
+            
             $leads->status = ActionMapperHelper::mapStatus($leads->status);
 
             return new ApiResponseResource(
@@ -738,7 +738,7 @@ class CustomerController extends Controller
         $contactsWithDeals = [];
         $contactsWithoutDeals = [];
         $contactsWithDealsNames = [];
-    
+        
         foreach ($id as $contactId) {
             $contact = Customer::find($contactId);
             if (!$contact) {
@@ -753,7 +753,7 @@ class CustomerController extends Controller
                 $contactsWithoutDeals[] = $contact->id;
             }
         }
-
+        
         try {
             $deletedCount = Customer::whereIn('id', $contactsWithoutDeals)->delete();
 

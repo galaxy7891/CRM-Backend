@@ -303,7 +303,7 @@ class ProductController extends Controller
                 $productsWithoutDeals[] = $product->id;
             }
         }
-
+        
         try {
             $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
 

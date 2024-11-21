@@ -80,6 +80,17 @@ class Product extends Model
     }
 
     /**
+     * Get the category of a product by ID.
+     *
+     * @param string $id
+     * @return string|null
+     */
+    public static function getCategoryById($id)
+    {
+        return self::where('id', $id)->value('category');
+    }
+
+    /**
      * Upload photo product of the product.
      *
      * @param \Illuminate\Http\UploadedFile $photo
@@ -127,7 +138,7 @@ class Product extends Model
             $quantity = $dataProduct['quantity'] ?? $product->quantity;
             $unit = $dataProduct['unit'] ?? $product->unit;
         }
-
+        
         $product->update([
             'name' => $dataProduct['name'] ?? $product->name,
             'category' => $dataProduct['category'] ?? $product->category,
