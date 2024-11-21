@@ -29,7 +29,7 @@ class CreateCustomersTable extends Migration
             $table->string('zip_code', 5)->nullable();
             $table->timestamps();
             $table->softDeletes();
-
+            
             // Foreign Key Constraints
             $table->foreign('owner')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('customers_company_id')->references('id')->on('customers_companies')->onDelete('cascade');

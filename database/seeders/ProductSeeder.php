@@ -49,6 +49,15 @@ class ProductSeeder extends Seeder
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
         ]);
         
+        Product::create([
+            'id' => '123e4567-e89b-12d3-a456-426614177004',
+            'name' => 'Education',
+            'user_company_id'=> '123e4567-e89b-12d3-a456-426614174000',
+            'category' => 'service',
+            'code' => 'SFT-001',
+            'price' => 1000000,
+            'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+        ]);
 
     }
 }

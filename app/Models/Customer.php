@@ -189,7 +189,7 @@ class Customer extends Model
         return $customer;
     }
 
-    public static function convert(array $dataCustomer, string $customerId): self
+    public static function convert(?array $dataCustomer, string $customerId): self
     {
         $customer = self::findOrFail($customerId);
         

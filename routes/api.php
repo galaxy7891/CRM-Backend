@@ -84,6 +84,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']); 
         
         Route::get('/deals', [DealController::class, 'index']);
+        Route::get('/deals/card', [DealController::class, 'indexCard']);
         Route::get('/deals/{dealsId}', [DealController::class, 'show']);
         Route::post('/deals', [DealController::class, 'store']);
         Route::post('/deals/{dealsId}', [DealController::class, 'update']);
@@ -92,7 +93,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin'], function () {
             Route::post('/employee/{employeeId}', [EmployeeController::class, 'update']);
             Route::delete('/employee', [EmployeeController::class, 'destroy']);
-
+            
             Route::post('/users/companies', [UsersCompaniesController::class, 'update']);
             Route::post('/users/companies/logo', [UsersCompaniesController::class, 'updateLogo']);
         });
