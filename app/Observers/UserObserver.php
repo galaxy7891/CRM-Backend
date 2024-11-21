@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Helpers\ModelChangeLoggerHelper;
 use App\Models\ActivityLog;
-use App\Models\User;
+use App\Models\User;    
 
 class UserObserver
 {
