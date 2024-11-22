@@ -494,20 +494,20 @@ class ActionMapperHelper
 
     private static function mapDealsUpdateDescription(array $changes, string $userName, string $dealsName): string
     {
-        $stageOld = $changes['stage']['old'] ?? null;
-        $stageNew = $changes['stage']['new'] ?? null;
+        $stageOld = $changes['stage']['old'] ? self::mapStageDeal($changes['stage']['old']) : null;
+        $stageNew = $changes['stage']['new'] ? self::mapStageDeal($changes['stage']['new']) : null;
 
         if (isset($stageNew)) {
-            if ($stageNew !== 'won' && $stageNew !== 'lose') {
+            if ($stageNew !== 'tercapai' && $stageNew !== 'gagal') {
                 return $userName . ' memindahkan tahap Deals ' . $dealsName .
                     ' dari ' . $stageOld . ' menjadi ' . $stageNew;
-
-            } elseif ($stageNew == 'won') {
+            
+            } elseif ($stageNew == 'tercapai') {
                 $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.')?? '';
                 return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual . 
                     ' berhasil tercapai oleh ' . $userName;
-
-            } elseif ($stageNew == 'lose') {
+                
+            } elseif ($stageNew == 'gagal') {
                 $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
                 return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
             }

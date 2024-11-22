@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class CustomersImport implements ToCollection, WithHeadingRow
 {
@@ -146,6 +147,13 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 $this->summaryData['invalid_data']++;
                 continue;
             }
+            
+            // Convert Excel serial date to Carbon instance
+            if (!empty($rowArray['tanggal_lahir'])) {
+                if (is_numeric($rowArray['tanggal_lahir'])) {
+                    $rowArray['tanggal_lahir'] = \Carbon\Carbon::instance(Date::excelToDateTimeObject($rowArray['tanggal_lahir']))->format('Y-m-d');
+                }
+            }
 
             $validator = Validator::make($rowArray, [
                 'nama_depan' => 'required|string|max:50',
@@ -240,7 +248,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 'job' => $row['pekerjaan'],
                 'description' => $row['deskripsi'],
                 'status' => $row['status'],
-                'birthdate' => \Carbon\Carbon::parse($row['tanggal_lahir']),
+                'birthdate' => $rowArray['tanggal_lahir'],
                 'email' => $row['email'],
                 'phone' => $row['nomor_telepon'],
                 'owner' => $this->owner,

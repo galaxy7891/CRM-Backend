@@ -42,7 +42,7 @@ class CustomersCompanyController extends Controller
                     'Data perusahaan pelanggan tidak ditemukan',
                     null
                 );
-            } 
+            }
 
             $CustomersCompanies->getCollection()->transform(function ($CustomersCompany) {
                 $CustomersCompany->status = ActionMapperHelper::mapStatus($CustomersCompany->status);
@@ -76,7 +76,7 @@ class CustomersCompanyController extends Controller
             'email' => 'nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->whereNull('deleted_at'),
             'phone' => 'nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->whereNull('deleted_at'),
             'website' => 'nullable|string|max:255',
-            'owner' => 'required|email|max:100',
+            'owner' => 'required|email|max:100|exists:users,email',
             'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'subdistrict' => 'nullable|string|max:100',
@@ -103,6 +103,7 @@ class CustomersCompanyController extends Controller
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
+            'owner.exists' => 'Penanggung jawab tidak tersedia.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',
@@ -218,7 +219,7 @@ class CustomersCompanyController extends Controller
             'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'phone' => 'sometimes|nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'website' => 'sometimes|nullable|string|max:255',
-            'owner' => 'sometimes|required|email|max:100',
+            'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'province' => 'sometimes|nullable|string|max:100',
             'city' => 'sometimes|nullable|string|max:100',
             'subdistrict' => 'sometimes|nullable|string|max:100',
@@ -246,6 +247,7 @@ class CustomersCompanyController extends Controller
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
+            'owner.exists' => 'Penanggung jawab tidak tersedia.',
             'province.string' => 'Provinsi harus berupa teks.',
             'province.max' => 'Provinsi maksimal 100 karakter.',
             'city.string' => 'Kota harus berupa teks.',

@@ -67,7 +67,7 @@ class DealController extends Controller
      * Store a newly created resource in storage.
      */ 
     public function store(Request $request)
-    {
+    {   
         $rules = [
             'name' => 'required|string|max:100',
             'category' => 'required|in:pelanggan,perusahaan',
@@ -81,7 +81,7 @@ class DealController extends Controller
             'owner' => 'required|email|max:100|exists:users,email',
             'description' => 'nullable|string|max:200',
         ];
-
+        
         Validator::extend('valid_quantity', function ($attribute, $value, $parameters, $validator) {
             $productId = request()->input('product_id');
             $product = Product::find($productId);
@@ -128,26 +128,26 @@ class DealController extends Controller
         }
 
         $messages = [
-            'name.required' => 'Nama deals tidak boleh kosong',
-            'name.string' => 'Nama deals harus berupa teks',
-            'name.max' => 'Nama deals maksimal berisi 100 karakter',
-            'category.required' => 'Kategori deals tidak boleh kosong',
-            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: pelanggan atau perusahaan',
-            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah pelanggan',
-            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah perusahaan',
-            'customer_id.exists' => 'Nama pelanggan tidak tersedia',
-            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah perusahaan',
-            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah pelanggan',
-            'customers_company_id.exists' => 'Nama perusahaan tidak tersedia',
-            'product_id.required' => 'Nama produk wajib dipilih',
-            'product_id.exists' => 'Nama produk yang dipilih tidak tersedia',
-            'quantity.required' => 'Jumlah produk tidak boleh kosong jika produk termasuk barang',
-            'quantity.prohibited' => 'Jumlah produk tidak boleh diisi jika produk termasuk jasa',
-            'quantity.numeric' => 'Jumlah produk harus berupa angka',
-            'quantity.min' => 'Jumlah produk harus lebih dari 0',
-            'quantity.valid_quantity' => 'Jumlah produk tidak boleh melebihi stok yang tersedia',
-            'unit.required' => 'Satuan tidak boleh kosong jika produk termasukbarang',
-            'unit.prohibited' => 'Satuan produk tidak boleh diisi jika produk termasuk jasa',
+            'name.required' => 'Nama deals tidak boleh kosong', 
+            'name.string' => 'Nama deals harus berupa teks', 
+            'name.max' => 'Nama deals maksimal berisi 100 karakter', 
+            'category.required' => 'Kategori deals tidak boleh kosong', 
+            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: pelanggan atau perusahaan', 
+            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah pelanggan', 
+            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah perusahaan', 
+            'customer_id.exists' => 'Nama pelanggan tidak tersedia', 
+            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah perusahaan', 
+            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah pelanggan', 
+            'customers_company_id.exists' => 'Nama perusahaan tidak tersedia', 
+            'product_id.required' => 'Nama produk wajib dipilih', 
+            'product_id.exists' => 'Nama produk yang dipilih tidak tersedia', 
+            'quantity.required' => 'Jumlah produk tidak boleh kosong jika produk termasuk barang', 
+            'quantity.prohibited' => 'Jumlah produk tidak boleh diisi jika produk termasuk jasa', 
+            'quantity.numeric' => 'Jumlah produk harus berupa angka', 
+            'quantity.min' => 'Jumlah produk minimal berisi 1',
+            'quantity.valid_quantity' => 'Jumlah produk tidak boleh melebihi stok yang tersedia', 
+            'unit.required' => 'Satuan tidak boleh kosong jika produk termasukbarang', 
+            'unit.prohibited' => 'Satuan produk tidak boleh diisi jika produk termasuk jasa', 
             'unit.in' => 'Satuan produk wajib pilih salah satu: box, pcs, atau unit',
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong',
             'payment_category.in' => 'Kategori pembayaran harus berupa pilih salah satu: sekali, hari, bulan, atau tahun',
@@ -357,7 +357,7 @@ class DealController extends Controller
             'quantity.required' => 'Jumlah produk tidak boleh kosong jika produk termasuk barang',
             'quantity.prohibited' => 'Jumlah produk tidak boleh diisi jika produk termasuk jasa',
             'quantity.numeric' => 'Jumlah produk harus berupa angka',
-            'quantity.min' => 'Jumlah produk harus lebih dari 0',
+            'quantity.min' => 'Jumlah produk minimal berisi 1',
             'quantity.valid_quantity' => 'Jumlah produk tidak boleh melebihi stok yang tersedia',
             'unit.required' => 'Satuan tidak boleh kosong jika produk termasukbarang',
             'unit.prohibited' => 'Satuan produk tidak boleh diisi jika produk termasuk jasa',
