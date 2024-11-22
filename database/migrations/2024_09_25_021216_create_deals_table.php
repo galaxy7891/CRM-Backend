@@ -15,7 +15,7 @@ class CreateDealsTable extends Migration
             $table->uuid('customer_id')->nullable();
             $table->uuid('customers_company_id')->nullable();
             $table->string('name', 100);
-            $table->text('description')->nullable();
+            $table->string('description', 200)->nullable();
             $table->string('tag', 255)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->enum('stage', ['qualificated', 'proposal', 'negotiate', 'won', 'lose']);

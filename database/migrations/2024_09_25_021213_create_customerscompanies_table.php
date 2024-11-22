@@ -23,7 +23,7 @@ class CreateCustomersCompaniesTable extends Migration
             $table->string('subdistrict', 100)->nullable();
             $table->string('village', 100)->nullable();
             $table->string('zip_code', 5)->nullable();
-            $table->text('description')->nullable();
+            $table->string('description', 200)->nullable();
             $table->timestamps();
             $table->softDeletes();
 

@@ -15,7 +15,7 @@ class CreateCustomersTable extends Migration
             $table->string('last_name', 50)->nullable();
             $table->enum('customerCategory', ['leads', 'contact'])->default('leads');
             $table->string('job', 100)->nullable();
-            $table->text('description')->nullable();
+            $table->string('description', 200)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->date('birthdate')->nullable();
             $table->string('email', 100)->nullable();

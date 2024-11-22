@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->integer('quantity')->nullable();
             $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
             $table->decimal('price', 20, 2);
-            $table->text('description')->nullable();
+            $table->string('description', 200)->nullable();
             $table->string('image_url', 255)->nullable();
             $table->string('image_public_id', 255)->nullable();
             $table->timestamps();
