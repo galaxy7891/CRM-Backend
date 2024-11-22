@@ -293,8 +293,6 @@ class UserController extends Controller
                 'email.exists' => 'Email belum terdaftar',
                 'email.max' => 'Email maksimal 100 karakter',
             ]);
-
-            // Jika validasi gagal
             if ($validator->fails()) {
                 return new ApiResponseResource(
                     false,
@@ -438,7 +436,7 @@ class UserController extends Controller
         $dealsWon = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'won');
 
         $dealsLost = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'lose');
-        $dealsValue = Deal::sumValueEstimatedByStage($user->email, $user->role);
+        $dealsValue = Deal::sumValueEstimatedByStage($user->email, $user->role, $user->user_company_id);
 
         Carbon::setLocale('id');
         $formattedDate = now()->translatedFormat('l, d F Y');

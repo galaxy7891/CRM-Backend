@@ -119,7 +119,7 @@ class Deal extends Model
     {
         $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
             $ownerQuery->where('user_company_id', $userCompanyId);
-        }); 
+        });
         
         $query->where('stage', $stage);
 
@@ -136,7 +136,7 @@ class Deal extends Model
      * @param string $email
      * @return \Illuminate\Support\Collection
      */
-    public static function sumValueEstimatedByStage($email, $role)
+    public static function sumValueEstimatedByStage($email, $role, $userCompanyId)
     {
         $query = self::select('stage', \Illuminate\Support\Facades\DB::raw("
                 SUM(
@@ -148,6 +148,10 @@ class Deal extends Model
             "))
             ->groupBy('stage');
         
+        $query->whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+            $ownerQuery->where('user_company_id', $userCompanyId);
+        });
+
         if ($role !== 'super_admin' && $role !== 'admin') {
             $query->where('owner', $email);
         }
@@ -155,9 +159,9 @@ class Deal extends Model
         $results = $query->pluck('total_value', 'stage');
         
         return [
-            'qualification' => $results->get('qualification', 0),
+            'qualification' => $results->get('qualificated', 0),
             'proposal' => $results->get('proposal', 0),
-            'negotiation' => $results->get('negotiation', 0),
+            'negotiation' => $results->get('negotiate', 0),
             'won' => $results->get('won', 0),
             'lose' => $results->get('lose', 0),
         ];

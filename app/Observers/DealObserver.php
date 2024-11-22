@@ -22,7 +22,7 @@ class DealObserver
             'changes' => $changes ? json_encode($changes) : null,
         ]);
     }
-
+    
     /**
      * Handle the Deal "updated" event.
      */

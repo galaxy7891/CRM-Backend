@@ -209,7 +209,7 @@ class ActionMapperHelper
                 return $status;
         }
     }
-      
+
     public static function mapRole($role)
     {
         switch ($role) {
@@ -223,7 +223,7 @@ class ActionMapperHelper
                 return $role;
         }
     }
-    
+
     public static function mapRoleToDatabase($role)
     {
         switch ($role) {
@@ -237,7 +237,7 @@ class ActionMapperHelper
                 return $role;
         }
     }
-    
+
     public static function mapGender($gender)
     {
         switch ($gender) {
@@ -382,7 +382,7 @@ class ActionMapperHelper
                 $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
                 return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
-                
+
             case 'customers_companies':
                 return $userName . ' menambahkan data Perusahaan ' . $changes['name']['new'];
 
@@ -427,12 +427,12 @@ class ActionMapperHelper
             case 'customers_companies':
                 $userCompaniesName = UsersCompany::getCompaniesNameById($changes['id']['new']);
                 return $userName . ' memperbarui data Perusahaan ' . $userCompaniesName;
-                
-            case 'products': 
+
+            case 'products':
                 $productName = Product::getProductNameById($changes['id']['new']);
-                $quantityOld = $changes['quantity']['old']?? null;
-                $quantityNew = $changes['quantity']['new']?? null;
-                if (isset($quantityNew)){
+                $quantityOld = $changes['quantity']['old'] ?? null;
+                $quantityNew = $changes['quantity']['new'] ?? null;
+                if (isset($quantityNew)) {
                     return $userName . ' memperbarui data jumlah Produk ' . $productName . ' dari ' . $quantityOld . ' menjadi ' . $quantityNew;
                 }
 
@@ -491,20 +491,19 @@ class ActionMapperHelper
 
     private static function mapDealsUpdateDescription(array $changes, string $userName, string $dealsName): string
     {
-        $stageOld = $changes['stage']['old'] ?? null;
-        $stageNew = $changes['stage']['new'] ?? null;
+        $stageOld = $changes['stage']['old'] ? self::mapStageDeal($changes['stage']['old']) : null;
+        $stageNew = $changes['stage']['new'] ? self::mapStageDeal($changes['stage']['new']) : null;
 
         if (isset($stageNew)) {
-            if ($stageNew !== 'won' && $stageNew !== 'lose') {
+            if ($stageNew !== 'tercapai' && $stageNew !== 'gagal') {
                 return $userName . ' memindahkan tahap Deals ' . $dealsName .
                     ' dari ' . $stageOld . ' menjadi ' . $stageNew;
-            } elseif ($stageNew == 'won') {
+            } elseif ($stageNew == 'tercapai') {
                 $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.') ?? '';
                 return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual .
                     ' berhasil tercapai oleh ' . $userName;
-
-            } elseif ($stageNew == 'lose') {
-                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+            } elseif ($stageNew == 'gagal') {
+                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
                 return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
             }
         }

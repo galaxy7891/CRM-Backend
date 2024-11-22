@@ -21,6 +21,7 @@ class ModelChangeLoggerHelper
                     'new' => null,
                 ];
             }
+            
         } else {
             if ($action === 'UPDATE'){
                 if (isset($originalAttributes['id'])) {
@@ -29,11 +30,18 @@ class ModelChangeLoggerHelper
                         'new' => $model->getKey(),
                     ];
                 }
-                
+
                 if ($modelName === 'customers' && isset($originalAttributes['customerCategory'])) {
                     $changes['customerCategory'] = [
                         'old' => $originalAttributes['customerCategory'],
                         'new' => $model->customerCategory,
+                    ];
+                }
+
+                if ($modelName === 'deals' && isset($originalAttributes['stage'])) {
+                    $changes['value_estimated'] = [
+                        'old' => $originalAttributes['value_estimated'],
+                        'new' => $model->value_estimated,
                     ];
                 }
             }
@@ -49,7 +57,7 @@ class ModelChangeLoggerHelper
                 }
             }
         }   
-
+        
         return $changes;
     }
 }
