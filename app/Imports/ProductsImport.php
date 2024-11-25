@@ -83,7 +83,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                     }
                 }
             }
-
+            
             // check duplicate data
             $rowKey = json_encode($rowArray); 
             if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {
@@ -141,7 +141,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 'jumlah_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|numeric|min:0',
                 'satuan_produk' => 'required_if:kategori_produk,barang|prohibited_if:kategori_produk,jasa|nullable|in:box,pcs,unit',
                 'harga_produk' => 'required|numeric|min:0|max_digits:20',
-                'deskripsi' => 'required|string',
+                'deskripsi' => 'nullable|string',
             ], [ 
                 'nama_produk.required' => 'Nama produk tidak boleh kosong.',
                 'nama_produk.string' => 'Nama produk harus berupa teks.',
@@ -149,16 +149,17 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 'nama_produk.unique' => 'Nama produk sudah terdaftar.',
                 'kode_produk.required' => 'Kode produk tidak boleh kosong.',
                 'kode_produk.string' => 'Kode produk harus berupa string.',
-                'kode_produk.max' => 'Kode terlalu panjang.',
+                'kode_produk.max' => 'Kode produk maksimal 100 karakter.',
+                'kode_produk.unique' => 'Kode produk sudah terdaftar.',
                 'kategori_produk.required' => 'Kategori produk tidak boleh kosong.',
                 'kategori_produk.in' => 'Kategori produk harus berupa salah satu: barang atau jasa.',
                 'jumlah_produk.required_if' => 'Jumlah produk tidak boleh kosong.',
+                'jumlah_produk.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
                 'jumlah_produk.numeric' => 'Jumlah produk harus berupa angka.',
                 'jumlah_produk.min' => 'Jumlah produk minimal berisi 1.',
-                'jumlah_produk.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
                 'satuan_produk.required_if' => 'Satuan produk tidak boleh kosong.',
-                'satuan_produk.in' => 'Satuan produk harus berupa salah satu: box, pcs, unit.',
                 'satuan_produk.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+                'satuan_produk.in' => 'Satuan produk harus berupa salah satu: box, pcs, unit.',
                 'harga_produk.required' => 'Harga tidak boleh kosong.',
                 'harga_produk.numeric' => 'Harga harus berupa angka.',
                 'harga_produk.min' => 'Harga minimal berisi 1.',
@@ -230,8 +231,10 @@ class ProductsImport implements ToCollection, WithHeadingRow
         $missingColumns = array_diff($expectedHeadings, $fileHeadings);
         $extraColumns = array_diff($fileHeadings, $expectedHeadings);
 
-        if (!empty($missingColumns) || !empty($extraColumns)) {
-            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan. Kolom berikut hilang: ' . implode(", ", $missingColumns);
+        if ($missingColumns || $extraColumns) {
+            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan.';
+            $errorMessage .= $missingColumns ? ' Kolom hilang: ' . implode(', ', $missingColumns) . '.' : '';
+            $errorMessage .= $extraColumns ? ' Kolom tidak dikenal: ' . implode(', ', $extraColumns) . '.' : '';
             
             throw new \Exception($errorMessage);
         }

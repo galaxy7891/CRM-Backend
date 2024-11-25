@@ -170,13 +170,13 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $validator = Validator::make($row->toArray(), [
-                'nama_perusahaan' => 'required|string|max:100|'.  Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
+            $validator = Validator::make($rowArray, [
+                'nama_perusahaan' => 'required|string|max:100|'.  Rule::unique('customers_companies', 'name')->whereNull('deleted_at'),
                 'jenis_industri' => 'nullable|string|max:50',
                 'status' => 'required|in:tinggi,sedang,rendah',
-                'email' => 'nullable|email|max:100|'.  Rule::unique('users_companies', 'email')->whereNull('deleted_at'),
-                'nomor_telepon' => 'nullable|numeric|max_digits:15|'. Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
-                'website' => 'nullable|string|max:255|'. Rule::unique('users_companies', 'website')->whereNull('deleted_at'),
+                'email' => 'nullable|email|max:100|'.  Rule::unique('customers_companies', 'email')->whereNull('deleted_at'),
+                'nomor_telepon' => 'nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->whereNull('deleted_at'),
+                'website' => 'nullable|string|max:255|'. Rule::unique('customers_companies', 'website')->whereNull('deleted_at'),
                 'provinsi' => 'nullable|string|max:100',
                 'kota' => 'nullable|string|max:100',
                 'kecamatan' => 'nullable|string|max:100',
@@ -191,7 +191,7 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
                 'jenis_industri.string' => 'Jenis industri harus berupa teks.',
                 'jenis_industri.max' => 'Jenis industri maksimal 50 karakter.',
                 'status.required' => 'Status tidak boleh kosong.',
-                'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
+                'status.in' => 'Status harus pilih salah satu dari: rendah, sedang, atau tinggi.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
                 'email.max' => 'Email maksimal 100 karakter.',
@@ -290,8 +290,10 @@ class CustomersCompanyImport implements ToCollection, WithHeadingRow
         $missingColumns = array_diff($expectedHeadings, $fileHeadings);
         $extraColumns = array_diff($fileHeadings, $expectedHeadings);
 
-        if (!empty($missingColumns) || !empty($extraColumns)) {
-            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan. Kolom berikut hilang: ' . implode(", ", $missingColumns);
+        if ($missingColumns || $extraColumns) {
+            $errorMessage = 'Dokumen tidak sesuai dengan template yang diberikan.';
+            $errorMessage .= $missingColumns ? ' Kolom hilang: ' . implode(', ', $missingColumns) . '.' : '';
+            $errorMessage .= $extraColumns ? ' Kolom tidak dikenal: ' . implode(', ', $extraColumns) . '.' : '';
             
             throw new \Exception($errorMessage);
         }

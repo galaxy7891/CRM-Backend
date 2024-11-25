@@ -43,7 +43,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-
+            
             $leads->getCollection()->transform(function ($lead) {
                 $lead->status = ActionMapperHelper::mapStatus($lead->status);
                 return $lead;

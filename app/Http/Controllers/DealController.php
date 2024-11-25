@@ -528,7 +528,7 @@ class DealController extends Controller
                 null
             );
         }
-
+         
         try {
             DealsProduct::whereIn('deals_id', $ids)->delete();
             $deletedDealsCount = Deal::whereIn('id', $ids)->delete();;
@@ -548,7 +548,6 @@ class DealController extends Controller
             );
         
         } catch (\Exception $e) {
-            DB::rollBack();
             return new ApiResponseResource(
                 false, 
                 $e->getMessage(),
