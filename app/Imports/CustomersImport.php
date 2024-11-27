@@ -97,7 +97,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                     }
                 }
             }
-
+            
             // Check duplicate data 
             $rowKey = json_encode($rowArray); 
             if (isset($rowMap[$rowKey]) && !empty($rowMap[$rowKey])) {

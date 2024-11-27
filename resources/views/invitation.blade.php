@@ -103,7 +103,7 @@
 
         <!-- Content -->
         <div class="content">
-            <h3>Permintaan Atur Ulang Kata Sandi Akun</h3>
+            <h3>Undangan Kolaborasi</h3>
             <p>Halo {{ $nama }},</p>
             <p>Anda telah diundang oleh {{ $invited_by }} untuk membuat akun dan berkolaborasi di LoyalCust, silakan klik tombol di bawah ini untuk melanjutkan.</p>
 

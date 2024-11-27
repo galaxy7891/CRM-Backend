@@ -24,19 +24,25 @@ class EmployeeController extends Controller
             $query = User::where('user_company_id', $user->user_company_id)
                 ->where('id', '!=', $user->id);
             
-            $employee = $this->applyFilters($request, $query);
-            if (!$employee) {
+            $employees = $this->applyFilters($request, $query);
+            if (!$employees) {
                 return new ApiResponseResource(
                     false,
                     'Data karyawan tidak ditemukan',
                     null
                 );
             }
+
+            $employees->getCollection()->transform(function ($employee) {
+                $employee->role = ActionMapperHelper::mapRole($employee->role);
+                $employee->gender = ActionMapperHelper::mapGender($employee->gender);
+                return $employee;
+            });
             
             return new ApiResponseResource(
                 true,
                 'Daftar Karyawan',
-                $employee
+                $employees
             );
             
         } catch (\Exception $e) {
@@ -63,6 +69,9 @@ class EmployeeController extends Controller
                     null
                 );
             }
+
+            $user->role = ActionMapperHelper::mapRole($user->role);
+            $user->gender = ActionMapperHelper::mapGender($user->gender);
 
             return new ApiResponseResource(
                 true,
@@ -144,7 +153,7 @@ class EmployeeController extends Controller
             $user = User::updateUser($data, $employeeId);
             return new ApiResponseResource(
                 true, 
-                'Data karyawan ' .  ucfirst($user->first_name) . ucfirst($user->last_name) . " berhasil diubah",
+                'Data karyawan ' .  ucfirst($user->first_name) . ' ' . ucfirst($user->last_name) . " berhasil diubah",
                 $user
             );
 
