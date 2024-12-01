@@ -14,7 +14,7 @@ class CreateTrialAccountsTable extends Migration
             $table->dateTime('trial_end_date');
             $table->timestamps();
             
-            // Foreign Key Constraints
+            // Forei gn Key Constraints
             $table->foreign('user_company_id')->references('id')->on('users_companies')->onDelete('cascade');
         });
     }

@@ -17,7 +17,7 @@ use App\Observers\ProductObserver;
 use App\Observers\UserInvitationObserver;
 use App\Observers\UserObserver;
 use App\Observers\UsersCompaniesObserver;
-
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +35,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Validator::extend('unique_product_name', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            return !\App\Models\Product::where('user_company_id', $userCompanyId)
+                ->where('name', $value)
+                ->exists();
+        });
+    
+        Validator::extend('unique_product_code', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            return !\App\Models\Product::where('user_company_id', $userCompanyId)
+                ->where('code', $value)
+                ->exists();
+        });
+
         UsersCompany::observe(UsersCompaniesObserver::class);
         Customer::observe(CustomerObserver::class);
         User::observe(UserObserver::class);

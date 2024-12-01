@@ -20,6 +20,8 @@ class UserInvitation extends Model
         'expired_at',
         'status',
         'invited_by',
+        'role',
+        'job_position',
         'created_at',
         'updated_at',
     ];
@@ -121,6 +123,8 @@ class UserInvitation extends Model
             'expired_at' => $dataUser['expired_at'],
             'status' => $dataUser['status'],
             'invited_by' => $dataUser['invited_by'],
+            'role' => $dataUser['role'],
+            'job_position' => $dataUser['job_position'],
             'created_at' => now()
             ]
         );

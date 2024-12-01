@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Helpers\ModelChangeLoggerHelper;
+use App\Helpers\ReportsHelper;
 use App\Models\ActivityLog;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Log;
@@ -15,8 +16,23 @@ class CustomerObserver
      */
     public function created(Customer $customer): void
     {
-        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'CREATE');
+        $userCompanyId = $customer->user()
+            ->whereHas('company', function ($query) use ($customer) {
+                $query->where('id', $customer->user->user_company_id);
+            })
+            ->value('user_company_id');
 
+        if ($userCompanyId) {
+            if ($customer->customerCategory === 'leads') {
+                ReportsHelper::recordAddedLeads($userCompanyId, $customer);
+            }
+    
+            if ($customer->customerCategory === 'contact') {
+                ReportsHelper::recordAddedContact($userCompanyId, $customer);
+            }
+        }
+
+        $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'CREATE');
         ActivityLog::create([
             'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
             'model_name' => 'customers',
@@ -29,7 +45,19 @@ class CustomerObserver
      * Handle the Customer "updated" event.
      */
     public function updated(Customer $customer): void
-    {
+    {   
+        $userCompanyId = $customer->user()
+            ->whereHas('company', function ($query) use ($customer) {
+                $query->where('id', $customer->user->user_company_id);
+            })
+            ->value('user_company_id');
+
+        if ($userCompanyId) {
+            if ($customer->isDirty('customerCategory') && $customer->customerCategory === 'contact') {
+                ReportsHelper::recordConversionContact($userCompanyId, $customer);
+            }
+        }
+
         $changes = ModelChangeLoggerHelper::getModelChanges($customer, 'customers', 'UPDATE');
 
         ActivityLog::create([

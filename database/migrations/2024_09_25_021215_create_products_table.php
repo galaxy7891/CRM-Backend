@@ -6,15 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateProductsTable extends Migration
 {
-
     public function up()
     {
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name', 100)->unique();
+            $table->string('name', 100);
             $table->uuid('user_company_id');
             $table->enum('category', ['stuff', 'service']);
-            $table->string('code', 100)->unique();
+            $table->string('code', 100);
             $table->integer('quantity')->nullable();
             $table->enum('unit', ['box', 'pcs', 'unit'])->nullable();
             $table->decimal('price', 20, 2);

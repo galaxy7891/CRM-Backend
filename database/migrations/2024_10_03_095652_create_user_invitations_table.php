@@ -17,6 +17,8 @@ Class CreateUserInvitationsTable extends Migration
             $table->timestamp('expired_at'); 
             $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending'); 
             $table->string('invited_by', 100);
+            $table->string('job_position', 50)->nullable();
+            $table->enum('role', ['super_admin', 'admin', 'employee'])->default('employee');
             $table->timestamps();
 
             // Foreign Key Constraints

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Helpers\ModelChangeLoggerHelper;
+use App\Helpers\ReportsHelper;
 use App\Models\ActivityLog;
 use App\Models\CustomersCompany;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,16 @@ class CustomersCompaniesObserver
      */
     public function created(CustomersCompany $customersCompany): void
     {
+        $userCompanyId = $customersCompany->user()
+            ->whereHas('company', function ($query) use ($customersCompany) {
+                $query->where('id', $customersCompany->user->user_company_id);
+            })
+            ->value('user_company_id');
+
+        if ($userCompanyId) {
+            ReportsHelper::recordAddedCompany($userCompanyId, $customersCompany);
+        }
+        
         $changes = ModelChangeLoggerHelper::getModelChanges($customersCompany, 'customers_companies', 'CREATE');
 
         ActivityLog::create([

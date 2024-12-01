@@ -59,9 +59,9 @@ class ProductController extends Controller
     {   
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
+            'name' => 'required|string|max:100|unique_product_name',
             'category' => 'required|in:barang,jasa|max:100',
-            'code' => 'required|string|max:100',
+            'code' => 'required|string|max:100|unique_product_code',
             'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
             'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
@@ -74,9 +74,10 @@ class ProductController extends Controller
             'category.required' => 'Kategori produk tidak boleh kosong.',
             'category.in' => 'Kategori produk harus pilih salah satu: barang atau jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
-            'code.required' => 'Kode tidak boleh kosong.',
-            'code.string' => 'Kode harus berupa string.',
-            'code.max' => 'Kode terlalu panjang.',
+            'code.required' => 'Kode produk tidak boleh kosong.',
+            'code.string' => 'Kode produk harus berupa string.',
+            'code.max' => 'Kode produk maksimal 100 karakter.',
+            'code.unique' => 'Kode produk sudah terdaftar.',
             'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',
@@ -174,9 +175,9 @@ class ProductController extends Controller
         }
 
         $validator = Validator::make($productData, [
-            'name' => 'sometimes|required|string|max:100|'. Rule::unique('products', 'name')->ignore($productId)->whereNull('deleted_at'),
+            'name' => 'sometimes|required|string|max:100|unique_product_name',
             'category' => 'sometimes|required|in:barang,jasa|max:100',
-            'code' => 'sometimes|required|string|max:100|'. Rule::unique('products', 'code')->ignore($productId)->whereNull('deleted_at'),
+            'code' => 'sometimes|required|string|max:100|unique_product_code',
             'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
             'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
@@ -189,10 +190,10 @@ class ProductController extends Controller
             'category.required' => 'Kategori produk tidak boleh kosong.',
             'category.string' => 'Kategori produk harus berupa teks.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
-            'code.required' => 'Kode tidak boleh kosong.',
-            'code.string' => 'Kode harus berupa teks.',
-            'code.max' => 'Kode terlalu panjang.',
-            'code.unique' => 'Kode sudah terdaftar.',
+            'code.required' => 'Kode produk tidak boleh kosong.',
+            'code.string' => 'Kode produk harus berupa teks.',
+            'code.max' => 'Kode produk terlalu panjang.',
+            'code.unique' => 'Kode produk sudah terdaftar.',
             'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',

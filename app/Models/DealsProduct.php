@@ -24,6 +24,18 @@ class DealsProduct extends Model
         'quantity',
         'unit'
     ];
+    
+    /**
+     * Get the product that have relation to deals_product.
+     * 
+     * This defines a many-to-one relationship where the deals products belongs to a product.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 
     public static function createDealsProducts(array $dataDealsProduct, string $dealsId): self
     {
@@ -56,13 +68,4 @@ class DealsProduct extends Model
         
         return $dealsProducts; 
     }
-
-    // public static function sumProductQuantity($productId)
-    // {
-    //     return self::join('deals', 'deals_products.deals_id', '=', 'deals.id')
-    //         ->where('deals_products.product_id', $productId)
-    //         ->whereNotIn('deals.stage', ['lose','won'])
-    //         ->sum('deals_products.quantity');
-    // }
-
 }

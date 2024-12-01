@@ -56,13 +56,13 @@ class CustomerController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                true,
+                false,
                 $e->getMessage(),
                 null
             );
         }
     }
-
+    
     /** 
      * Display a listing of the resource.
      *  
@@ -105,7 +105,7 @@ class CustomerController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                true,
+                false,
                 $e->getMessage(),
                 null
             );
@@ -203,7 +203,7 @@ class CustomerController extends Controller
      * Store a newly created resource in storage.
      */
     public function storeContact(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
@@ -498,7 +498,7 @@ class CustomerController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
@@ -516,7 +516,7 @@ class CustomerController extends Controller
             'village' => 'sometimes|nullable|string|max:100',
             'zip_code' => 'sometimes|nullable|string|max:5',
             'description' => 'sometimes|nullable|string',
-        ], [
+        ],  [
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',

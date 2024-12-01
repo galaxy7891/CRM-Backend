@@ -40,7 +40,6 @@ class AuthController extends Controller
         try {
 
             $credentials = $request->only(['email', 'password']);
-
             if (!$token = auth()->attempt($credentials)) {
                 return new ApiResponseResource(
                     false,
@@ -96,8 +95,8 @@ class AuthController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
-            'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
+            'job_position.required' => 'Jabatan tidak boleh kosong',
+            'job_position.max' => 'Jabatan maksimal 50 karakter',
             'name.required' => 'Nama perusahaan tidak boleh kosong',
             'name.unique' => 'Nama perusahaan sudah terdaftar',
             'industry.required' => 'Jenis industri tidak boleh kosong',
@@ -162,21 +161,29 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
+            $user = User::where('google_id', $googleUser->id)
+            ->first();
 
-            return new ApiResponseResource(
-                true,
-                'Data user google',
-                [
-                    'email' => $googleUser->email,
-                    'first_name' => $nameParts['first_name'],
-                    'last_name' => $nameParts['last_name'],
-                    'role' => 'super_admin',
-                    'photo' => $googleUser->avatar,
-                    'google_id' => $googleUser->id,
-                ]
-            );
+            if ($user) {
+                $token = auth()->login($user);
 
+                return $this->respondWithToken($token);
+            } else {
+                $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
+
+                return new ApiResponseResource(
+                    true,
+                    'Data user google',
+                    [
+                        'email' => $googleUser->email,
+                        'first_name' => $nameParts['first_name'],
+                        'last_name' => $nameParts['last_name'],
+                        'role' => 'super_admin',
+                        'photo' => $googleUser->avatar,
+                        'google_id' => $googleUser->id,
+                    ]
+                );
+            }
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

@@ -12,6 +12,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\CustomersCompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserInvitationController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\RoleMiddleware;
@@ -44,6 +45,9 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/dashboard', [UserController::class, 'getSummary']);
+        Route::get('/report/conversion/contact', [DashboardController::class, 'getConversionContact']);
+        Route::get('/report/status', [DashboardController::class, 'getStatusReport']);
+
 
         Route::post('/import/{type}', [ImportController::class, 'import']);
 

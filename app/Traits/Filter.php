@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 trait Filter
 {
@@ -58,6 +59,21 @@ trait Filter
         }
 
         $perPage = $request->input('per_page', 10);
+
+        if ($perPage === 'semua') {
+            $data = $query->get();
+
+            return new LengthAwarePaginator(
+                $data, 
+                $data->count(),
+                $data->count(),
+                1,
+                [
+                    'path' => $request->url(), 
+                    'query' => $request->query()
+                ] 
+            );
+        }
 
         return $query->paginate($perPage);
     }

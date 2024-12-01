@@ -81,6 +81,18 @@ class Deal extends Model
         return $this->belongsTo(CustomersCompany::class, 'customers_company_id', 'id');
     }
 
+    /**
+     * Get the deals products associated with the deals.
+     * 
+     * This defines a one-to-many relationship where the deals product can have multiple deals.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dealsProducts()
+    {
+        return $this->hasMany(DealsProduct::class, 'deals_id', 'id');
+    }
+
     /** 
      * Get the deals's by ID.
      * 

@@ -26,7 +26,11 @@ class DealController extends Controller
             $user = auth()->user();
             $query = Deal::whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
-            });
+            })->with([
+                'dealsProducts.product' => function ($productQuery) {
+                    $productQuery->select('id', 'name', 'price', 'quantity');
+                },
+            ]);
 
             $query = $this->applyFiltersDeals($request, $query);
             $deals = $this->applyFilters($request, $query);
@@ -35,16 +39,20 @@ class DealController extends Controller
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
                 $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
                 
-                $deal->products = $deal->products->map(function ($product) {
-                    return [
-                        'product_id' => $product->id,
-                        'name' => $product->name,
-                        'price' => $product->price,
-                        'quantity' => $product->pivot->quantity,
-                        'unit' => $product->pivot->unit,
+                $dealsProduct = $deal->dealsProducts->first(); 
+                if ($dealsProduct) {
+                    $deal->product = [
+                        'product_id' => $dealsProduct->product_id,
+                        'name' => $dealsProduct->product->name ?? null,
+                        'price' => $dealsProduct->product->price ?? null,
+                        'quantity' => $dealsProduct->quantity ?? $dealsProduct->product->quantity,
+                        'unit' => $dealsProduct->unit,
                     ];
-                });
-                
+                } else {
+                    $deal->product = null;
+                }
+
+                unset($deal->dealsProducts);
                 return $deal;
             });
 
@@ -238,7 +246,11 @@ class DealController extends Controller
             $user = auth()->user();
             $deal = Deal::whereHas('user', function ($query) use ($user) {
                 $query->where('user_company_id', $user->user_company_id);
-            })->with(['products'])->find($id);
+            })->with([
+                'dealsProducts.product' => function ($productQuery) {
+                    $productQuery->select('id', 'name', 'price', 'quantity');
+                },
+            ])->find($id);
 
             if (!$deal) {
                 return new ApiResponseResource(
@@ -252,8 +264,20 @@ class DealController extends Controller
             $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
             $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category); 
             
-            $customer = Customer::where('id', $deal->customer_id)->first(['first_name', 'last_name']); 
-                $deal->customer_name = $customer ? trim(ucfirst($customer->first_name) . ' ' . ucfirst($customer->last_name)) : null; 
+            $dealsProduct = $deal->dealsProducts->first();
+            if ($dealsProduct) {
+                $deal->product = [
+                    'product_id' => $dealsProduct->product_id,
+                    'name' => $dealsProduct->product->name ?? null,
+                    'price' => $dealsProduct->product->price ?? null,
+                    'quantity' => $dealsProduct->quantity ?? $dealsProduct->product->quantity,
+                    'unit' => $dealsProduct->unit,
+                ];
+            } else {
+                $deal->product = null;
+            }
+
+            unset($deal->dealsProducts);
 
             return new ApiResponseResource(
                 true,
@@ -269,7 +293,7 @@ class DealController extends Controller
             );
         }
     }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -283,7 +307,7 @@ class DealController extends Controller
                 null
             );
         }
-
+        
         $rules = [
             'name' => 'sometimes|required|string|max:100',
             'category' => 'sometimes|required|in:pelanggan,perusahaan',
