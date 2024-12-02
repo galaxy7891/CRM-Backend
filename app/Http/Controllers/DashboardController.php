@@ -89,7 +89,6 @@ class DashboardController extends Controller
         }
     }
 
-
      /**
      * Get status report data for the chart.
      *
