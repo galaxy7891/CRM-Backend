@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateInviteUser;
 use App\Models\User;
@@ -24,13 +25,19 @@ class UserInvitationController extends Controller
      */
     public function sendInvitation(Request $request)
     {   
-        $validator = Validator::make($request->only('email'), [
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
+            'role' => 'required|in:admin,karyawan',
+            'job_position' => 'required|max:50',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
+            'role.required' => 'Akses user harus diisi',
+            'role.in' => 'Akses user harus pilih salah satu: admin, atau karyawan.',
+            'job_position.required' => 'Jabatan tidak boleh kosong',
+            'job_position.max' => 'Jabatan maksimal 50 karakter',
         ]);
 
         if ($validator->fails()) {
@@ -41,21 +48,26 @@ class UserInvitationController extends Controller
             );
         }
 
-        $recentInvitation = UserInvitation::getRecentInvitation($request->email);
-
-        if ($recentInvitation) {
-            $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
-
-            return new ApiResponseResource(
-                false,
-                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
-                    "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-                null
-            );
+        $data = $request->all();
+        if (isset($data['role'])) {
+            $data['role'] = ActionMapperHelper::mapRoleToDatabase($data['role']);
         }
 
+        $recentInvitation = UserInvitation::getRecentInvitation($data['email']);
+
+        // if ($recentInvitation) {
+        //     $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
+
+        //     return new ApiResponseResource(
+        //         false,
+        //         'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
+        //             "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+        //         null
+        //     );
+        // }
+
         try {
-            $email = $request->email;
+            $email = $data['email'];
             $token = Str::uuid()->toString();
             $expired_at = now()->addWeek()->toDateTimeString();
             $invited_by = Auth::user()->email;
@@ -67,11 +79,13 @@ class UserInvitationController extends Controller
                 'expired_at' => $expired_at,
                 'status' => 'pending',
                 'invited_by' => $invited_by,
+                'role' => $data['role'],
+                'job_position' => $data['job_position'],
             ];
 
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
             $url = $frontendUrl . '/accept-invitation?email=' . urlencode($email) . '&token=' . $token;
-            
+
             Mail::to($email)->send(new TemplateInviteUser($email, $url, $nama, $invited_by));
 
             UserInvitation::createInvitation($dataUser);
@@ -146,19 +160,20 @@ class UserInvitationController extends Controller
 
         try {
             $inviter = $invitation->inviter;
-            $useruser_company_id = $inviter?->user_company_id;
+            $user_company_id = $inviter?->user_company_id;
 
             $dataUser = [
-                'user_company_id' => $useruser_company_id,
+                'user_company_id' => $user_company_id,
                 'email' => $request->email,
-                'role' => 'employee',
+                'role' => $invitation->role,
+                'job_position' => $invitation->job_position,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'password' => $request->password,
                 'phone' => $request->phone,
             ];
 
-            $user = User::createUser($dataUser, $useruser_company_id);
+            $user = User::createUser($dataUser, $user_company_id);
             $invitation->updateStatus('accepted');
 
             return new ApiResponseResource(

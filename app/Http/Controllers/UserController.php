@@ -90,8 +90,8 @@ class UserController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
-            'job_position.required' => 'Posisi pekerjaan tidak boleh kosong',
-            'job_position.max' => 'Posisi pekerjaan maksimal 50 karakter',
+            'job_position.required' => 'Jabatan tidak boleh kosong',
+            'job_position.max' => 'Jabatan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses harus pilih salah satu: super admin, admin, atau karyawan.',
             'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
@@ -421,7 +421,7 @@ class UserController extends Controller
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
-
+        
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
 

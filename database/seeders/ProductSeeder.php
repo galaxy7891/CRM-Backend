@@ -212,6 +212,7 @@ class ProductSeeder extends Seeder
                 'price' => 3000000,
                 'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             ]
+
         ];
 
         foreach ($products as $product) {
