@@ -301,6 +301,30 @@ class ActionMapperHelper
         }
     }
 
+    public static function mapCategoryDeal($stage)
+    {
+        switch ($stage) {
+            case 'customers':
+                return 'pelanggan';
+            case 'customers_companies':
+                return 'perusahaan';
+            default:
+                return $stage;
+        }
+    }
+
+    public static function mapCategoryDealToDatabase($stage)
+    {
+        switch ($stage) {
+            case 'pelanggan':
+                return 'customers';
+            case 'perusahaan':
+                return 'customers_companies';
+            default:
+                return $stage;
+        }
+    }
+
     public static function mapPaymentCategory($paymentCategory)
     {
         switch ($paymentCategory) {

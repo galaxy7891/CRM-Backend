@@ -38,6 +38,7 @@ class DealController extends Controller
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
                 $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
+                $deal->category = ActionMapperHelper::mapCategoryDeal($deal->category);
                 
                 $dealsProduct = $deal->dealsProducts->first(); 
                 if ($dealsProduct) {
@@ -262,7 +263,8 @@ class DealController extends Controller
 
             $deal->status = ActionMapperHelper::mapStatus($deal->status);
             $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
-            $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category); 
+            $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
+            $deal->category = ActionMapperHelper::mapCategoryDeal($deal->category);
             
             $dealsProduct = $deal->dealsProducts->first();
             if ($dealsProduct) {
