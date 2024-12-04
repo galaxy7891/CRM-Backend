@@ -19,8 +19,16 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $query = Product::where('user_company_id', $user->user_company_id);
 
             $products = $this->applyFilters($request, $query);
@@ -58,6 +66,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {   
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|unique_product_name',
             'category' => 'required|in:barang,jasa|max:100',

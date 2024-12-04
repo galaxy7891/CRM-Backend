@@ -23,8 +23,16 @@ class CustomerController extends Controller
 
     public function indexLeads(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $query = Customer::where('customerCategory', 'leads');
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
@@ -71,8 +79,16 @@ class CustomerController extends Controller
 
     public function indexContact(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $query = Customer::with(['customersCompany:id,name'])
                     ->where('customerCategory', 'contact');
 
@@ -293,6 +309,15 @@ class CustomerController extends Controller
      */
     public function showLeads($leadsId)
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
             $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
 
@@ -304,7 +329,6 @@ class CustomerController extends Controller
                 );
             }
             
-            $user = auth()->user();
             if ($user->role == 'employee' && $leads->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
@@ -335,6 +359,15 @@ class CustomerController extends Controller
      */
     public function showContact($contactId)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
             $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
 
@@ -346,7 +379,6 @@ class CustomerController extends Controller
                 );
             }
 
-            $user = auth()->user();
             if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
@@ -376,6 +408,15 @@ class CustomerController extends Controller
      */
     public function updateLeads(Request $request, $leadsId)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
         if (!$leads) {
             return new ApiResponseResource(
@@ -385,7 +426,6 @@ class CustomerController extends Controller
             );
         }
 
-        $user = auth()->user();
         if ($user->role == 'employee' && $leads->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
@@ -480,6 +520,15 @@ class CustomerController extends Controller
      */
     public function updateContact(Request $request, $contactId)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $contacts = Customer::findCustomerByIdCategory($contactId, 'contact');
 
         if (!$contacts) {
@@ -490,7 +539,6 @@ class CustomerController extends Controller
             );
         }
 
-        $user = auth()->user();
         if ($user->role == 'employee' && $contacts->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
@@ -586,6 +634,15 @@ class CustomerController extends Controller
      */
     public function convert(Request $request, $leadsId)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
         if (!$leads) {
             return new ApiResponseResource(
@@ -595,7 +652,6 @@ class CustomerController extends Controller
             );
         }
 
-        $user = auth()->user();
         if ($user->role == 'employee' && $leads->owner !== $user->email) {
             return new ApiResponseResource(
                 false,

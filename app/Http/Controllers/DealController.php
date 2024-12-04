@@ -12,6 +12,7 @@ use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\TryCatch;
 
 class DealController extends Controller
 {
@@ -22,8 +23,16 @@ class DealController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $query = Deal::whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             })->with([
@@ -31,7 +40,7 @@ class DealController extends Controller
                     $productQuery->select('id', 'name', 'price', 'quantity');
                 },
             ]);
-
+            
             $query = $this->applyFiltersDeals($request, $query);
             $deals = $this->applyFilters($request, $query);
             $deals->getCollection()->transform(function ($deal) {
@@ -243,8 +252,16 @@ class DealController extends Controller
      */
     public function show($id)
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $deal = Deal::whereHas('user', function ($query) use ($user) {
                 $query->where('user_company_id', $user->user_company_id);
             })->with([
@@ -293,6 +310,33 @@ class DealController extends Controller
                 $e->getMessage(),
                 null
             );
+        }
+    }
+
+    /**
+     * Show value deals for a specific stage
+     */
+    public function value(Request $request){
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
+        try {
+            $deals = Deal::sumValueEstimatedByStage($user->email, $user->role, $user->user_company_id);
+            
+            return new ApiResponseResource(
+                true,
+                'Value deals',
+                $deals
+            );
+
+        } catch(\Exception $e){
+
         }
     }
     
@@ -365,7 +409,7 @@ class DealController extends Controller
                 'close_date' => 'prohibited',
             ];
         }
-
+        
         $messages = [
             'name.required' => 'Nama deals tidak boleh kosong',
             'name.string' => 'Nama deals harus berupa teks',

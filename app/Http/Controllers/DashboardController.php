@@ -97,8 +97,16 @@ class DashboardController extends Controller
      */    
     public function getStatusReport(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         try {
-            $user = auth()->user();
             $userCompanyId = $user->user_company_id;
             $currentYear = now()->year;
 

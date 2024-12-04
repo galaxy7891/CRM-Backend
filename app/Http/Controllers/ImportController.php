@@ -19,8 +19,16 @@ class ImportController extends Controller
 {
     public function import(Request $request, $type)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         try {
-            $user = auth()->user();
             $request->validate([
                 'file' => 'required|mimes:xlsx,csv|max:2048',
             ], [

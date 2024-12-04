@@ -19,8 +19,16 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         try {
-            $user = auth()->user();
             $query = User::where('user_company_id', $user->user_company_id)
                 ->where('id', '!=', $user->id);
             

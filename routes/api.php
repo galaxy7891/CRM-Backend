@@ -88,6 +88,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('/product/photo/{productId}', [ProductController::class, 'updatePhotoProduct']); 
         
         Route::get('/deals', [DealController::class, 'index']);
+        Route::get('/deals/value', [DealController::class, 'value']);
         Route::get('/deals/{dealsId}', [DealController::class, 'show']);
         Route::post('/deals', [DealController::class, 'store']);
         Route::post('/deals/stage/{dealsId}', [DealController::class, 'updateStage']);

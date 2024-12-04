@@ -52,6 +52,14 @@ class UsersCompaniesController extends Controller
     public function update(Request $request)
     {       
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $userCompanyId = $user->user_company_id;
         $userCompany = UsersCompany::where('id', $userCompanyId)->first();
         if (!$userCompany) {
@@ -115,6 +123,14 @@ class UsersCompaniesController extends Controller
     public function updateLogo(Request $request)
     {
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         $userCompanyId = $user->user_company_id;
         $userCompany = UsersCompany::where('id', $userCompanyId)->first();
         if (!$userCompany) {

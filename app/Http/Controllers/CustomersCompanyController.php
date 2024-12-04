@@ -23,8 +23,16 @@ class CustomersCompanyController extends Controller
      */ 
     public function index(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
-            $user = auth()->user();
             $query = CustomersCompany::query();
 
             $query->whereHas('user', function ($ownerQuery) use ($user) {
@@ -152,6 +160,15 @@ class CustomersCompanyController extends Controller
      */
     public function show($customersCompanyId)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         try {
             $CustomersCompany = CustomersCompany::find($customersCompanyId);
             if (is_null($CustomersCompany)) {
@@ -162,7 +179,6 @@ class CustomersCompanyController extends Controller
                 );
             }
 
-            $user = auth()->user();
             if ($user->role == 'employee' && $CustomersCompany->owner !== $user->email) {
                 return new ApiResponseResource(
                     false, 
