@@ -34,7 +34,7 @@ class DashboardController extends Controller
             $usersCompanyCount = AccountsType::countCompaniesByAccountType();
             Carbon::setLocale('id');
             $formattedDate = now()->translatedFormat('l, d F Y');
-    
+            
             return new ApiResponseResource(
                 true,
                 'Dashboard Admin',

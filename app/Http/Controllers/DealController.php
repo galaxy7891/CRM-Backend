@@ -39,6 +39,12 @@ class DealController extends Controller
                 'dealsProducts.product' => function ($productQuery) {
                     $productQuery->select('id', 'name', 'price', 'quantity');
                 },
+                'customer' => function ($customerQuery) {
+                    $customerQuery->select('id', 'first_name', 'last_name');
+                },
+                'customersCompany' => function ($companyQuery) {
+                    $companyQuery->select('id', 'name');
+                },
             ]);
 
             $query = $this->applyFiltersDeals($request, $query);
@@ -49,7 +55,7 @@ class DealController extends Controller
                 $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
                 $deal->category = ActionMapperHelper::mapCategoryDeal($deal->category);
                 
-                $dealsProduct = $deal->dealsProducts->first(); 
+                $dealsProduct = $deal->dealsProducts->first();
                 if ($dealsProduct) {
                     $deal->product = [
                         'product_id' => $dealsProduct->product_id,
@@ -62,7 +68,21 @@ class DealController extends Controller
                     $deal->product = null;
                 }
 
+                if ($deal->customer) {
+                    $deal->customer_name = $deal->customer->first_name . ' ' . $deal->customer->last_name;
+                } else {
+                    $deal->customer_name = null;
+                }
+
+                if ($deal->customersCompany) {
+                    $deal->customers_company_name = $deal->customersCompany->name;
+                } else {
+                    $deal->customers_company_name = null;
+                }
+
                 unset($deal->dealsProducts);
+                unset($deal->customer);
+                unset($deal->customersCompany);
                 return $deal;
             });
 
@@ -80,6 +100,7 @@ class DealController extends Controller
             );
         }
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -268,6 +289,12 @@ class DealController extends Controller
                 'dealsProducts.product' => function ($productQuery) {
                     $productQuery->select('id', 'name', 'price', 'quantity');
                 },
+                'customer' => function ($customerQuery) {
+                    $customerQuery->select('id', 'first_name', 'last_name');
+                },
+                'customersCompany' => function ($companyQuery) {
+                    $companyQuery->select('id', 'name');
+                },
             ])->find($id);
 
             if (!$deal) {
@@ -296,22 +323,37 @@ class DealController extends Controller
                 $deal->product = null;
             }
 
-            unset($deal->dealsProducts);
+            if ($deal->customer) {
+                $deal->customer_name = $deal->customer->first_name . ' ' . $deal->customer->last_name;
+            } else {
+                $deal->customer_name = null;
+            }
 
+            if ($deal->customersCompany) {
+                $deal->customers_company_name = $deal->customersCompany->name;
+            } else {
+                $deal->customers_company_name = null;
+            }
+
+            unset($deal->dealsProducts);
+            unset($deal->customer);
+            unset($deal->customersCompany);
+            
             return new ApiResponseResource(
                 true,
                 'Data deals', 
                 $deal 
             ); 
-            
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                 false, 
+                false, 
                 $e->getMessage(),
                 null
             );
         }
     }
+
 
     /**
      * Show value deals for a specific stage
