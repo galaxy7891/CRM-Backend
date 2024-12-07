@@ -8,28 +8,19 @@ use Illuminate\Pagination\LengthAwarePaginator;
 trait Filter
 {
     public function applyFiltersDeals(Request $request, $query)
-    {
-        $stage = $request->input('tahapan');
-        if ($stage) {
-            switch ($stage) {
-                case 'kualifikasi':
-                    $query->where('stage', 'qualificated');
+    {                                                                    
+        $category = $request->input('kategori');
+        if ($category) {
+            switch ($category) {
+                case 'pelanggan':
+                    $query->where('category', 'customers');
                     break;
-                case 'proposal':
-                    $query->where('stage', 'proposal');
-                    break;
-                case 'negosiasi':
-                    $query->where('stage', 'negotiate');
-                    break;
-                case 'gagal':
-                    $query->where('stage', 'lose');
-                    break;
-                case 'tercapai':
-                    $query->where('stage', 'won');
+                case 'perusahaan':
+                    $query->where('category', 'customers_companies');
                     break;
             }
         }
-        
+                              
         return $query;
     }
     

@@ -13,7 +13,7 @@ class DealsProductSeeder extends Seeder
     public function run(): void
     {
         DealsProduct::create([
-            'id' => '123e4567-e89b-12dp7-v212-646184150',
+            'id' => '123e4127-e89b-124-v22-6443512a',
             'deals_id' => '123e4567-e89b-12d7-a452-42661413400',
             'product_id' => '123e4567-e89b-12d3-a456-426614173004',
             'quantity' => 5,
@@ -21,7 +21,7 @@ class DealsProductSeeder extends Seeder
         ]);
 
         DealsProduct::create([
-            'id' => '123e4567-e89b-12dp7-v212-646281150',
+            'id' => '123e457-e89b-1dp7-v12-64628115016',
             'deals_id' => '123e4567-e89b-12d7-a452-42661413300',
             'product_id' => '123e4567-e89b-12d3-a456-426614172004',
             'quantity' => 5,

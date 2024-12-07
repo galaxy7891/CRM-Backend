@@ -131,7 +131,7 @@ class Customer extends Model
         }); 
         
         $query->where('customerCategory', $category);
-
+        
         if ($role !== 'super_admin' && $role !== 'admin') {
             $query->where('owner', $email);
         }
@@ -165,7 +165,6 @@ class Customer extends Model
     public static function updateCustomer(array $dataCustomer, string $customerId): self
     {
         $customer = self::findOrFail($customerId);
-        
         $customer->update([
             'customers_company_id' => $dataCustomer['customers_company_id'] ?? $customer->customers_company_id,
             'first_name' => $dataCustomer['first_name'] ?? $customer->first_name,
@@ -185,7 +184,7 @@ class Customer extends Model
             'village' => $dataCustomer['village'] ?? $customer->village,
             'zip_code' => $dataCustomer['zip_code'] ?? $customer->zip_code,
         ]);
-
+        
         return $customer;
     }
 

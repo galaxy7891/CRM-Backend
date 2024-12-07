@@ -245,6 +245,7 @@ class AuthController extends Controller
                 null
             );
         }
+        
         $userCompany = $user->company;
 
         return new ApiResponseResource(

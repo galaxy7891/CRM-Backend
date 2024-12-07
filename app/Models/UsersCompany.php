@@ -38,15 +38,13 @@ class UsersCompany extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
-     * Get the users company associated with the trial accounts .
+     * Get the account type that've relation the user company.
      * 
-     * This defines a one-to-one relationship.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function trial()
+    public function accountType()
     {
-        return $this->hasOne(TrialAccounts::class, 'id', 'id');
+        return $this->hasOne(AccountsType::class, 'user_company_id');
     }
 
     /**

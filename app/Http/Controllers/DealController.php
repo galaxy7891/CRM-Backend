@@ -40,7 +40,7 @@ class DealController extends Controller
                     $productQuery->select('id', 'name', 'price', 'quantity');
                 },
             ]);
-            
+
             $query = $this->applyFiltersDeals($request, $query);
             $deals = $this->applyFilters($request, $query);
             $deals->getCollection()->transform(function ($deal) {
@@ -497,9 +497,8 @@ class DealController extends Controller
                     $product->update(['quantity' => $newQuantity]);
                 }
             }
-            
-            $deal = Deal::updateDeal($dataDeals, $dealsId);
 
+            $deal = Deal::updateDeal($dataDeals, $dealsId);
             $dealsProoducts = DealsProduct::where('deals_id', $deal->id)->first();
             $dealsProduct = DealsProduct::updateDealsProducts($dataDealsProduct, $dealsProoducts->id);
             

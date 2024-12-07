@@ -26,7 +26,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 3000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -42,12 +42,12 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
         
         Deal::create([
-            'id' => '123e4567-e89b-12d7-a452-42661413200',
-            'category' => 'customers',
+            'id' => '123e4567-e89b-12d7-a452-42661413200',               
+            'category' => 'customers',       
             'customer_id' => '123e4567-e89b-12d3-a456-426614174001',
             'name' => 'Penjualan Alat Tulis Kantor',
             'description' => 'Lorem ipsum dolor sit amet.',
@@ -60,7 +60,7 @@ class DealSeeder extends Seeder
             'value_estimated' => 1500000,
             'value_actual' => 1500000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
         
         Deal::create([
@@ -76,7 +76,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 1000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
     }
 }

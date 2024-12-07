@@ -3,14 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
+use App\Models\AccountsType;
 use App\Models\CustomersCompaniesReport;
 use App\Models\CustomersReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
+    /**
+     * Get Summary data for dashboard user
+     *
+     * @return \Illuminate\Http\JsonResponse 
+     */
+    public function getSummaryAdmin()
+    {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        try {
+            $nama = $user->first_name . ' ' . strtolower($user->last_name);
+    
+            $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();
+            $usersCompanyCount = AccountsType::countCompaniesByAccountType();
+            Carbon::setLocale('id');
+            $formattedDate = now()->translatedFormat('l, d F Y');
+    
+            return new ApiResponseResource(
+                true,
+                'Dashboard Admin',
+                [
+                    'user' => $nama,
+                    'greeting' => $greetingMessage,
+                    'date' => $formattedDate,
+                    'count' => $usersCompanyCount,
+                ]
+            );
+        
+        } catch (\Exception $e){
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
+    }
     
      /**
      * Get conversion contact data for the chart.

@@ -116,7 +116,7 @@ class UsersCompaniesController extends Controller
             );
         }
     }
-
+    
     /**
      * Update logo profile in cloudinary.
      */
