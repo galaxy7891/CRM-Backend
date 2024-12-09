@@ -23,6 +23,23 @@ trait Filter
                               
         return $query;
     }
+
+    public function applyFiltersArticles(Request $request, $query)
+    {                                                                    
+        $status = $request->input('status');
+        if ($status) {
+            switch ($status) {
+                case 'terbit':
+                    $query->where('status', 'post');
+                    break;
+                case 'draf':
+                    $query->where('status', 'draft');
+                    break;
+            }
+        }
+                              
+        return $query;
+    }
     
     public function applyFilters(Request $request, $query)
     {

@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Article;
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ArticlesController extends Controller
 {
+    
+    use Filter;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         if (!$user) {
@@ -25,8 +29,15 @@ class ArticlesController extends Controller
         }
 
         try {
-            $articles = Article::orderBy('created_at', 'desc')
-                ->get();
+            $query = Article::query();
+
+            $query = $this->applyFiltersArticles($request, $query);
+            $articles = $this->applyFilters($request, $query);
+            $articles->getCollection()->transform(function ($article) {
+                $article->status = ActionMapperHelper::mapStatusArticle($article->status);
+                return $article;
+            });
+
             if (!$articles) {
                 return new ApiResponseResource(
                     false,
@@ -34,11 +45,6 @@ class ArticlesController extends Controller
                     null
                 );
             }
-
-            $articles->transform(function ($article) {
-                $article->category = ActionMapperHelper::mapStatusArticle($article->status);
-                return $article;
-            });
 
             return new ApiResponseResource(
                 true,

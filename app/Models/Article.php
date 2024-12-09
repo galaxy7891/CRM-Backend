@@ -28,7 +28,7 @@ class Article extends Model
         'updated_at',
         'deleted_at',
     ];
-
+    
     /**
      * Upload photo article of the articles.
      *
@@ -79,7 +79,6 @@ class Article extends Model
         return self::create($articleData);
     }
 
-
     public static function updateArticle(array $dataArticle, string $articleId): self
     {
         $article = self::findOrFail($articleId);
@@ -118,6 +117,4 @@ class Article extends Model
 
         return $article;
     }
-
-
 }
