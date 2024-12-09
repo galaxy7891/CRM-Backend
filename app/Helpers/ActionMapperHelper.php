@@ -358,6 +358,30 @@ class ActionMapperHelper
         }
     }
 
+    public static function mapStatusArticle($status)
+    {
+        switch ($status) {
+            case 'draft':
+                return 'draf';
+            case 'post':
+                return 'terbit';
+            default:
+                return $status;
+        }
+    }
+
+    public static function mapStatusArticleToDatabase($status)
+    {
+        switch ($status) {
+            case 'draf':
+                return 'draft';
+            case 'terbit':
+                return 'post';
+            default:
+                return $status;
+        }
+    }
+
     public static function mapDescription($log, array $changes, string $modelName): string
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);

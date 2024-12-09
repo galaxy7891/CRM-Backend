@@ -46,7 +46,7 @@ class UsersCompany extends Model
     {
         return $this->hasOne(AccountsType::class, 'user_company_id');
     }
-
+    
     /**
      * Get the users associated with the company.
      * Get the products associated with the company.

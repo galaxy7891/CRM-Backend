@@ -69,7 +69,7 @@ class UsersCompaniesController extends Controller
                 null
             );
         }   
-            
+        
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->ignore($userCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|required|string|max:50',

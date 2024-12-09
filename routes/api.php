@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ArticlesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AuthController;
@@ -51,6 +52,11 @@ Route::group(['middleware' => 'api'], function () {
         
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin_lc'], function () {
             Route::get('/dashboard/admin', [DashboardController::class, 'getSummaryAdmin']);
+            
+            Route::get('/article', [ArticlesController::class, 'index']);
+            Route::get('/article/{articleId}', [ArticlesController::class, 'show']);
+            Route::post('/article', [ArticlesController::class, 'store']);
+            Route::post('/article/{articleId}', [ArticlesController::class, 'update']);
         });
 
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin,admin,employee'], function () {

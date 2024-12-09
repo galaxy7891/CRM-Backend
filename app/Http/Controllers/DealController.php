@@ -304,7 +304,7 @@ class DealController extends Controller
                     null 
                 ); 
             }
-
+            
             $deal->status = ActionMapperHelper::mapStatus($deal->status);
             $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
             $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
