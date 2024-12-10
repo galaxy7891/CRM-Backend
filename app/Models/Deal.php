@@ -217,6 +217,7 @@ class Deal extends Model
             'stage' => $dataDeals['stage'] ?? $deals->stage,
             'expected_close_date' => $dataDeals['expected_close_date'] ?? $deals->expected_close_date,
             'close_date' => $dataDeals['close_date'] ?? $deals->close_date,
+            'status' => $dataDeals['status'] ?? null,
             'tag' => $dataDeals['tag'] ?? $deals->tag,
             'owner' => $dataDeals['owner'] ?? $deals->owner,
             'description' => $dataDeals['description'] ?? $deals->description,

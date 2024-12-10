@@ -37,6 +37,7 @@ Route::group(['middleware' => 'api'], function () {
     Route::group(['prefix' => 'oauth'], function () {
         Route::get('/google', [AuthController::class, 'redirectToGoogle']);
         Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
+        Route::post('/google', [AuthController::class, 'handleGoogleLogin']);
     });
 
     Route::post('/invitation/accept', [UserInvitationController::class, 'createUser']);

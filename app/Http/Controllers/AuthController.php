@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UsersCompany;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
+use Google_Client;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -67,15 +68,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'google_id' => 'nullable|string|'. Rule::unique('users', 'google_id')->whereNull('deleted_at'),
-            'email' => 'required|email|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
+            'google_id' => 'nullable|string|' . Rule::unique('users', 'google_id')->whereNull('deleted_at'),
+            'email' => 'required|email|' . Rule::unique('users', 'email')->whereNull('deleted_at'),
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|min:8',
             'password_confirmation' => 'required|min:8|same:password',
-            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->whereNull('deleted_at'),
+            'phone' => 'required|numeric|max_digits:15|' . Rule::unique('users', 'phone')->whereNull('deleted_at'),
             'job_position' => 'required|max:50',
-            'name' => 'required|max:100|'.  Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
+            'name' => 'required|max:100|' .  Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'required|max:50',
         ], [
             'google_id.unique' => 'Akun Google sudah terdaftar',
@@ -109,7 +110,7 @@ class AuthController extends Controller
                 null,
             );
         }
-        
+
         try {
             $userCompany = UsersCompany::createCompany($request->only(['name', 'industry']));
             User::createUser($request->all(), $userCompany->id);
@@ -127,7 +128,6 @@ class AuthController extends Controller
                 );
             }
             return $this->respondWithToken($token);
-        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -136,7 +136,7 @@ class AuthController extends Controller
             );
         }
     }
-    
+
     /**
      * Redirect the user to the Google login page.
      *
@@ -156,42 +156,6 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function handleGoogleCallback()
-    {
-        try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
-
-            $user = User::where('google_id', $googleUser->id)
-            ->first();
-
-            if ($user) {
-                $token = auth()->login($user);
-
-                return $this->respondWithToken($token);
-            } else {
-                $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
-
-                return new ApiResponseResource(
-                    true,
-                    'Data user google',
-                    [
-                        'email' => $googleUser->email,
-                        'first_name' => $nameParts['first_name'],
-                        'last_name' => $nameParts['last_name'],
-                        'role' => 'super_admin',
-                        'photo' => $googleUser->avatar,
-                        'google_id' => $googleUser->id,
-                    ]
-                );
-            }
-        } catch (\Exception $e) {
-            return new ApiResponseResource(
-                false,
-                $e->getMessage(),
-                null,
-            );
-        }
-    }
 
     /**
      * Logout (Invalidate the token).
@@ -248,15 +212,15 @@ class AuthController extends Controller
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60,
                 'user' => [
-                   'id' => $user->id,
-                   'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
-                   'email' => $user->email,
-                   'phone' => $user->phone,
-                   'job_position' => $user->job_position,
-                   'role' => $user->role,
-                   'gender' => $user->gender,
-                   'photo' => $user->image_url,
-                   'company_id' => $userCompany ? $userCompany->id : null
+                    'id' => $user->id,
+                    'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'job_position' => $user->job_position,
+                    'role' => $user->role,
+                    'gender' => $user->gender,
+                    'photo' => $user->image_url,
+                    'company_id' => $userCompany ? $userCompany->id : null
                 ]
             ],
         );
