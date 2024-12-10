@@ -26,6 +26,7 @@ class Deal extends Model
         'description',
         'tag',
         'stage',
+        'status',
         'open_date',
         'close_date',
         'expected_close_date',
@@ -202,7 +203,7 @@ class Deal extends Model
         ]);
     }
 
-    public static function updateDeal(array $dataDeals, string $dealsId): self
+    public static function updateDeal(array $dataDeals, string $dealsId): self 
     {
         $deals = self::findOrFail($dealsId);
         $deals->update([
@@ -217,7 +218,7 @@ class Deal extends Model
             'stage' => $dataDeals['stage'] ?? $deals->stage,
             'expected_close_date' => $dataDeals['expected_close_date'] ?? $deals->expected_close_date,
             'close_date' => $dataDeals['close_date'] ?? $deals->close_date,
-            'status' => $dataDeals['status'] ?? null,
+            'status' => $dataDeals['status'] ?? $deals->status,
             'tag' => $dataDeals['tag'] ?? $deals->tag,
             'owner' => $dataDeals['owner'] ?? $deals->owner,
             'description' => $dataDeals['description'] ?? $deals->description,

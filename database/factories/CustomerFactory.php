@@ -35,7 +35,7 @@ class CustomerFactory extends Factory
             'status' => Arr::random(['warm', 'cold', 'hot']),
             'email' => strtolower($firstName . '.' . $lastName) . '@example.com',
             'phone' => $this->faker->unique()->numerify('62########'),
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
 
         ];
     }

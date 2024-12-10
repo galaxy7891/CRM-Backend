@@ -137,6 +137,15 @@ class UserController extends Controller
      */
     public function changePassword(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'password' => 'required|min:8',
             'new_password' => 'required|min:8',
@@ -158,7 +167,6 @@ class UserController extends Controller
             );
         }
 
-        $user = auth()->user();
 
         try {
             if (!Hash::check($request->password, $user->password)) {
@@ -418,6 +426,14 @@ class UserController extends Controller
     public function getSummary()
     {
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         $nama = $user->first_name . ' ' . strtolower($user->last_name);
 
         $greetingMessage = \App\Helpers\TimeGreetingHelper::getGreeting();

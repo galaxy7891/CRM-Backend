@@ -52,6 +52,14 @@ class UsersCompaniesController extends Controller
     public function update(Request $request)
     {       
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $userCompanyId = $user->user_company_id;
         $userCompany = UsersCompany::where('id', $userCompanyId)->first();
         if (!$userCompany) {
@@ -61,7 +69,7 @@ class UsersCompaniesController extends Controller
                 null
             );
         }   
-            
+        
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->ignore($userCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|required|string|max:50',
@@ -108,13 +116,21 @@ class UsersCompaniesController extends Controller
             );
         }
     }
-
+    
     /**
      * Update logo profile in cloudinary.
      */
     public function updateLogo(Request $request)
     {
         $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
         $userCompanyId = $user->user_company_id;
         $userCompany = UsersCompany::where('id', $userCompanyId)->first();
         if (!$userCompany) {

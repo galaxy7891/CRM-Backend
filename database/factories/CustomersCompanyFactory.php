@@ -27,7 +27,7 @@ class CustomersCompanyFactory extends Factory
             'email' => $name . '@example.com',
             'status' => Arr::random(['warm', 'cold', 'hot']),
             'phone' => $this->faker->unique()->numerify('62########'),
-            'owner' => 'raafi.sdmsib7@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
             'description' => $this->faker->sentence(),
         ];
     }

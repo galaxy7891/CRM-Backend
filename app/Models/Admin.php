@@ -37,8 +37,6 @@ class Admin extends Authenticatable implements JWTSubject
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
-    protected $guarded = [];
-
     public function getJWTIdentifier()
     {
         return $this->getKey();

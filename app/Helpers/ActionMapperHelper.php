@@ -357,6 +357,30 @@ class ActionMapperHelper
         }
     }
 
+    public static function mapStatusArticle($status)
+    {
+        switch ($status) {
+            case 'draft':
+                return 'draf';
+            case 'post':
+                return 'terbit';
+            default:
+                return $status;
+        }
+    }
+
+    public static function mapStatusArticleToDatabase($status)
+    {
+        switch ($status) {
+            case 'draf':
+                return 'draft';
+            case 'terbit':
+                return 'post';
+            default:
+                return $status;
+        }
+    }
+
     public static function mapDescription($log, array $changes, string $modelName): string
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);
@@ -405,8 +429,8 @@ class ActionMapperHelper
             case 'deals':
                 $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
                 $dealsName = Deal::getDealsNameById($changes['id']['new']);
-                return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar ' . $valueEstimated;
-
+                return $userName . ' menambahkan data Deals ' . $dealsName . ' sebesar Rp' . $valueEstimated;
+                
             case 'customers_companies':
                 return $userName . ' menambahkan data Perusahaan ' . $changes['name']['new'];
 
@@ -515,20 +539,24 @@ class ActionMapperHelper
 
     private static function mapDealsUpdateDescription(array $changes, string $userName, string $dealsName): string
     {
-        $stageOld = $changes['stage']['old'] ? self::mapStageDeal($changes['stage']['old']) : null;
-        $stageNew = $changes['stage']['new'] ? self::mapStageDeal($changes['stage']['new']) : null;
-
-        if (isset($stageNew)) {
-            if ($stageNew !== 'tercapai' && $stageNew !== 'gagal') {
-                return $userName . ' memindahkan tahap Deals ' . $dealsName .
-                    ' dari ' . $stageOld . ' menjadi ' . $stageNew;
-            } elseif ($stageNew == 'tercapai') {
-                $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.') ?? '';
-                return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual .
-                    ' berhasil tercapai oleh ' . $userName;
-            } elseif ($stageNew == 'gagal') {
-                $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.') ?? '';
-                return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
+        if (isset($changes['stage'])){
+            $stageOld = $changes['stage']['old'] ? self::mapStageDeal($changes['stage']['old']) : null;
+            $stageNew = $changes['stage']['new'] ? self::mapStageDeal($changes['stage']['new']) : null;
+    
+            if (isset($stageNew)) {
+                if ($stageNew !== 'tercapai' && $stageNew !== 'gagal') {
+                    return $userName . ' memindahkan tahap Deals ' . $dealsName .
+                        ' dari ' . $stageOld . ' menjadi ' . $stageNew;
+                
+                } elseif ($stageNew == 'tercapai') {
+                    $valueActual = number_format($changes['value_actual']['new'], 0, ',', '.')?? '';
+                    return 'Deals ' . $dealsName . ' sebesar Rp' . $valueActual . 
+                        ' berhasil tercapai oleh ' . $userName;
+                    
+                } elseif ($stageNew == 'gagal') {
+                    $valueEstimated = number_format($changes['value_estimated']['new'], 0, ',', '.')?? '';
+                    return 'Deals ' . $dealsName . ' dengan perkiraan sebesar Rp' . $valueEstimated . ' gagal didapatkan oleh ' . $userName;
+                }
             }
         }
 

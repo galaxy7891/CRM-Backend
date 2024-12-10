@@ -27,7 +27,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -43,7 +43,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -59,7 +59,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -75,7 +75,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
         ]);
         Deal::create([
             'id' => '123e4567-e89b-12d7-a452-42661413177',
@@ -90,7 +90,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -106,7 +106,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'admin_cdi@gmail.com',
         ]);
 
         Deal::create([
@@ -122,7 +122,7 @@ class DealSeeder extends Seeder
             'expected_close_date' => '2022-01-31',
             'value_estimated' => 2000000,
             'payment_category' => 'once',
-            'owner' => 'user_satu@gmail.com',
+            'owner' => 'employee_cdi@gmail.com',
         ]);
     }
 }

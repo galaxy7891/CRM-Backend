@@ -150,7 +150,7 @@ class Product extends Model
         ]);
         
         return $product;
-    }
+    }   
 
     /**
      * Update the photo product URL and public_id of the product.
