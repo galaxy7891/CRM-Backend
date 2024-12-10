@@ -44,7 +44,7 @@ class UsersCompany extends Model
      */
     public function accountType()
     {
-        return $this->hasOne(AccountsType::class, 'user_company_id');
+        return $this->hasOne(AccountsType::class, 'user_company_id', 'id');
     }
     
     /**

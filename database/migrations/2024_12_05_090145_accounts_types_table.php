@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_company_id');
             $table->enum('account_type', ['trial', 'regular', 'professional', 'business', 'unactive'])->default('trial');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

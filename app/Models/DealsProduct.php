@@ -51,7 +51,7 @@ class DealsProduct extends Model
     {
         $product = Product::findOrFail($dataDealsProduct['product_id']);
         $dealsProducts = self::findOrFail($dealsId);
-
+        
         if ($product['category'] === 'service'){
             $quantity = null;
             $unit = null;
