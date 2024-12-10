@@ -382,6 +382,42 @@ class ActionMapperHelper
         }
     }
 
+    public static function mapAccountsTypes($accountsType)
+    {
+        switch ($accountsType) {
+            case 'trial':
+                return 'percobaan';
+            case 'regular':
+                return 'reguler';
+            case 'professional':
+                return 'profesional';
+            case 'business':
+                return 'bisnis';
+            case 'unactive':
+                return 'tidak aktif';
+            default:
+                return $accountsType;
+        }
+    }
+
+    public static function mapAccountsTypesToDatabase($accountsType)
+    {
+        switch ($accountsType) {
+            case 'percobaan':
+                return 'trial';
+            case 'reguler':
+                return 'regular';
+            case 'profesional':
+                return 'professional';
+            case 'bisnis':
+                return 'business';
+            case 'tidak aktif':
+                return 'unactive';
+            default:
+                return $accountsType;
+        }
+    }
+
     public static function mapDescription($log, array $changes, string $modelName): string
     {
         $userName = ucfirst($log->user->first_name) . ' ' . ucfirst($log->user->last_name);

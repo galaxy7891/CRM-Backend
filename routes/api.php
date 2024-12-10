@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountsTypeController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ArticlesController;
 use Illuminate\Support\Facades\Route;
@@ -57,8 +58,11 @@ Route::group(['middleware' => 'api'], function () {
             Route::get('/article/{articleId}', [ArticlesController::class, 'show']);
             Route::post('/article', [ArticlesController::class, 'store']);
             Route::post('/article/{articleId}', [ArticlesController::class, 'update']);
-        });
+            Route::delete('/article', [ArticlesController::class, 'destroy']);
 
+            Route::get('/accountstype', [AccountsTypeController::class, 'index']);
+        });
+        
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin,admin,employee'], function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/refresh', [AuthController::class, 'refresh']);

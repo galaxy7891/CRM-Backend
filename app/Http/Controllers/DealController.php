@@ -642,7 +642,7 @@ class DealController extends Controller
          
         try {
             DealsProduct::whereIn('deals_id', $ids)->delete();
-            $deletedDealsCount = Deal::whereIn('id', $ids)->delete();;
+            $deletedDealsCount = Deal::whereIn('id', $ids)->delete();
 
             if ($deletedDealsCount > 0) {
                 return new ApiResponseResource(
@@ -651,8 +651,8 @@ class DealController extends Controller
                     null
                 );
             }
-        
-        return new ApiResponseResource(
+            
+            return new ApiResponseResource(
                 false,
                 'Data deals tidak ditemukan',
                 null

@@ -41,6 +41,32 @@ trait Filter
         return $query;
     }
     
+    public function applyFiltersAccountsType(Request $request, $query)
+    {                                                                    
+        $type = $request->input('tipe');
+        if ($type) {
+            switch ($type) {
+                case 'percobaan':
+                    $query->where('account_type', 'trial');
+                    break;
+                case 'reguler':
+                    $query->where('account_type', 'regular');
+                    break;
+                case 'profesional':
+                    $query->where('account_type', 'professional');
+                    break;
+                case 'bisnis':
+                    $query->where('account_type', 'business');
+                    break;
+                case 'tidak aktif':
+                    $query->where('account_type', 'unactive');
+                    break;
+            }
+        }
+        
+        return $query;
+    }
+    
     public function applyFilters(Request $request, $query)
     {
         $sort = $request->input('sort', 'terbaru');
@@ -59,7 +85,7 @@ trait Filter
                     break;
             }
         }
-
+        
         if ($sort === 'terlama') {
             $query->orderBy('updated_at', 'asc');
         } else {
