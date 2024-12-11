@@ -60,7 +60,8 @@ Route::group(['middleware' => 'api'], function () {
             Route::post('/article/{articleId}', [ArticlesController::class, 'update']);
             Route::delete('/article', [ArticlesController::class, 'destroy']);
 
-            Route::get('/accountstype', [AccountsTypeController::class, 'index']);
+            Route::get('/accountstypes', [AccountsTypeController::class, 'index']);
+            Route::post('/accountstypes/{accountsTypeId}', [AccountsTypeController::class, 'update']);
         });
 
         Route::group(['middleware' => RoleMiddleware::class . ':super_admin,admin,employee'], function () {

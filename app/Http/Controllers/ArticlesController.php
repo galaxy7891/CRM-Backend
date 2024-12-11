@@ -211,8 +211,40 @@ class ArticlesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
+            return new ApiResponseResource(
+                true,
+                "Pilih data yang ingin dihapus terlebih dahulu",
+                null
+            );
+        }
+        
+        try {
+            $deletedCount = Article::whereIn('id', $ids)->delete();
+
+            if ($deletedCount > 0) {
+                return new ApiResponseResource(
+                    true,
+                    $deletedCount . ' data article berhasil dihapus',
+                    null
+                );
+            }
+            
+            return new ApiResponseResource(
+                false,
+                'Data article tidak ditemukan',
+                null
+            );
+                    
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
     }
 }

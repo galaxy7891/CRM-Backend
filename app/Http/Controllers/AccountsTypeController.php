@@ -8,6 +8,7 @@ use App\Models\AccountsType;
 use App\Models\UsersCompany;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AccountsTypeController extends Controller
 {
@@ -22,34 +23,35 @@ class AccountsTypeController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Unauthorized',
-                null
-            );
-        }
-
+                'Unauthorized',              
+                null                         
+            );                               
+        }                                    
+        
         try {
             $query = AccountsType::with('userCompany');
 
             $query = $this->applyFiltersAccountsType($request, $query);
-            $accountTypes = $this->applyFilters($request, $query);
-            if (!$accountTypes) {
+            $accountsTypes = $this->applyFilters($request, $query);
+            if (!$accountsTypes) {
                 return new ApiResponseResource(
                     false,
                     'Data pelanggan tidak ditemukan',
                     null
                 );
             }
-
-            $accountTypes->getCollection()->transform(function ($accountType) {
-                $accountType->account_type = ActionMapperHelper::mapAccountsTypes($accountType->account_type);
-                return $accountType;
+            
+            $accountsTypes->getCollection()->transform(function ($accountsType) {
+                $accountsType->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
+                return $accountsType;
             });
 
             return new ApiResponseResource(
                 true,
                 'Daftar pelanggan',
-                $accountTypes
+                $accountsTypes
             );
+            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -58,15 +60,7 @@ class AccountsTypeController extends Controller
             );
         }
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
+        
     /**
      * Store a newly created resource in storage.
      */
@@ -84,17 +78,92 @@ class AccountsTypeController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id) {}
+    public function update(Request $request, string $accountsTypeId)
+    {
+        $accountsType = AccountsType::find($accountsTypeId);
+        if (!$accountsType) {
+            return new ApiResponseResource(
+                false, 
+                'Data pelanggan tidak ditemukan.',
+                null
+            );
+        }
+        
+        $validator = Validator::make($request->all(), [
+            'account_type' => 'sometimes|required|in:percobaan,reguler,profesional,bisnis,tidak aktif',
+            'user_company_id' => 'sometimes|required',
+            'quantity' => 'required_if:account_type,percobaan,reguler,profesional,bisnis|prohibited_if:account_type,tidak aktif|nullable|numeric|min:1',
+            'category' => 'required_if:account_type,percobaan,reguler,profesional,bisnis|prohibited_if:account_type,tidak aktif|nullable|in:hari,bulan,tahun',
+        ], [
+            'account_type.required' => 'Tipe pelanggan tidak boleh kosong',
+            'account_type.in' => 'Tipe pelanggan harus pilih salah satu: percobaan, reguler, profesional, bisnis, atau tidak aktif',
+            'user_company_id.required' => 'Nama perusahaan tidak boleh kosong',
+            'quantity.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif',
+            'quantity.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif',
+            'quantity.numeric' => 'Batas langganan harus berupa angka',
+            'quantity.min' => 'Batas langganan minimal berisi 1', 
+            'category.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif', 
+            'category.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif', 
+            'category.in' => 'Batas langganan harus pilih salah satu: hari, bulan, tahun', 
+        ]);
+        if ($validator->fails()) {
+            return new ApiResponseResource(
+                false,
+                $validator->errors(),
+                null
+            );
+        }
+        
+        $accountsTypeData = $request->all();
+        if (isset($accountsTypeData['account_type'])) {
+            $accountsTypeData['account_type'] = ActionMapperHelper::mapAccountsTypesToDatabase($accountsTypeData['account_type']);
+        }
+        
+        if (isset($accountsTypeData['category']) && isset($accountsTypeData['quantity'])) {
+            $accountsTypeData['start_date'] = now();
+            if ($accountsType->account_type === $accountsTypeData['account_type']) {
+                $accountsTypeData['start_date'] = $accountsType->start_date;
+            }
+            
+            $quantity = (int)$accountsTypeData['quantity'];
+            switch ($accountsTypeData['category']) {
+                case 'hari':
+                    $endDate = now()->addDays($quantity);
+                    break;
+                case 'bulan':
+                    $endDate = now()->addMonths($quantity);
+                    break;
+                case 'tahun':
+                    $endDate = now()->addYears($quantity);
+                    break;
+                default:
+                    $endDate = null;
+            }
+            
+            $accountsTypeData['end_date'] = $endDate;
+        } else {
+            $accountsTypeData['start_date'] =  null;
+            $accountsTypeData['end_date'] = null;
+        }
+
+        try {
+            $accountsType = AccountsType::updateAccountsType($accountsTypeData, $accountsTypeId);
+            return new ApiResponseResource(
+                true,
+                "Data pelanggan berhasil diubah",
+                $accountsType
+            );
+
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false, 
+                $e->getMessage(),
+                null
+            );
+        }
+    }
 
     /**
      * Remove the specified resource from storage.

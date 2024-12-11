@@ -398,7 +398,7 @@ class ActionMapperHelper
                 return $accountsType;
         }
     }
-
+    
     public static function mapAccountsTypesToDatabase($accountsType)
     {
         switch ($accountsType) {

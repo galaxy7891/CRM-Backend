@@ -207,7 +207,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 foreach ($failedRules as $key => $failures) {
                     $property[] = $propertyMapping[$key] ?? $key;
                 }
-
+                
                 $this->failedData[] = [
                     'row' => $index + 2,
                     'data' => [
@@ -234,7 +234,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                     $this->summaryData['total_data']++;
                     $this->summaryData['invalid_data']++;
                     continue;
-                }
+                } 
                 $customerCompanyId = $customersCompany->id;
             } else {
                 $customerCompanyId = null;
