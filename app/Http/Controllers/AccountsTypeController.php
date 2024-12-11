@@ -4,60 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
+use App\Models\AccountsType;
 use App\Models\UsersCompany;
+use App\Traits\Filter;
 use Illuminate\Http\Request;
 
 class AccountsTypeController extends Controller
 {
+    use Filter;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    // {
-    //     $user = auth()->user();
-    //     if (!$user) {
-    //         return new ApiResponseResource(
-    //             false,
-    //             'Unauthorized',
-    //             null
-    //         );
-    //     }
-        
-    //     try {
-    //         $query = UsersCompany::where('user_company_id', $user->user_company_id)
-    //             ->where('id', '!=', $user->id);
-            
-    //         $employees = $this->applyFilters($request, $query);
-    //         if (!$employees) {
-    //             return new ApiResponseResource(
-    //                 false,
-    //                 'Data karyawan tidak ditemukan',
-    //                 null
-    //             );
-    //         }
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
 
-    //         $employees->getCollection()->transform(function ($employee) {
-    //             $employee->role = ActionMapperHelper::mapRole($employee->role);
-    //             $employee->gender = ActionMapperHelper::mapGender($employee->gender);
-    //             return $employee;
-    //         });
-            
-    //         return new ApiResponseResource(
-    //             true,
-    //             'Daftar Karyawan',
-    //             $employees
-    //         );
-            
-    //     } catch (\Exception $e) {
-    //         return new ApiResponseResource(
-    //             false,
-    //             $e->getMessage(),
-    //             null
-    //         );
-    //     }
-    // }
-    {}
-    
+        try {
+            $query = AccountsType::with('userCompany');
+
+            $query = $this->applyFiltersAccountsType($request, $query);
+            $accountTypes = $this->applyFilters($request, $query);
+            if (!$accountTypes) {
+                return new ApiResponseResource(
+                    false,
+                    'Data pelanggan tidak ditemukan',
+                    null
+                );
+            }
+
+            $accountTypes->getCollection()->transform(function ($accountType) {
+                $accountType->account_type = ActionMapperHelper::mapAccountsTypes($accountType->account_type);
+                return $accountType;
+            });
+
+            return new ApiResponseResource(
+                true,
+                'Daftar pelanggan',
+                $accountTypes
+            );
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null
+            );
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -93,10 +94,7 @@ class AccountsTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+    public function update(Request $request, string $id) {}
 
     /**
      * Remove the specified resource from storage.
