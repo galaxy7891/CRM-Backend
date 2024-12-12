@@ -183,24 +183,26 @@ class Deal extends Model
 
     public static function createDeal(array $dataDeals): self
     {
-        return self::create([
-            'name' => $dataDeals['name'] ?? null,
-            'category' => $dataDeals['category'] ?? null,
-            'customer_id' => $dataDeals['customer_id'] ?? null,
-            'customers_company_id' => $dataDeals['customers_company_id'] ?? null, 
-            'payment_category' => $dataDeals['payment_category'] ?? null,
-            'payment_duration' => $dataDeals['payment_duration'] ?? null,
-            'value_estimated' => $dataDeals['value_estimated'] ?? null,
-            'value_actual' => $dataDeals['value_actual'] ?? null,
-            'stage' => $dataDeals['stage'] ?? null,
-            'open_date' => $validatedData['open_date'] ?? now()->format('Y-m-d'),
-            'expected_close_date' => $dataDeals['expected_close_date'] ?? null,
-            'close_date' => $dataDeals['close_date'] ?? null,
-            'status' => $dataDeals['status'] ?? null,
-            'tag' => $dataDeals['tag'] ?? null,
-            'owner' => $dataDeals['owner'] ?? null ,
-            'description' => $dataDeals['description'] ?? null,
-        ]);
+        $deals = new Deal();
+        $deals->name = $dataDeals['name'] ?? null;
+        $deals->category = $dataDeals['category'] ?? null;
+        $deals->customer_id = $dataDeals['customer_id'] ?? null;
+        $deals->customers_company_id = $dataDeals['customers_company_id'] ?? null; 
+        $deals->payment_category = $dataDeals['payment_category'] ?? null;
+        $deals->payment_duration = $dataDeals['payment_duration'] ?? null;
+        $deals->value_estimated = $dataDeals['value_estimated'] ?? null;
+        $deals->value_actual = $dataDeals['value_actual'] ?? null;
+        $deals->stage = $dataDeals['stage'] ?? null;
+        $deals->open_date = $validatedData['open_date'] ?? now()->format('Y-m-d');
+        $deals->expected_close_date = $dataDeals['expected_close_date'] ?? null;
+        $deals->close_date = $dataDeals['close_date'] ?? null;
+        $deals->status = $dataDeals['status'] ?? null;
+        $deals->tag = $dataDeals['tag'] ?? null;
+        $deals->owner = $dataDeals['owner'] ?? null;
+        $deals->description = $dataDeals['description'] ?? null;
+
+        $deals->save();
+        return $deals;
     }
 
     public static function updateDeal(array $dataDeals, string $dealsId): self 

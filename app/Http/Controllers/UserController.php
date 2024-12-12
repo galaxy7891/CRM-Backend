@@ -10,7 +10,6 @@ use App\Models\CustomersCompany;
 use App\Models\PasswordResetToken;
 use App\Models\User;
 use Illuminate\Support\Str;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -51,7 +50,7 @@ class UserController extends Controller
             );
         }
     }
-
+    
     /**
      * Update the specified resource in storage.
      */ 
@@ -441,7 +440,7 @@ class UserController extends Controller
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
         
-        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
+        $customersCompanyCount = CustomersCompany::countCustomersCompanySummary($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
         

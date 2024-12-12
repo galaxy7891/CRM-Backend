@@ -115,16 +115,18 @@ class Product extends Model
 
     public static function createProduct(array $data): self
     {
-        return self::create([
-            'name' => $data['name'],
-            'user_company_id' => $data['user_company_id'],
-            'category' => $data['category'],
-            'code' => $data['code'] ?? null,
-            'quantity' => $data['quantity'] ?? null,
-            'unit' => $data['unit'] ?? null,
-            'price' => $data['price'],
-            'description' => $data['description'] ?? null,
-        ]);
+        $products = new Product();
+        $products->name = $data['name'];
+        $products->user_company_id = $data['user_company_id'];
+        $products->category = $data['category'];
+        $products->code = $data['code'] ?? null;
+        $products->quantity = $data['quantity'] ?? null;
+        $products->unit = $data['unit'] ?? null;
+        $products->price = $data['price'];
+        $products->description = $data['description'] ?? null;
+        
+        $products->save();
+        return $products;
     }
 
     public static function updateProduct(array $dataProduct, string $productId): self

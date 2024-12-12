@@ -54,7 +54,7 @@ class User extends Authenticatable implements JWTSubject
         'updated_at', 
         'deleted_at'
     ];
-
+    
     /**
      * Get the company that owns the user.
      * 
@@ -153,18 +153,20 @@ class User extends Authenticatable implements JWTSubject
      */
     public static function createUser(array $dataUser, ?string $userCompanyId): self
     {
-        return self::create([
-            'google_id' => $dataUser['google_id'] ?? null,
-            'user_company_id' => $userCompanyId ?? null,
-            'email' => $dataUser['email'],
-            'role' => $dataUser['role'] ?? 'super_admin',
-            'first_name' => $dataUser['first_name'],
-            'last_name' => $dataUser['last_name'] ?? null,
-            'password' => Hash::make($dataUser['password']) ?? null,
-            'phone' => $dataUser['phone'],
-            'job_position' => $dataUser['job_position'] ?? null,
-            'image_url' => $dataUser['photo'] ?? null,
-        ]);
+        $user = new User();
+        $user->google_id = $dataUser['google_id'] ?? null;
+        $user->user_company_id = $userCompanyId ?? null;
+        $user->email = $dataUser['email'];
+        $user->role = $dataUser['role'] ?? 'super_admin';
+        $user->first_name = $dataUser['first_name'];
+        $user->last_name = $dataUser['last_name'] ?? null;
+        $user->password = Hash::make($dataUser['password']) ?? null;
+        $user->phone = $dataUser['phone'];
+        $user->job_position = $dataUser['job_position'] ?? null;
+        $user->image_url = $dataUser['photo'] ?? null;
+        
+        $user->save();
+        return $user;
     }
 
     /**

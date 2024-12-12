@@ -85,15 +85,17 @@ class UsersCompany extends Model
      * @param array $dataCompany
      * @return Company
      */
-    public static function createCompany(array $dataCompany): self
+    public static function createUserCompany(array $dataCompany): self
     {
-        return self::create([
-            'name' => $dataCompany['name'],
-            'industry' => $dataCompany['industry'],
-            'email' => $dataCompany['email'] ?? null,
-            'phone' => $dataCompany['phone'] ?? null,
-            'website' => $dataCompany['website'] ?? null,
-        ]);
+        $userCompany = new UsersCompany();
+        $userCompany->name = $dataCompany['name'];
+        $userCompany->industry = $dataCompany['industry'];
+        $userCompany->email = $dataCompany['email'] ?? null;
+        $userCompany->phone = $dataCompany['phone'] ?? null;
+        $userCompany->website = $dataCompany['website'] ?? null;
+        
+        $userCompany->save();
+        return $userCompany;
     }
 
     /**

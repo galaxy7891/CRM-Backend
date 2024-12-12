@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
+use App\Models\AccountsType;
 use App\Models\UsersCompany;
 use App\Traits\Filter;
 use Illuminate\Http\Request;

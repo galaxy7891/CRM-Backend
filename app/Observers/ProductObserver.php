@@ -15,12 +15,12 @@ class ProductObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'CREATE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'products',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'products';
+        $activityLog->action = 'CREATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 
     /**
@@ -30,12 +30,12 @@ class ProductObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($product, 'products', 'UPDATE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'products',
-            'action' => 'UPDATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'products';
+        $activityLog->action = 'UPDATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 
     /**
@@ -50,11 +50,11 @@ class ProductObserver
             'code' => time() . '::' . $product->code,
         ]);
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'products',
-            'action' => 'DELETE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'products';
+        $activityLog->action = 'DELETE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 }

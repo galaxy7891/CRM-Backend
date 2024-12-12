@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Models\User;
 use App\Models\UsersCompany;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-
+use App\Models\AccountsType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -111,8 +112,9 @@ class AuthController extends Controller
         }
         
         try {
-            $userCompany = UsersCompany::createCompany($request->only(['name', 'industry']));
+            $userCompany = UsersCompany::createUserCompany($request->only(['name', 'industry']));
             User::createUser($request->all(), $userCompany->id);
+            AccountsType::createAccountsType($userCompany->id);
 
             $credentials = [
                 'email' => $request->email,
@@ -246,7 +248,7 @@ class AuthController extends Controller
             );
         }
         
-        $userCompany = $user->company;
+        $userCompanyData = $this->getAccountTypeAndDuration($user);
 
         return new ApiResponseResource(
             true,
@@ -264,9 +266,60 @@ class AuthController extends Controller
                    'role' => $user->role,
                    'gender' => $user->gender,
                    'photo' => $user->image_url,
-                   'company_id' => $userCompany ? $userCompany->id : null
+                   'company_id' => $userCompanyData['company_id'],
+                   'account_type' => $userCompanyData['account_type'],
+                   'duration' => $userCompanyData['duration'],
                 ]
             ],
         );
     }
+
+    /**
+     * Get the account type and duration for the user's company.
+     *
+     * @param  \App\Models\User $user
+     * @return array
+     */
+    protected function getAccountTypeAndDuration($user)
+    {
+        $userCompany = $user->company;
+        $accountTypeData = [
+            'company_id' => null,
+            'account_type' => null,
+            'duration' => null,
+        ];
+
+        if ($userCompany) {
+            $accountsType = AccountsType::where('user_company_id', $userCompany->id)->first();
+            
+            if ($accountsType) {
+                $userCompany->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
+                $endDate = \Carbon\Carbon::parse($accountsType->end_date)->startOfDay();
+                $now = \Carbon\Carbon::now()->startOfDay();
+                
+                $daysDiff = $now->diffInDays($endDate);
+
+                if ($daysDiff <= 31) {
+                    $duration = $daysDiff . ' hari';
+                } elseif ($daysDiff > 31 && $daysDiff <= 365) {
+                    $months = floor($daysDiff / 30);
+                    $duration = $months . ' bulan';
+                } else {
+                    $years = floor($daysDiff / 365);
+                    $duration = $years . ' tahun';
+                }
+
+                $userCompany->duration = $duration;
+
+                $accountTypeData = [
+                    'company_id' => $userCompany->id,
+                    'account_type' => $userCompany->account_type,
+                    'duration' => $userCompany->duration,
+                ];
+            }
+        }
+
+        return $accountTypeData;
+    }
+
 }

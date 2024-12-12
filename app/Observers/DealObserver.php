@@ -15,12 +15,12 @@ class DealObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($deal, 'deals', 'CREATE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'deals',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'deals';
+        $activityLog->action = 'CREATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
     
     /**
@@ -30,12 +30,12 @@ class DealObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($deal, 'deals', 'UPDATE'); 
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'deals',
-            'action' => 'UPDATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'deals';
+        $activityLog->action = 'UPDATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 
     /**
@@ -45,11 +45,11 @@ class DealObserver
     {
         $changes = ModelChangeLoggerHelper::getModelChanges($deal, 'deals', 'DELETE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'deals',
-            'action' => 'DELETE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'deals';
+        $activityLog->action = 'DELETE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 }

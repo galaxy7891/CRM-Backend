@@ -63,20 +63,21 @@ class Article extends Model
     {
         $postDate = $dataArticle['status'] === 'draft' ? null : now();
 
-        $articleData = [
-            'title' => $dataArticle['title'],
-            'status' => $dataArticle['status'],
-            'description' => $dataArticle['description'],
-            'post_date' => $postDate,
-        ];
+        $articleData = new Article();
+        $articleData->title = $dataArticle['title'];
+        $articleData->status = $dataArticle['status'];
+        $articleData->description = $dataArticle['description'];
+        $articleData->post_date = $postDate;
+        
 
         if (isset($dataArticle['photo'])) {
             $uploadResult = (new self())->uploadPhoto($dataArticle['photo']);
-            $articleData['image_url'] = $uploadResult['image_url'];
-            $articleData['image_public_id'] = $uploadResult['image_public_id'];
+            $articleData->image_url = $uploadResult['image_url'];
+            $articleData->image_public_id = $uploadResult['image_public_id'];
         }
-
-        return self::create($articleData);
+        
+        $articleData->save();
+        return $articleData;
     }
 
     public static function updateArticle(array $dataArticle, string $articleId): self

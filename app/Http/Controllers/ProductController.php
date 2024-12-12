@@ -234,7 +234,7 @@ class ProductController extends Controller
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
         }
-
+        
         try {
             $updatedProduct = Product::updateProduct($productData, $productId);
             return new ApiResponseResource(

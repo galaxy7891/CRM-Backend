@@ -54,21 +54,19 @@ class AccountsType extends Model
                 ];
             });
     }
-
-    public static function createAccountsType(array $dataAccountsType): self
+    
+    public static function createAccountsType(string $userCompanyId): self
     {
-        $postDate = $dataAccountsType['status'] === 'draft' ? null : now();
+        $accountsTypes = new AccountsType();
+        $accountsTypes->account_type = 'trial';
+        $accountsTypes->user_company_id = $userCompanyId;
+        $accountsTypes->start_date = now();
+        $accountsTypes->end_date = now()->addDays(7);
+        $accountsTypes->save();
 
-        $accountsTypeData = [
-            'title' => $dataAccountsType['title'],
-            'status' => $dataAccountsType['status'],
-            'description' => $dataAccountsType['description'],
-            'post_date' => $postDate,
-        ];
-
-        return self::create($accountsTypeData);
+        return $accountsTypes;
     }
-
+    
     public static function updateAccountsType(array $dataAccountsType, string $accountsTypeId): self
     {   
         $accountsType = self::findOrFail($accountsTypeId);
@@ -80,6 +78,5 @@ class AccountsType extends Model
         ]);
 
         return $accountsType; 
-    }
-    
+    } 
 }

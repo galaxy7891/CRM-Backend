@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-
+            
             // Foreign key
             $table->foreign('user_company_id')->references('id')->on('users_companies')->onDelete('cascade');
         });
