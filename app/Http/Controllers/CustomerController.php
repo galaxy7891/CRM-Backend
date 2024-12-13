@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\AccountsType;
+use App\Models\User;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -143,12 +144,16 @@ class CustomerController extends Controller
                 null
             );
         }
-        
-        // $userCompanyId = $user->company->id; 
-        // $account = AccountsType::where('user_company_id', $userCompanyId); 
+    
+        // $userCompanyId = $user->company->id;                             
+        // $account = AccountsType::where('user_company_id', $userCompanyId)->first();                                                 
         // $limits = Config::get("account_limits.{$account->account_type}");
-
-        // $customerCount = $user->company->customers()->count();
+        
+        // $customersCount = Customer::countCustomers($userCompanyId);
+        
+        // dd($user, $userCompanyId, $user->company, $account, $limits, $customersCount);
+        
+        // $customersCompanyCount = $user->company->count();
         // if ($customerCount >= $limits['customers']) {
         //     return response()->json([
         //         'message' => 'Customer limit reached for your account type.',

@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('articles', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->uuid('id')->primary();
             $table->string('title', 100);
+            $table->string('slug')->unique();
             $table->enum('status', ['draft', 'post'])->default('draft');
             $table->text('description');
             $table->dateTime('post_date')->nullable();

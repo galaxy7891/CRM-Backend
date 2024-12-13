@@ -9,6 +9,10 @@ class CreateUsersCompaniesTable extends Migration
     public function up()
     {
         Schema::create('users_companies', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->uuid('id')->primary();
             $table->string('name', 100)->unique();
             $table->string('industry', 50);

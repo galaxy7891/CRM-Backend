@@ -102,7 +102,7 @@ class Customer extends Model
             $ownerQuery->where('user_company_id', $userCompanyIds);
         })->count();
     }
-
+    
     /**
      * Get the customer's by ID and category.
      *

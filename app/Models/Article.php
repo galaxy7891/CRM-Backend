@@ -6,10 +6,11 @@ use App\Traits\HasUuid;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Article extends Model
 {
-    use SoftDeletes, HasUuid;
+    use SoftDeletes, HasUuid, Sluggable;
 
     /**
      * The attributes that are mass assignable.
@@ -19,6 +20,7 @@ class Article extends Model
     protected $fillable = [
         'id',
         'title',
+        'slug',
         'status',
         'description',
         'post_date',
@@ -28,7 +30,21 @@ class Article extends Model
         'updated_at',
         'deleted_at',
     ];
-    
+
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'title'
+            ]
+        ];
+    }
+
     /**
      * Upload photo article of the articles.
      *
@@ -68,7 +84,6 @@ class Article extends Model
         $articleData->status = $dataArticle['status'];
         $articleData->description = $dataArticle['description'];
         $articleData->post_date = $postDate;
-        
 
         if (isset($dataArticle['photo'])) {
             $uploadResult = (new self())->uploadPhoto($dataArticle['photo']);
