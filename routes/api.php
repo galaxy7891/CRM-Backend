@@ -20,7 +20,9 @@ use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 
 Route::group(['middleware' => 'api'], function () {
-    
+    Route::get('/landingpage/article', [ArticlesController::class, 'index']);
+    Route::get('/landingpage/article/{articleId}', [ArticlesController::class, 'show']);
+
     Route::group(['prefix' => 'auth'], function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/register', [AuthController::class, 'register']);

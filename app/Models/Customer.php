@@ -116,7 +116,7 @@ class Customer extends Model
             ->where('customerCategory', $customerCategory)
             ->first();
     }
-
+    
     /**
      * Nullify the `customers_company_id` for all customers related to the specified company IDs.
      *

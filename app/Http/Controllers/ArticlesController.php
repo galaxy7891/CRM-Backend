@@ -19,15 +19,6 @@ class ArticlesController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        if (!$user) {
-            return new ApiResponseResource(
-                false,
-                'Unauthorized',
-                null
-            );
-        }
-
         try {
             $query = Article::query();
 

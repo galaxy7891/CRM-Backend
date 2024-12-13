@@ -136,25 +136,21 @@ class CustomerController extends Controller
      */
     public function storeLeads(Request $request)
     {   
-        $user = auth()->user();
-        if (!$user) {
-            return new ApiResponseResource(
-                false,
-                'Unauthorized',
-                null
-            );
-        }
-    
+        // $user = auth()->user();
+        // if (!$user) {
+        //     return new ApiResponseResource(
+        //         false,
+        //         'Unauthorized',
+        //         null
+        //     );
+        // }
+        
         // $userCompanyId = $user->company->id;                             
         // $account = AccountsType::where('user_company_id', $userCompanyId)->first();                                                 
         // $limits = Config::get("account_limits.{$account->account_type}");
         
         // $customersCount = Customer::countCustomers($userCompanyId);
-        
-        // dd($user, $userCompanyId, $user->company, $account, $limits, $customersCount);
-        
-        // $customersCompanyCount = $user->company->count();
-        // if ($customerCount >= $limits['customers']) {
+        // if ($customersCount >= $limits['customers']) {
         //     return response()->json([
         //         'message' => 'Customer limit reached for your account type.',
         //     ], 403);
@@ -225,7 +221,7 @@ class CustomerController extends Controller
             $dataLeads['status'] = ActionMapperHelper::mapStatusToDatabase($dataLeads['status']);
         }
         $dataLeads['customerCategory'] = 'leads';
-
+        
         try {
             $customer = Customer::createCustomer($dataLeads);
             return new ApiResponseResource(

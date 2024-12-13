@@ -172,7 +172,7 @@ class AuthController extends Controller
                 return $this->respondWithToken($token);
             } else {
                 $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
-
+                
                 return new ApiResponseResource(
                     true,
                     'Data user google',
