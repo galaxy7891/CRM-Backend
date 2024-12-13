@@ -136,25 +136,27 @@ class CustomerController extends Controller
      */
     public function storeLeads(Request $request)
     {   
-        // $user = auth()->user();
-        // if (!$user) {
-        //     return new ApiResponseResource(
-        //         false,
-        //         'Unauthorized',
-        //         null
-        //     );
-        // }
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
         
-        // $userCompanyId = $user->company->id;                             
-        // $account = AccountsType::where('user_company_id', $userCompanyId)->first();                                                 
-        // $limits = Config::get("account_limits.{$account->account_type}");
+        $userCompanyId = $user->company->id;                             
+        $account = AccountsType::where('user_company_id', $userCompanyId)->first();
+        $limits = Config::get("account_limits.{$account->account_type}");
+        $customersCount = Customer::countCustomers($userCompanyId);
         
-        // $customersCount = Customer::countCustomers($userCompanyId);
-        // if ($customersCount >= $limits['customers']) {
-        //     return response()->json([
-        //         'message' => 'Customer limit reached for your account type.',
-        //     ], 403);
-        // }
+        if ($customersCount >= $limits['customers']) {
+            return new ApiResponseResource(
+                false,
+                'Jumlah Customer (Leads + Kontak + Perusahaan) sudah mencapai limit untuk tipe akun anda',
+                null
+            );
+        }
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
@@ -221,7 +223,7 @@ class CustomerController extends Controller
             $dataLeads['status'] = ActionMapperHelper::mapStatusToDatabase($dataLeads['status']);
         }
         $dataLeads['customerCategory'] = 'leads';
-        
+
         try {
             $customer = Customer::createCustomer($dataLeads);
             return new ApiResponseResource(
