@@ -91,6 +91,17 @@ class Product extends Model
     }
 
     /**
+     * count the products.
+     *  
+     * @return self
+     */
+    public static function countProducts($userCompanyIds)
+    {
+        return self::where('user_company_id', $userCompanyIds)
+            ->count();
+    }
+
+    /**
      * Upload photo product of the product.
      *
      * @param \Illuminate\Http\UploadedFile $photo
@@ -106,15 +117,15 @@ class Product extends Model
         $result = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
             'folder' => 'products',
         ]);
-
+        
         return [
-            'image_url' => $result['secure_url'],
-            'image_public_id' => $result['public_id'],
-        ];
-    }
+            'image_url' => $result['secure_url'],                        
+            'image_public_id' => $result['public_id'],                   
+        ];                                                               
+    }                                                                    
 
     public static function createProduct(array $data): self
-    {
+    {       
         $products = new Product();
         $products->name = $data['name'];
         $products->user_company_id = $data['user_company_id'];
@@ -172,8 +183,8 @@ class Product extends Model
         ]);
 
         return [
-            'image_url' => $uploadResult['secure_url'],
-            'image_public_id' => $uploadResult['public_id'],
+            'image_url' => $uploadResult['image_url'],
+            'image_public_id' => $uploadResult['image_public_id'],
         ];
     }
 

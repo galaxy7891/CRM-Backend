@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Deal;
 use App\Models\DealsProduct;
 use App\Models\Product;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -107,6 +108,25 @@ class DealController extends Controller
      */ 
     public function store(Request $request)
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->company->id;
+        $limitCheck = DataLimitService::checkDealsLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+
         $rules = [
             'name' => 'required|string|max:100',
             'category' => 'required|in:pelanggan,perusahaan',

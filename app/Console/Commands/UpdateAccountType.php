@@ -36,7 +36,7 @@ class UpdateAccountType extends Command
                 'start_date' => null,
                 'end_date' => null
             ]);
-
+            
         Log::info("Scheduler executed: {$accountsType} accounts updated.");
         $this->info($accountsType. ' akun pelanggan menjadi tidak aktif');
     }

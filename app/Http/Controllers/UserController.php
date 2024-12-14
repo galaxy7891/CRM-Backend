@@ -205,7 +205,7 @@ class UserController extends Controller
                 'Unauthorized',
                 null
             );
-        }
+        }   
 
         $validator = Validator::make($request->only('photo'), [
             'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -224,7 +224,6 @@ class UserController extends Controller
         }
 
         try {
-
             $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id);
 
             return new ApiResponseResource(
@@ -265,6 +264,7 @@ class UserController extends Controller
                 "Data pengguna {$first_name} " . strtolower($last_name) . "berhasil dihapus",
                 null
             );
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -285,7 +285,7 @@ class UserController extends Controller
     {
         $email = '';
         $frontendPath = '';
-
+        
         if (auth()->check()) {
             $user = auth()->user();
             $email = $user->email;

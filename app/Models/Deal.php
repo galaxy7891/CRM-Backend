@@ -107,6 +107,18 @@ class Deal extends Model
     }
 
     /**
+     * count the deal.
+     *  
+     * @return self
+     */
+    public static function countDeals($userCompanyIds)
+    {
+        return self::whereHas('user', function ($ownerQuery) use ($userCompanyIds) {
+            $ownerQuery->where('user_company_id', $userCompanyIds);
+        })->count();
+    }
+
+    /**
      * Get the deals's full name by ID.
      *
      * @param  int|string  $id

@@ -7,7 +7,9 @@ use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\AccountsType;
+use App\Models\CustomersCompany;
 use App\Models\User;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -145,19 +147,16 @@ class CustomerController extends Controller
             );
         }
         
-        $userCompanyId = $user->company->id;                             
-        $account = AccountsType::where('user_company_id', $userCompanyId)->first();
-        $limits = Config::get("account_limits.{$account->account_type}");
-        $customersCount = Customer::countCustomers($userCompanyId);
-        
-        if ($customersCount >= $limits['customers']) {
+        $userCompanyId = $user->company->id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
             return new ApiResponseResource(
-                false,
-                'Jumlah Customer (Leads + Kontak + Perusahaan) sudah mencapai limit untuk tipe akun anda',
+                false, 
+                $limitCheck['message'], 
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
@@ -253,6 +252,16 @@ class CustomerController extends Controller
                 null
             );
         }
+        
+        $userCompanyId = $user->company->id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }   
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
@@ -319,7 +328,7 @@ class CustomerController extends Controller
         }
 
         $dataContact = $request->all();
-        if (isset($dataContact['status'])) {
+        if (isset($dataContact ['status'])) {
             $dataContact['status'] = ActionMapperHelper::mapStatusToDatabase($dataContact['status']);
         }
         $dataContact['customerCategory'] = 'contact';
@@ -331,6 +340,7 @@ class CustomerController extends Controller
                 'Data kontak ' . ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -780,35 +790,54 @@ class CustomerController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage for leads.
      */
     public function destroyLeads(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
-        
-        try {
-            $deletedCount = Customer::whereIn('id', $id)->delete();
-            if ($deletedCount > 0) {
-                return new ApiResponseResource(
-                    true,
-                    $deletedCount . ' data leads berhasil dihapus',
-                    null
-                );
+
+        $leadsWithDeals = [];
+        $leadsWithoutDeals = [];
+        $leadsWithDealsNames = [];
+
+        foreach ($ids as $leadId) {
+            $lead = Customer::find($leadId);
+            if (!$lead) {
+                continue;
             }
 
+            if ($lead->deals()->exists()) {
+                $leadsWithDeals[] = $lead->id;
+                $leadsWithDealsNames[] = ucfirst($lead->first_name) . ' ' . ucfirst($lead->last_name);
+            } else {
+                $leadsWithoutDeals[] = $lead->id;
+            }
+        }
+
+        if (count($leadsWithDeals) > 0) {
             return new ApiResponseResource(
                 false,
-                'Data leads tidak ditemukan',
+                "Data leads tidak dapat dihapus karena terdapat " . count($leadsWithDeals) . " leads terhubung dengan data deals.",
+                $leadsWithDealsNames
+            );
+        }
+
+        try {
+            $deletedCount = Customer::whereIn('id', $leadsWithoutDeals)->delete();
+
+            return new ApiResponseResource(
+                true,
+                $deletedCount . " data leads berhasil dihapus.",
                 null
             );
-            
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -817,60 +846,63 @@ class CustomerController extends Controller
             );
         }
     }
-    
+
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage for contacts.
      */
     public function destroyContact(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
-        
+
         $contactsWithDeals = [];
         $contactsWithoutDeals = [];
         $contactsWithDealsNames = [];
-        
-        foreach ($id as $contactId) {
+
+        foreach ($ids as $contactId) {
             $contact = Customer::find($contactId);
             if (!$contact) {
                 continue;
             }
 
-            if ($contact && $contact->deals()->exists()) {
+            if ($contact->deals()->exists()) {
                 $contactsWithDeals[] = $contact->id;
                 $contactsWithDealsNames[] = ucfirst($contact->first_name) . ' ' . ucfirst($contact->last_name);
-
             } else {
                 $contactsWithoutDeals[] = $contact->id;
             }
         }
-        
+
+        if (count($contactsWithDeals) > 0) {
+            return new ApiResponseResource(
+                false,
+                "Data kontak tidak dapat dihapus karena ada " . count($contactsWithDeals) . " kontak terhubung dengan data deals.",
+                $contactsWithDealsNames
+            );
+        }
+
         try {
             $deletedCount = Customer::whereIn('id', $contactsWithoutDeals)->delete();
 
-            $message = $deletedCount . " data kontak berhasil dihapus. ";
-            if (count($contactsWithDeals) > 0) {
-                $message .= count($contactsWithDeals) . " data kontak tidak dapat dihapus karena terhubung dengan data deals.";
-            }
-
             return new ApiResponseResource(
                 true,
-                $message,
-                $contactsWithDealsNames
+                $deletedCount . " data kontak berhasil dihapus.",
+                null
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false,
-                $e->getMessage(),
-                null
-            );
-        }
+            false,
+            $e->getMessage(),
+            null
+        );
     }
+}
+
 
 }

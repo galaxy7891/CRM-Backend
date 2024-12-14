@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -27,7 +28,7 @@ class ProductController extends Controller
                 null
             );
         }
-
+        
         try {
             $query = Product::where('user_company_id', $user->user_company_id);
 
@@ -74,6 +75,16 @@ class ProductController extends Controller
             );
         }
         
+        $userCompanyId = $user->company->id;
+        $limitCheck = DataLimitService::checkProductsLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|unique_product_name',
             'category' => 'required|in:barang,jasa|max:100',
@@ -283,7 +294,7 @@ class ProductController extends Controller
         }
 
         try {
-            $photoData = $product->updatePhotoProduct($request->file('photo'), $productId); 
+            $photoData = $product->updatePhotoProduct($request->file('photo_product'), $productId); 
 
             return new ApiResponseResource(
                 true,
@@ -308,45 +319,47 @@ class ProductController extends Controller
         $ids = $request->input('id', []);
         if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
-        
+
         $productsWithDeals = [];
         $productsWithoutDeals = [];
         $productsWithDealsNames = [];
-        
+
         foreach ($ids as $productId) {
             $product = Product::find($productId);
             if (!$product) {
                 continue;
             }
 
-            if ($product && $product->deals()->exists()) {
+            if ($product->deals()->exists()) {
                 $productsWithDeals[] = $product->id;
                 $productsWithDealsNames[] = ucfirst($product->name);
-            
             } else {
                 $productsWithoutDeals[] = $product->id;
             }
         }
-        
-        try {
-            $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
 
-            $message = $deletedCount . " data produk berhasil dihapus. ";
-            if (count($productsWithDeals) > 0) {
-                $message .= count($productsWithDeals) . " data produk tidak dapat dihapus karena terhubung dengan data deals.";
-            }
+        if (count($productsWithDeals) > 0) {
+            return new ApiResponseResource(
+                false,
+                "Data produk tidak dapat dihapus karena terdapat ". count($productsWithDeals) . " produk terhubung dengan data deals.",
+                $productsWithDealsNames
+            );
+        }
+
+        try {
+            // Delete products without deals
+            $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
 
             return new ApiResponseResource(
                 true,
-                $message,
-                $productsWithDealsNames
+                $deletedCount . " data produk berhasil dihapus.",
+                null
             );
-                    
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -355,4 +368,5 @@ class ProductController extends Controller
             );
         }
     }
+
 }

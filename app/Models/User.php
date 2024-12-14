@@ -220,7 +220,7 @@ class User extends Authenticatable implements JWTSubject
         if ($user->image_public_id) {
             $cloudinary->uploadApi()->destroy($user->image_public_id);
         }
-
+        
         $uploadResult = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
             'folder' => 'users',
         ]);

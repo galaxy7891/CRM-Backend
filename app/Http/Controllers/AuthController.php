@@ -39,7 +39,6 @@ class AuthController extends Controller
         }
 
         try {
-
             $credentials = $request->only(['email', 'password']);
             if (!$token = auth()->attempt($credentials)) {
                 return new ApiResponseResource(
@@ -49,7 +48,20 @@ class AuthController extends Controller
                 );
             }
 
+            $user = auth()->user();
+            if ($user->company) {
+                $endDate = $user->company->accountType->end_date;
+                if ($endDate && now()->greaterThan($endDate)) {
+                    return new ApiResponseResource(
+                        false,
+                        'Masa aktif perusahaan Anda telah habis. Silakan hubungi customer support untuk memperbarui akun.',
+                        null,
+                    );
+                }
+            }
+
             return $this->respondWithToken($token);
+
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -167,6 +179,14 @@ class AuthController extends Controller
             ->first();
 
             if ($user) {
+                if ($user->company && $user->company->accountType->end_date && now()->greaterThan($user->company->end_date)) {
+                    return new ApiResponseResource(
+                        false,
+                        'Masa aktif perusahaan Anda telah habis. Silakan hubungi customer support untuk memperbarui akun.',
+                        null
+                    );
+                }
+
                 $token = auth()->login($user);
 
                 return $this->respondWithToken($token);

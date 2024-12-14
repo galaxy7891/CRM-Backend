@@ -74,7 +74,7 @@ class Article extends Model
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-
+    
     public static function createArticle(array $dataArticle): self
     {
         $postDate = $dataArticle['status'] === 'draft' ? null : now();
@@ -111,7 +111,6 @@ class Article extends Model
             }
         }
 
-        
         $articleData = [
             'title' => $dataArticle['title'] ?? $article->title,
             'status' => $dataArticle['status'] ?? $article->status,

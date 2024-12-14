@@ -6,6 +6,7 @@ use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Customer;
 use App\Models\CustomersCompany;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 
 use Illuminate\Http\Request;
@@ -77,6 +78,25 @@ class CustomersCompanyController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->company->id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|'. Rule::unique('customers_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'nullable|string|max:50',
@@ -314,10 +334,10 @@ class CustomersCompanyController extends Controller
      */
     public function destroy(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data perusahaan pelanggan yang ingin dihapus terlebih dahulu",
                 null
             );
@@ -328,7 +348,7 @@ class CustomersCompanyController extends Controller
         $companiesToNullifyContacts = [];
         $companiesWithDealsNames = [];
 
-        foreach ($id as $companyId) {
+        foreach ($ids as $companyId) {
             $company = CustomersCompany::find($companyId);
             if (!$company) {
                 continue;
@@ -346,6 +366,14 @@ class CustomersCompanyController extends Controller
             }
         }
 
+        if (!empty($companiesWithDeals)) {
+            return new ApiResponseResource(
+                false,
+                "Data perusahaan pelanggan tidak dapat dihapus karena terdapat " . count($companiesWithDeals) . " perusahaan pelanggan terhubung dengan data deals.",
+                $companiesWithDealsNames
+            );
+        }
+
         try {
             if (!empty($companiesToNullifyContacts)) {
                 Customer::nullifyCompanyAssociation($companiesToNullifyContacts);
@@ -353,15 +381,11 @@ class CustomersCompanyController extends Controller
 
             $deletedCount = CustomersCompany::whereIn('id', $companiesWithoutDeals)->delete();
 
-            $message = $deletedCount . " data perusahaan pelanggan berhasil dihapus. ";
-            if (count($companiesWithDeals) > 0) {
-                $message .= count($companiesWithDeals) . " data perusahaan pelanggan tidak dapat dihapus karena terhubung dengan data deals.";
-            }
-
+            $message = $deletedCount . " data perusahaan pelanggan berhasil dihapus.";
             return new ApiResponseResource(
                 true,
                 $message,
-                $companiesWithDealsNames
+                null
             );
 
         } catch (\Exception $e) {

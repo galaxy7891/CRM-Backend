@@ -107,7 +107,7 @@ class CustomersCompany extends Model
         $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
             $ownerQuery->where('user_company_id', $userCompanyId);
         });
-
+    
         if ($role !== 'super_admin' && $role !== 'admin') {
             $query->where('owner', $email);
         }
