@@ -111,6 +111,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 $this->summaryData['total_data']++;
                 $this->summaryData['invalid_data']++;
                 continue;
+
             } else {
                 $rowMap[$rowKey] = $index;
             }
@@ -241,7 +242,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
             }
 
             $this->validData[] = [
-                'customer_company_id' => $customerCompanyId,
+                'customers_company_id' => $customerCompanyId,
                 'first_name' => $row['nama_depan'],
                 'last_name' => $row['nama_belakang'],
                 'customerCategory' => $this->customerCategory,
@@ -270,7 +271,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
             'summaryData' => $this->summaryData,
         ];
     }
-
+    
     private function isEmptyRow($row) 
     {
         return collect($row->toArray())->filter(function ($value) {

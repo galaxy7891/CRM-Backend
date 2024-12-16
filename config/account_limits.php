@@ -2,23 +2,23 @@
 
 return [
     'trial' => [
-        'customers' => INF,
-        'products' => INF,
-        'users' => INF,
+        'customers' => 20,
+        'products' => 10,
+        'users' => 5,
     ],
     'regular' => [
-        'customers' => 500,
-        'products' => 500,
-        'users' => 50,
+        'customers' => 100,
+        'products' => 50,
+        'users' => 10,
     ],
     'professional' => [
-        'customers' => 1000,
-        'products' => 1000,
-        'users' => 100,
+        'customers' => 500,
+        'products' => 100,
+        'users' => 25,
     ],
     'business' => [
-        'customers' => INF, 
-        'products' => INF, 
-        'users' => INF,    
+        'customers' => 1000, 
+        'products' => 200, 
+        'users' => 50,    
     ],
 ];

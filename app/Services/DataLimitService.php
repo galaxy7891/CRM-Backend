@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\CustomersCompany;
 use App\Models\Deal;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Config;
 
 class DataLimitService
@@ -49,6 +50,20 @@ class DataLimitService
         return [
             'isExceeded' => $productCount >= $limits['products'],
             'message' => "Jumlah Produk sudah mencapai limit (> {$limits['products']}) untuk tipe akun Anda. Hubungi customer support untuk masalah lebih lanjut.",
+        ];
+    }
+
+
+    public static function checkUsersLimit($userCompanyId)
+    {   
+        $account = self::getAccountType($userCompanyId);
+        $limits = Config::get("account_limits.{$account}");
+
+        $usersCount = (int) User::countUsers($userCompanyId);
+
+        return [
+            'isExceeded' => $usersCount >= $limits['users'],
+            'message' => "Jumlah Pengguna sudah mencapai limit (> {$limits['users']}) untuk tipe akun Anda. Hubungi customer support untuk masalah lebih lanjut.",
         ];
     }
 

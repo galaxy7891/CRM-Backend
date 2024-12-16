@@ -6,14 +6,10 @@ use App\Helpers\ActionMapperHelper;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-use App\Models\AccountsType;
-use App\Models\CustomersCompany;
-use App\Models\User;
 use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
@@ -58,6 +54,7 @@ class CustomerController extends Controller
             }
             
             $leads->getCollection()->transform(function ($lead) {
+                $lead->customerCategory = ActionMapperHelper::mapCustomerCategory($lead->customerCategory);
                 $lead->status = ActionMapperHelper::mapStatus($lead->status);
                 return $lead;
             });
@@ -115,6 +112,7 @@ class CustomerController extends Controller
             }
 
             $contacts->getCollection()->transform(function ($contact) {
+                $contact->customerCategory = ActionMapperHelper::mapCustomerCategory($contact->customerCategory);
                 $contact->status = ActionMapperHelper::mapStatus($contact->status);
                 return $contact;
             });
@@ -147,7 +145,7 @@ class CustomerController extends Controller
             );
         }
         
-        $userCompanyId = $user->company->id;
+        $userCompanyId = $user->user_company_id;
         $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
         if ($limitCheck['isExceeded']) {
             return new ApiResponseResource(
@@ -253,7 +251,7 @@ class CustomerController extends Controller
             );
         }
         
-        $userCompanyId = $user->company->id;
+        $userCompanyId = $user->user_company_id;
         $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
         if ($limitCheck['isExceeded']) {
             return new ApiResponseResource(
@@ -354,7 +352,7 @@ class CustomerController extends Controller
      * Display the specified resource.
      */
     public function showLeads($leadsId)
-    {   
+    {
         $user = auth()->user();
         if (!$user) {
             return new ApiResponseResource(
@@ -366,7 +364,7 @@ class CustomerController extends Controller
 
         try {
             $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
-
+            
             if (!$leads) {
                 return new ApiResponseResource(
                     false,
@@ -375,6 +373,14 @@ class CustomerController extends Controller
                 );
             }
             
+            if ($leads->customers_company_id) {
+                $leads->customers_company_name = $leads->customersCompany->name;
+            } else {
+                $leads->customers_company_name = null;
+            }
+            
+            unset($leads->customersCompany);
+
             if ($user->role == 'employee' && $leads->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
@@ -400,6 +406,7 @@ class CustomerController extends Controller
         }
     }
 
+
     /**
      * Display the specified resource.
      */
@@ -424,6 +431,14 @@ class CustomerController extends Controller
                     null
                 );
             }
+            
+            if ($contacts->customers_company_id) {
+                $contacts->customers_company_name = $contacts->customersCompany->name;
+            } else {
+                $contacts->customers_company_name = null;
+            }
+            
+            unset($contacts->customersCompany);
 
             if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
@@ -806,7 +821,7 @@ class CustomerController extends Controller
         $leadsWithDeals = [];
         $leadsWithoutDeals = [];
         $leadsWithDealsNames = [];
-
+        
         foreach ($ids as $leadId) {
             $lead = Customer::find($leadId);
             if (!$lead) {
@@ -819,7 +834,7 @@ class CustomerController extends Controller
             } else {
                 $leadsWithoutDeals[] = $lead->id;
             }
-        }
+        }   
 
         if (count($leadsWithDeals) > 0) {
             return new ApiResponseResource(
@@ -837,7 +852,7 @@ class CustomerController extends Controller
                 $deletedCount . " data leads berhasil dihapus.",
                 null
             );
-
+            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,

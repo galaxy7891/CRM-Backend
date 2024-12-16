@@ -138,9 +138,9 @@ class ActionMapperHelper
     {
         switch ($categoryProduct) {
             case 'stuff':
-                return 'barang';
+                return 'Barang';
             case 'service':
-                return 'jasa';
+                return 'Jasa';
             default:
                 return $categoryProduct;
         }
@@ -149,9 +149,9 @@ class ActionMapperHelper
     public static function mapCategoryProductToDatabase($categoryProduct)
     {
         switch ($categoryProduct) {
-            case 'barang':
+            case 'Barang':
                 return 'stuff';
-            case 'jasa':
+            case 'Jasa':
                 return 'service';
             default:
                 return $categoryProduct;
@@ -186,11 +186,11 @@ class ActionMapperHelper
     {
         switch ($status) {
             case 'cold':
-                return 'rendah';
+                return 'Rendah';
             case 'warm':
-                return 'sedang';
+                return 'Sedang';
             case 'hot':
-                return 'tinggi';
+                return 'Tinggi';
             default:
                 return $status;
         }
@@ -199,17 +199,41 @@ class ActionMapperHelper
     public static function mapStatusToDatabase($status)
     {
         switch ($status) {
-            case 'rendah':
+            case 'Rendah':
                 return 'cold';
-            case 'sedang':
+            case 'Sedang':
                 return 'warm';
-            case 'tinggi':
+            case 'Tinggi':
                 return 'hot';
             default:
                 return $status;
         }
     }
-      
+
+    public static function mapCustomerCategory($customerCategory)
+    {
+        switch ($customerCategory) {
+            case 'leads':
+                return 'Leads';
+            case 'contact':
+                return 'Kontak';
+            default:
+                return $customerCategory;
+        }
+    }
+    
+    public static function mapCustomerCategoryToDatabase($customerCategory)
+    {
+        switch ($customerCategory) {
+            case 'Leads':
+                return 'leads';
+            case 'Kontak':
+                return 'contact';
+            default:
+                return $customerCategory;
+        }
+    }
+    
     public static function mapRole($role)
     {
         switch ($role) {

@@ -9,7 +9,6 @@ use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -41,7 +40,7 @@ class ProductController extends Controller
                 );
             }
 
-            $products->getCollection()->transform(function ($product) {
+            $products->transform(function ($product) {
                 $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
                 return $product;
             });
@@ -75,7 +74,7 @@ class ProductController extends Controller
             );
         }
         
-        $userCompanyId = $user->company->id;
+        $userCompanyId = $user->user_company_id;
         $limitCheck = DataLimitService::checkProductsLimit($userCompanyId);
         if ($limitCheck['isExceeded']) {
             return new ApiResponseResource(
@@ -130,7 +129,7 @@ class ProductController extends Controller
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
         }
-        $productData['user_company_id'] = $user->company->id;
+        $productData['user_company_id'] = $user->user_company_id;
 
         try {
             $product = Product::createProduct($productData);

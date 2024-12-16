@@ -87,7 +87,7 @@ class CustomersCompanyController extends Controller
             );
         }
         
-        $userCompanyId = $user->company->id;
+        $userCompanyId = $user->user_company_id;
         $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
         if ($limitCheck['isExceeded']) {
             return new ApiResponseResource(

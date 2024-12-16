@@ -145,6 +145,17 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * count the products.
+     *  
+     * @return self
+     */ 
+    public static function countUsers($userCompanyIds)
+    {   
+        return self::where('user_company_id', $userCompanyIds)
+            ->count();
+    }   
+    
+    /**
      * Create a new user instance after a valid registration.
      *
      * @param array $dataUser
