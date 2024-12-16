@@ -65,16 +65,16 @@ class UserController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'user_company_id' => 'sometimes|nullable|uuid',
             'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($id)->whereNull('deleted_at'),
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
             'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($id)->whereNull('deleted_at'),
-            'role' => 'sometimes|required|in:super admin,admin,karyawan',
+            'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
             'job_position' => 'sometimes|required|max:50',
-            'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
+            'gender' => 'sometimes|nullable|in:Laki-laki,Perempuan,Lainnya',
         ], [
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
@@ -92,8 +92,8 @@ class UserController extends Controller
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus pilih salah satu: super admin, admin, atau karyawan.',
-            'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
+            'role.in' => 'Akses harus pilih salah satu: Super Admin, Admin, atau Karyawan.',
+            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lainnya.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

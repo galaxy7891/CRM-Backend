@@ -54,7 +54,7 @@ class DealController extends Controller
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
                 $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
-                $deal->category = ActionMapperHelper::mapCategoryDeal($deal->category);
+                $deal->category = ActionMapperHelper::mapCategoryDeals($deal->category);
                 
                 $dealsProduct = $deal->dealsProducts->first();
                 if ($dealsProduct) {
@@ -129,13 +129,13 @@ class DealController extends Controller
 
         $rules = [
             'name' => 'required|string|max:100',
-            'category' => 'required|in:pelanggan,perusahaan',
-            'customer_id' => 'required_if:category,pelanggan|prohibited_if:category,perusahaan|nullable|exists:customers,id',
-            'customers_company_id' => 'required_if:category,perusahaan|prohibited_if:category,pelanggan|nullable|exists:customers_companies,id',
+            'category' => 'required|in:Pelanggan,Perusahaan',
+            'customer_id' => 'required_if:category,Pelanggan|prohibited_if:category,Perusahaan|nullable|exists:customers,id',
+            'customers_company_id' => 'required_if:category,Perusahaan|prohibited_if:category,Pelanggan|nullable|exists:customers_companies,id',
             'product_id' => 'required|exists:products,id',
-            'payment_category' => 'required|in:sekali,hari,bulan,tahun',
-            'stage' => 'required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
-            'status' => 'required|in:rendah,sedang,tinggi',
+            'payment_category' => 'required|in:Sekali,Hari,Bulan,Tahun',
+            'stage' => 'required|in:Kualifikasi,Proposal,Negosiasi,Tercapai,Gagal',
+            'status' => 'required|in:Rendah,Sedang,Tinggi',
             'tag' => 'nullable|string|max:255',
             'owner' => 'required|email|max:100|exists:users,email',
             'description' => 'nullable|string|max:200',
@@ -191,12 +191,12 @@ class DealController extends Controller
             'name.string' => 'Nama deals harus berupa teks', 
             'name.max' => 'Nama deals maksimal berisi 100 karakter', 
             'category.required' => 'Kategori deals tidak boleh kosong', 
-            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: pelanggan atau perusahaan', 
-            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah pelanggan', 
-            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah perusahaan', 
+            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: Pelanggan atau Perusahaan', 
+            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah Pelanggan', 
+            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah Perusahaan', 
             'customer_id.exists' => 'Nama pelanggan tidak tersedia', 
-            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah perusahaan', 
-            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah pelanggan', 
+            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah Perusahaan', 
+            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah Pelanggan', 
             'customers_company_id.exists' => 'Nama perusahaan tidak tersedia', 
             'product_id.required' => 'Nama produk wajib dipilih', 
             'product_id.exists' => 'Nama produk yang dipilih tidak tersedia', 
@@ -209,7 +209,7 @@ class DealController extends Controller
             'unit.prohibited' => 'Satuan produk tidak boleh diisi jika produk termasuk jasa', 
             'unit.in' => 'Satuan produk wajib pilih salah satu: box, pcs, atau unit',
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong',
-            'payment_category.in' => 'Kategori pembayaran harus berupa pilih salah satu: sekali, hari, bulan, atau tahun',
+            'payment_category.in' => 'Kategori pembayaran harus berupa pilih salah satu: Sekali, Hari, Bulan, atau Tahun',
             'payment_duration.required' => 'Durasi pembayaran tidak boleh kosong',
             'payment_duration.prohibited' => 'Durasi pembayaran tidak boleh diisi jika kategori pembayaran adalah sekali',
             'payment_duration.numeric' => 'Durasi pembayaran harus berupa angka',
@@ -221,7 +221,7 @@ class DealController extends Controller
             'value_actual.prohibited' => 'Nilai sebenarnya tidak boleh diisi jika tahapannya belum tercapai',
             'value_actual.max_digits' => 'Nilai sebenarnya maksimal 20 digit',
             'stage.required' => 'Tahapan tidak boleh kosong',
-            'stage.in' => 'Tahapan harus berupa pilih salah satu: kualifikasi, proposal, negosiasi, tercapai, atau gagal',
+            'stage.in' => 'Tahapan harus berupa pilih salah satu: Kualifikasi, Proposal, Negosiasi, Tercapai, atau Gagal',
             'expected_close_date.required' => 'Tanggal perkiraan penutupan tidak boleh kosong jika tahapan belum tercapai',
             'expected_close_date.prohibited' => 'Tanggal perkiraan penutupan tidak boleh diisi jika tahapan tercapai',
             'close_date.required' => 'Tanggal penutupan tidak boleh kosong jika tahapan tercapai',
@@ -328,7 +328,7 @@ class DealController extends Controller
             $deal->status = ActionMapperHelper::mapStatus($deal->status);
             $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);
             $deal->payment_category = ActionMapperHelper::mapPaymentCategory($deal->payment_category);
-            $deal->category = ActionMapperHelper::mapCategoryDeal($deal->category);
+            $deal->category = ActionMapperHelper::mapCategoryDeals($deal->category);
             
             $dealsProduct = $deal->dealsProducts->first();
             if ($dealsProduct) {
@@ -418,13 +418,13 @@ class DealController extends Controller
         
         $rules = [
             'name' => 'sometimes|required|string|max:100',
-            'category' => 'sometimes|required|in:pelanggan,perusahaan',
-            'customer_id' => 'sometimes|required_if:category,pelanggan|prohibited_if:category,perusahaan|nullable|exists:customers,id',
-            'customers_company_id' => 'sometimes|required_if:category,perusahaan|prohibited_if:category,pelanggan|nullable|exists:customers_companies,id',
+            'category' => 'sometimes|required|in:Pelanggan,Perusahaan',
+            'customer_id' => 'sometimes|required_if:category,Pelanggan|prohibited_if:category,Perusahaan|nullable|exists:customers,id',
+            'customers_company_id' => 'sometimes|required_if:category,Perusahaan|prohibited_if:category,Pelanggan|nullable|exists:customers_companies,id',
             'product_id' => 'sometimes|required|exists:products,id',
-            'payment_category' => 'sometimes|required|in:sekali,hari,bulan,tahun',
-            'stage' => 'sometimes|required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
-            'status' => 'sometimes|required|in:rendah,sedang,tinggi',
+            'payment_category' => 'sometimes|required|in:Sekali,Hari,Bulan,Tahun',
+            'stage' => 'sometimes|required|in:Kualifikasi,Proposal,Negosiasi,Tercapai,Gagal',
+            'status' => 'sometimes|required|in:Rendah,Sedang,Tinggi',
             'tag' => 'sometimes|nullable|string|max:255',
             'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'description' => 'sometimes|nullable|string|max:200',
@@ -477,12 +477,12 @@ class DealController extends Controller
             'name.string' => 'Nama deals harus berupa teks',
             'name.max' => 'Nama deals maksimal berisi 100 karakter',
             'category.required' => 'Kategori deals tidak boleh kosong',
-            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: pelanggan atau perusahaan',
-            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah pelanggan',
-            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah perusahaan',
+            'category.in' => 'Kategori pembeli harus berupa pilih salah satu: Pelanggan atau Perusahaan',
+            'customer_id.required_if' => 'Nama pelanggan tidak boleh kosong jika kategori pembeli adalah Pelanggan',
+            'customer_id.prohibited_if' => 'Nama pelanggan harus kosong jika kategori pembeli adalah Perusahaan',
             'customer_id.exists' => 'Nama pelanggan tidak tersedia',
-            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah perusahaan',
-            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah pelanggan',
+            'customers_company_id.required_if' => 'Nama perusahaan  tidak boleh kosong jika kategori pembeli adalah Perusahaan',
+            'customers_company_id.prohibited_if' => 'Nama perusahaan harus kosong jika kategori pembeli adalah Pelanggan',
             'customers_company_id.exists' => 'Nama perusahaan tidak tersedia',
             'product_id.required' => 'Nama produk wajib dipilih',
             'product_id.exists' => 'Nama produk yang dipilih tidak tersedia',
@@ -495,7 +495,7 @@ class DealController extends Controller
             'unit.prohibited' => 'Satuan produk tidak boleh diisi jika produk termasuk jasa',
             'unit.in' => 'Satuan produk wajib pilih salah satu: box, pcs, atau unit',
             'payment_category.required' => 'Kategori pembayaran tidak boleh kosong',
-            'payment_category.in' => 'Kategori pembayaran harus berupa pilih salah satu: sekali, hari, bulan, atau tahun',
+            'payment_category.in' => 'Kategori pembayaran harus berupa pilih salah satu: Sekali, Hari, Bulan, atau Tahun',
             'payment_duration.required' => 'Durasi pembayaran tidak boleh kosong',
             'payment_duration.prohibited' => 'Durasi pembayaran tidak boleh diisi jika kategori pembayaran adalah sekali',
             'payment_duration.numeric' => 'Durasi pembayaran harus berupa angka',
@@ -507,7 +507,7 @@ class DealController extends Controller
             'value_actual.prohibited' => 'Nilai sebenarnya tidak boleh diisi jika tahapannya belum tercapai',
             'value_actual.max_digits' => 'Nilai sebenarnya maksimal 20 digit',
             'stage.required' => 'Tahapan tidak boleh kosong',
-            'stage.in' => 'Tahapan harus berupa pilih salah satu: kualifikasi, proposal, negosiasi, tercapai, atau gagal',
+            'stage.in' => 'Tahapan harus berupa pilih salah satu: Kualifikasi, Proposal, Negosiasi, Tercapai, atau Gagal',
             'expected_close_date.required' => 'Tanggal perkiraan penutupan tidak boleh kosong jika tahapan belum tercapai',
             'expected_close_date.prohibited' => 'Tanggal perkiraan penutupan tidak boleh diisi jika tahapan tercapai',
             'close_date.required' => 'Tanggal penutupan tidak boleh kosong jika tahapan tercapai',
@@ -599,10 +599,10 @@ class DealController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'stage' => 'required|in:kualifikasi,proposal,negosiasi,tercapai,gagal',
+            'stage' => 'required|in:Kualifikasi,Proposal,Negosiasi,Tercapai,Gagal',
         ], [
             'stage.required' => 'Tahapan tidak boleh kosong',
-            'stage.in' => 'Tahapan harus berupa salah satu: kualifikasi, proposal, negosiasi, tercapai, atau gagal',
+            'stage.in' => 'Tahapan harus berupa salah satu: Kualifikasi, Proposal, Negosiasi, Tercapai, atau Gagal',
         ]);
 
         if ($validator->fails()) {

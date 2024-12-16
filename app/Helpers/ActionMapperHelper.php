@@ -162,9 +162,9 @@ class ActionMapperHelper
     {
         switch ($categoryDeals) {
             case 'customers':
-                return 'pelanggan';
+                return 'Pelanggan';
             case 'customers_companies':
-                return 'perusahaan';
+                return 'Perusahaan';
             default:
                 return $categoryDeals;
         }
@@ -173,9 +173,9 @@ class ActionMapperHelper
     public static function mapCategoryDealsToDatabase($categoryDeals)
     {
         switch ($categoryDeals) {
-            case 'pelanggan':
+            case 'Pelanggan':
                 return 'customers';
-            case 'perusahaan':
+            case 'Perusahaan':
                 return 'customers_companies';
             default:
                 return $categoryDeals;
@@ -220,8 +220,8 @@ class ActionMapperHelper
             default:
                 return $customerCategory;
         }
-    }
-    
+    }   
+
     public static function mapCustomerCategoryToDatabase($customerCategory)
     {
         switch ($customerCategory) {
@@ -238,11 +238,11 @@ class ActionMapperHelper
     {
         switch ($role) {
             case 'super_admin':
-                return 'super admin';
+                return 'Super Admin';
             case 'admin':
-                return 'admin';
+                return 'Admin';
             case 'employee':
-                return 'karyawan';
+                return 'Karyawan';
             default:
                 return $role;
         }
@@ -251,11 +251,11 @@ class ActionMapperHelper
     public static function mapRoleToDatabase($role)
     {
         switch ($role) {
-            case 'super admin':
+            case 'Super Admin':
                 return 'super_admin';
-            case 'admin':
+            case 'Admin':
                 return 'admin';
-            case 'karyawan':
+            case 'Karyawan':
                 return 'employee';
             default:
                 return $role;
@@ -266,11 +266,11 @@ class ActionMapperHelper
     {
         switch ($gender) {
             case 'male':
-                return 'laki-laki';
+                return 'Laki-laki';
             case 'female':
-                return 'perempuan';
+                return 'Perempuan';
             case 'other':
-                return 'lainnya';
+                return 'Lainnya';
             default:
                 return $gender;
         }
@@ -279,11 +279,11 @@ class ActionMapperHelper
     public static function mapGenderToDatabase($status)
     {
         switch ($status) {
-            case 'laki-laki':
+            case 'Laki-laki':
                 return 'male';
-            case 'perempuan':
+            case 'Perempuan':
                 return 'female';
-            case 'lainnya':
+            case 'Lainnya':
                 return 'other';
             default:
                 return $status;
@@ -294,15 +294,15 @@ class ActionMapperHelper
     {
         switch ($stage) {
             case 'qualificated':
-                return 'kualifikasi';
+                return 'Kualifikasi';
             case 'proposal':
-                return 'proposal';
+                return 'Proposal';
             case 'negotiate':
-                return 'negosiasi';
+                return 'Negosiasi';
             case 'won':
-                return 'tercapai';
+                return 'Tercapai';
             case 'lose':
-                return 'gagal';
+                return 'Gagal';
             default:
                 return $stage;
         }
@@ -311,40 +311,16 @@ class ActionMapperHelper
     public static function mapStageDealToDatabase($stage)
     {
         switch ($stage) {
-            case 'kualifikasi':
+            case 'Kualifikasi':
                 return 'qualificated';
-            case 'proposal':
+            case 'Proposal':
                 return 'proposal';
-            case 'negosiasi':
+            case 'Negosiasi':
                 return 'negotiate';
-            case 'tercapai':
+            case 'Tercapai':
                 return 'won';
-            case 'gagal':
+            case 'Gagal':
                 return 'lose';
-            default:
-                return $stage;
-        }
-    }
-
-    public static function mapCategoryDeal($stage)
-    {
-        switch ($stage) {
-            case 'customers':
-                return 'pelanggan';
-            case 'customers_companies':
-                return 'perusahaan';
-            default:
-                return $stage;
-        }
-    }
-
-    public static function mapCategoryDealToDatabase($stage)
-    {
-        switch ($stage) {
-            case 'pelanggan':
-                return 'customers';
-            case 'perusahaan':
-                return 'customers_companies';
             default:
                 return $stage;
         }
@@ -354,13 +330,13 @@ class ActionMapperHelper
     {
         switch ($paymentCategory) {
             case 'once':
-                return 'sekali';
+                return 'Sekali';
             case 'daily':
-                return 'hari';
+                return 'Hari';
             case 'monthly':
-                return 'bulan';
+                return 'Bulan';
             case 'yearly':
-                return 'tahun';
+                return 'Tahun';
             default:
                 return $paymentCategory;
         }
@@ -369,13 +345,13 @@ class ActionMapperHelper
     public static function mapPaymentCategoryToDatabase($paymentCategory)
     {
         switch ($paymentCategory) {
-            case 'sekali':
+            case 'Sekali':
                 return 'once';
-            case 'hari':
+            case 'Hari':
                 return 'daily';
-            case 'bulan':
+            case 'Bulan':
                 return 'monthly';
-            case 'tahun':
+            case 'Tahun':
                 return 'yearly';
             default:
                 return $paymentCategory;
@@ -386,9 +362,9 @@ class ActionMapperHelper
     {
         switch ($status) {
             case 'draft':
-                return 'draf';
+                return 'Draf';
             case 'post':
-                return 'terbit';
+                return 'Terbit';
             default:
                 return $status;
         }
@@ -397,9 +373,9 @@ class ActionMapperHelper
     public static function mapStatusArticleToDatabase($status)
     {
         switch ($status) {
-            case 'draf':
+            case 'Draf':
                 return 'draft';
-            case 'terbit':
+            case 'Terbit':
                 return 'post';
             default:
                 return $status;
@@ -410,15 +386,15 @@ class ActionMapperHelper
     {
         switch ($accountsType) {
             case 'trial':
-                return 'percobaan';
+                return 'Percobaan';
             case 'regular':
-                return 'reguler';
+                return 'Reguler';
             case 'professional':
-                return 'profesional';
+                return 'Profesional';
             case 'business':
-                return 'bisnis';
+                return 'Bisnis';
             case 'unactive':
-                return 'tidak aktif';
+                return 'Tidak Aktif';
             default:
                 return $accountsType;
         }
@@ -427,15 +403,15 @@ class ActionMapperHelper
     public static function mapAccountsTypesToDatabase($accountsType)
     {
         switch ($accountsType) {
-            case 'percobaan':
+            case 'Percobaan':
                 return 'trial';
-            case 'reguler':
+            case 'Reguler':
                 return 'regular';
-            case 'profesional':
+            case 'Profesional':
                 return 'professional';
-            case 'bisnis':
+            case 'Bisnis':
                 return 'business';
-            case 'tidak aktif':
+            case 'Tidak Aktif':
                 return 'unactive';
             default:
                 return $accountsType;

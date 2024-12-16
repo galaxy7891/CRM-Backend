@@ -86,10 +86,10 @@ class ProductController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|unique_product_name',
-            'category' => 'required|in:barang,jasa|max:100',
+            'category' => 'required|in:Barang,Jasa|max:100',
             'code' => 'required|string|max:100|unique_product_code',
-            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
-            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
+            'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
         ], [
@@ -98,19 +98,19 @@ class ProductController extends Controller
             'name.max' => 'Nama produk maksimal 100 karakter.',
             'name.unique' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
-            'category.in' => 'Kategori produk harus pilih salah satu: barang atau jasa.',
+            'category.in' => 'Kategori produk harus pilih salah satu: Barang atau Jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode produk tidak boleh kosong.',
             'code.string' => 'Kode produk harus berupa string.',
             'code.max' => 'Kode produk maksimal 100 karakter.',
             'code.unique' => 'Kode produk sudah terdaftar.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya Barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya Jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya Barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya Jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga minimal berisi 1.',
@@ -195,17 +195,17 @@ class ProductController extends Controller
         }
         
         $productData = $request->all();
-        if (isset($productData['category']) && $productData['category'] === 'jasa') {
+        if (isset($productData['category']) && $productData['category'] === 'Jasa') {
             $productData['quantity'] = null;
             $productData['unit'] = null;
         }
-
+        
         $validator = Validator::make($productData, [
             'name' => 'sometimes|required|string|max:100|unique_product_name',
-            'category' => 'sometimes|required|in:barang,jasa|max:100',
+            'category' => 'sometimes|required|in:Barang,Jasa|max:100',
             'code' => 'sometimes|required|string|max:100|unique_product_code',
-            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
-            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
+            'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|in:box,pcs,unit',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
             'description' => 'sometimes|nullable|string',
         ], [
@@ -214,19 +214,19 @@ class ProductController extends Controller
             'name.max' => 'Nama produk maksimal 100 karakter.',
             'name.unique' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
-            'category.string' => 'Kategori produk harus berupa teks.',
+            'category.in' => 'Kategori produk harus pilih salah satu: Barang atau Jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode produk tidak boleh kosong.',
             'code.string' => 'Kode produk harus berupa teks.',
             'code.max' => 'Kode produk terlalu panjang.',
             'code.unique' => 'Kode produk sudah terdaftar.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya Barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya Jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya Barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya Jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga minimal berisi 1.',

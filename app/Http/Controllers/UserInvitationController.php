@@ -46,7 +46,7 @@ class UserInvitationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
-            'role' => 'required|in:admin,karyawan',
+            'role' => 'required|in:Admin,Karyawan',
             'job_position' => 'required|max:50',
         ], [
             'email.required' => 'Email tidak boleh kosong',
@@ -54,11 +54,11 @@ class UserInvitationController extends Controller
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses user harus pilih salah satu: admin, atau karyawan.',
+            'role.in' => 'Akses user harus pilih salah satu: Admin, atau Karyawan.',
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
         ]);
-
+        
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,

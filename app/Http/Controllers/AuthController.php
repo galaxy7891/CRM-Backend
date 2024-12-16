@@ -78,7 +78,7 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'google_id' => 'nullable|string|'. Rule::unique('users', 'google_id')->whereNull('deleted_at'),
             'email' => 'required|email|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
