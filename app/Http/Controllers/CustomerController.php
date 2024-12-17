@@ -6,6 +6,7 @@ use App\Helpers\ActionMapperHelper;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -53,6 +54,7 @@ class CustomerController extends Controller
             }
             
             $leads->getCollection()->transform(function ($lead) {
+                $lead->customerCategory = ActionMapperHelper::mapCustomerCategory($lead->customerCategory);
                 $lead->status = ActionMapperHelper::mapStatus($lead->status);
                 return $lead;
             });
@@ -110,6 +112,7 @@ class CustomerController extends Controller
             }
 
             $contacts->getCollection()->transform(function ($contact) {
+                $contact->customerCategory = ActionMapperHelper::mapCustomerCategory($contact->customerCategory);
                 $contact->status = ActionMapperHelper::mapStatus($contact->status);
                 return $contact;
             });
@@ -133,12 +136,31 @@ class CustomerController extends Controller
      */
     public function storeLeads(Request $request)
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->user_company_id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+        
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
             'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
-            'status' => 'required|in:tinggi,sedang,rendah',
+            'status' => 'required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'nullable|date',
             'job' => 'nullable|string|max:100',
             'owner' => 'required|email|max:100|exists:users,email',
@@ -162,8 +184,8 @@ class CustomerController extends Controller
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
-            'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
+            'status.required' => 'Status leads wajib dipilih.',
+            'status.in' => 'Status leads harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
@@ -220,15 +242,34 @@ class CustomerController extends Controller
      */
     public function storeContact(Request $request)
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->user_company_id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }   
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
-            'status' => 'required|in:tinggi,sedang,rendah',
+            'status' => 'required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'nullable|date',
             'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
             'job' => 'nullable|string|max:100',
-            'customers_company_id' => 'nullable|uuid',
+            'customers_company_id' => 'required|exists:customers_companies,id',
             'owner' => 'required|email|max:100|exists:users,email',
             'address' => 'nullable|string|max:100',
             'province' => 'nullable|string|max:100',
@@ -243,18 +284,20 @@ class CustomerController extends Controller
             'first_name.max' => 'Nama depan maksimal 50 karakter',
             'last_name.string' => 'Nama belakang harus berupa teks',
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
+            'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
-            'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
+            'status.required' => 'Status kontak wajib dipilih.',
+            'status.in' => 'Status leads harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'customers_company_id.uuid' => 'ID perusahaan harus berupa UUID yang valid.',
+            'customers_company_id.required' => 'Perusahaan wajib dipilih.',
+            'customers_company_id.exists' => 'Perusahaan belum terdaftar.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
@@ -283,7 +326,7 @@ class CustomerController extends Controller
         }
 
         $dataContact = $request->all();
-        if (isset($dataContact['status'])) {
+        if (isset($dataContact ['status'])) {
             $dataContact['status'] = ActionMapperHelper::mapStatusToDatabase($dataContact['status']);
         }
         $dataContact['customerCategory'] = 'contact';
@@ -295,6 +338,7 @@ class CustomerController extends Controller
                 'Data kontak ' . ucfirst($customer->first_name) . ' ' .  ucfirst($customer->last_name) . ' berhasil ditambahkan!',
                 $customer
             );
+
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -308,7 +352,7 @@ class CustomerController extends Controller
      * Display the specified resource.
      */
     public function showLeads($leadsId)
-    {   
+    {
         $user = auth()->user();
         if (!$user) {
             return new ApiResponseResource(
@@ -320,7 +364,7 @@ class CustomerController extends Controller
 
         try {
             $leads = Customer::findCustomerByIdCategory($leadsId, 'leads');
-
+            
             if (!$leads) {
                 return new ApiResponseResource(
                     false,
@@ -329,6 +373,14 @@ class CustomerController extends Controller
                 );
             }
             
+            if ($leads->customers_company_id) {
+                $leads->customers_company_name = $leads->customersCompany->name;
+            } else {
+                $leads->customers_company_name = null;
+            }
+            
+            unset($leads->customersCompany);
+
             if ($user->role == 'employee' && $leads->owner !== $user->email) {
                 return new ApiResponseResource(
                     false,
@@ -354,6 +406,7 @@ class CustomerController extends Controller
         }
     }
 
+
     /**
      * Display the specified resource.
      */
@@ -378,6 +431,14 @@ class CustomerController extends Controller
                     null
                 );
             }
+            
+            if ($contacts->customers_company_id) {
+                $contacts->customers_company_name = $contacts->customersCompany->name;
+            } else {
+                $contacts->customers_company_name = null;
+            }
+            
+            unset($contacts->customersCompany);
 
             if ($user->role == 'employee' && $contacts->owner !== $user->email) {
                 return new ApiResponseResource(
@@ -439,10 +500,10 @@ class CustomerController extends Controller
             'last_name' => 'sometimes|nullable|string|max:50',
             'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers','phone')->ignore($leadsId)->whereNull('deleted_at'),
             'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
-            'status' => 'sometimes|required|in:tinggi,sedang,rendah',
+            'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'customers_company_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|exists:customers_companies,id',
             'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -464,11 +525,11 @@ class CustomerController extends Controller
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
+            'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'customers_company_id.uuid' => 'ID perusahaan harus berupa UUID yang valid.',
+            'customers_company_id.exists'  => 'Perusahaan belum terdaftar.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
@@ -552,10 +613,10 @@ class CustomerController extends Controller
             'last_name' => 'sometimes|nullable|string|max:50',
             'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($contactId)->whereNull('deleted_at'),
             'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($contactId)->whereNull('deleted_at'),
-            'status' => 'sometimes|required|in:tinggi,sedang,rendah',
+            'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'customers_company_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|exists:customers_companies,id',
             'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -577,11 +638,11 @@ class CustomerController extends Controller
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
+            'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'customers_company_id.uuid' => 'ID perusahaan harus berupa UUID yang valid.',
+            'customers_company_id.exists' => 'Perusahaan belum terdaftar.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
@@ -628,7 +689,7 @@ class CustomerController extends Controller
             );
         }
     }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -651,7 +712,7 @@ class CustomerController extends Controller
                 null
             );
         }
-
+        
         if ($user->role == 'employee' && $leads->owner !== $user->email) {
             return new ApiResponseResource(
                 false,
@@ -665,10 +726,10 @@ class CustomerController extends Controller
             'last_name' => 'sometimes|nullable|string|max:50',
             'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($leadsId)->whereNull('deleted_at'),
             'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
-            'status' => 'sometimes|required|in:tinggi,sedang,rendah',
+            'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
-            'customers_company_id' => 'sometimes|nullable|uuid',
+            'customers_company_id' => 'sometimes|nullable|exists:customers_companies,id',
             'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'address' => 'sometimes|nullable|string|max:100',
             'province' => 'sometimes|nullable|string|max:100',
@@ -690,11 +751,11 @@ class CustomerController extends Controller
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
-            'status.in' => 'Status harus berupa pilih salah satu: tinggi, sedang, atau rendah.',
+            'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
             'birthdate.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
             'job.string' => 'Pekerjaan harus berupa teks.',
             'job.max' => 'Pekerjaan maksimal 100 karakter.',
-            'customers_company_id.uuid' => 'ID perusahaan harus berupa UUID yang valid.',
+            'customers_company_id.exists' => 'Perusahaan belum terdaftar.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
             'owner.email' => 'Penanggung jawab kontak harus berupa email valid.',
             'owner.max' => 'Penanggung jawab maksimal 100 karakter.',
@@ -744,32 +805,51 @@ class CustomerController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage for leads.
      */
     public function destroyLeads(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
+
+        $leadsWithDeals = [];
+        $leadsWithoutDeals = [];
+        $leadsWithDealsNames = [];
         
-        try {
-            $deletedCount = Customer::whereIn('id', $id)->delete();
-            if ($deletedCount > 0) {
-                return new ApiResponseResource(
-                    true,
-                    $deletedCount . ' data leads berhasil dihapus',
-                    null
-                );
+        foreach ($ids as $leadId) {
+            $lead = Customer::find($leadId);
+            if (!$lead) {
+                continue;
             }
 
+            if ($lead->deals()->exists()) {
+                $leadsWithDeals[] = $lead->id;
+                $leadsWithDealsNames[] = ucfirst($lead->first_name) . ' ' . ucfirst($lead->last_name);
+            } else {
+                $leadsWithoutDeals[] = $lead->id;
+            }
+        }   
+
+        if (count($leadsWithDeals) > 0) {
             return new ApiResponseResource(
                 false,
-                'Data leads tidak ditemukan',
+                "Data leads tidak dapat dihapus karena terdapat " . count($leadsWithDeals) . " leads terhubung dengan data deals.",
+                $leadsWithDealsNames
+            );
+        }
+
+        try {
+            $deletedCount = Customer::whereIn('id', $leadsWithoutDeals)->delete();
+
+            return new ApiResponseResource(
+                true,
+                $deletedCount . " data leads berhasil dihapus.",
                 null
             );
             
@@ -781,60 +861,63 @@ class CustomerController extends Controller
             );
         }
     }
-    
+
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage for contacts.
      */
     public function destroyContact(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
         }
-        
+
         $contactsWithDeals = [];
         $contactsWithoutDeals = [];
         $contactsWithDealsNames = [];
-        
-        foreach ($id as $contactId) {
+
+        foreach ($ids as $contactId) {
             $contact = Customer::find($contactId);
             if (!$contact) {
                 continue;
             }
 
-            if ($contact && $contact->deals()->exists()) {
+            if ($contact->deals()->exists()) {
                 $contactsWithDeals[] = $contact->id;
                 $contactsWithDealsNames[] = ucfirst($contact->first_name) . ' ' . ucfirst($contact->last_name);
-
             } else {
                 $contactsWithoutDeals[] = $contact->id;
             }
         }
-        
+
+        if (count($contactsWithDeals) > 0) {
+            return new ApiResponseResource(
+                false,
+                "Data kontak tidak dapat dihapus karena ada " . count($contactsWithDeals) . " kontak terhubung dengan data deals.",
+                $contactsWithDealsNames
+            );
+        }
+
         try {
             $deletedCount = Customer::whereIn('id', $contactsWithoutDeals)->delete();
 
-            $message = $deletedCount . " data kontak berhasil dihapus. ";
-            if (count($contactsWithDeals) > 0) {
-                $message .= count($contactsWithDeals) . " data kontak tidak dapat dihapus karena terhubung dengan data deals.";
-            }
-
             return new ApiResponseResource(
                 true,
-                $message,
-                $contactsWithDealsNames
+                $deletedCount . " data kontak berhasil dihapus.",
+                null
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false,
-                $e->getMessage(),
-                null
-            );
-        }
+            false,
+            $e->getMessage(),
+            null
+        );
     }
+}
+
 
 }

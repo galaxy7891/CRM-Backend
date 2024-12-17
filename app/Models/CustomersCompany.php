@@ -85,17 +85,29 @@ class CustomersCompany extends Model
     }
 
     /**
+     * count the customer company.
+     *
+     * @return self
+     */
+    public static function countCustomersCompany($userCompanyIds)
+    {
+        return self::whereHas('user', function ($ownerQuery) use ($userCompanyIds) {
+            $ownerQuery->where('user_company_id', $userCompanyIds);
+        })->count();
+    }
+
+    /**
      * Count CustomersCompany Owned
      * 
      * @param string $email
      * @return int
      */
-    public static function countCustomersCompany($email, $role, $userCompanyId)
+    public static function countCustomersCompanySummary($email, $role, $userCompanyId)
     {
         $query = self::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
             $ownerQuery->where('user_company_id', $userCompanyId);
         });
-
+    
         if ($role !== 'super_admin' && $role !== 'admin') {
             $query->where('owner', $email);
         }
@@ -105,22 +117,24 @@ class CustomersCompany extends Model
 
     public static function createCustomersCompany(array $dataCustomersCompany): self
     {
-        return self::create([
-            'name' => $dataCustomersCompany['name'],
-            'industry' => $dataCustomersCompany['industry'] ?? null,
-            'status' => $dataCustomersCompany['status'],
-            'email' => $dataCustomersCompany['email'] ?? null,
-            'phone' => $dataCustomersCompany['phone'] ?? null,
-            'owner' => $dataCustomersCompany['owner'],
-            'website' => $dataCustomersCompany['website'] ?? null,
-            'address' => $dataCustomersCompany['address'] ?? null,
-            'province' => $dataCustomersCompany['province'] ?? null,
-            'city' => $dataCustomersCompany['city'] ?? null,
-            'subdistrict' => $dataCustomersCompany['subdistrict'] ?? null,
-            'village' => $dataCustomersCompany['village'] ?? null,
-            'zip_code' => $dataCustomersCompany['zip_code'] ?? null,
-            'description' => $dataCustomersCompany['description'] ?? null
-        ]);
+        $customersCompany = new CustomersCompany();
+        $customersCompany->name = $dataCustomersCompany['name'];
+        $customersCompany->industry = $dataCustomersCompany['industry'] ?? null;
+        $customersCompany->status = $dataCustomersCompany['status'];
+        $customersCompany->email = $dataCustomersCompany['email'] ?? null;
+        $customersCompany->phone = $dataCustomersCompany['phone'] ?? null;
+        $customersCompany->owner = $dataCustomersCompany['owner'];
+        $customersCompany->website = $dataCustomersCompany['website'] ?? null;
+        $customersCompany->address = $dataCustomersCompany['address'] ?? null;
+        $customersCompany->province = $dataCustomersCompany['province'] ?? null;
+        $customersCompany->city = $dataCustomersCompany['city'] ?? null;
+        $customersCompany->subdistrict = $dataCustomersCompany['subdistrict'] ?? null;
+        $customersCompany->village = $dataCustomersCompany['village'] ?? null;
+        $customersCompany->zip_code = $dataCustomersCompany['zip_code'] ?? null;
+        $customersCompany->description = $dataCustomersCompany['description'] ?? null;
+
+        $customersCompany->save();
+        return $customersCompany;
     }
 
     public static function updateCustomersCompany(array $dataCustomersCompany, string $customersCompanyId): self

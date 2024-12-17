@@ -12,6 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers_reports', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->uuid('id')->primary();
             $table->uuid('user_company_id');
             $table->integer('added_leads')->default(0);

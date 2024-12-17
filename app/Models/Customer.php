@@ -93,6 +93,18 @@ class Customer extends Model
     }
 
     /**
+     * count the customer.
+     *
+     * @return self
+     */
+    public static function countCustomers($userCompanyIds)
+    {
+        return self::whereHas('user', function ($ownerQuery) use ($userCompanyIds) {
+            $ownerQuery->where('user_company_id', $userCompanyIds);
+        })->count();
+    }
+    
+    /**
      * Get the customer's by ID and category.
      *
      * @param string $id
@@ -105,7 +117,7 @@ class Customer extends Model
             ->where('customerCategory', $customerCategory)
             ->first();
     }
-
+    
     /**
      * Nullify the `customers_company_id` for all customers related to the specified company IDs.
      *
@@ -142,25 +154,27 @@ class Customer extends Model
 
     public static function createCustomer(array $dataCustomer): self
     {
-        return self::create([
-            'customers_company_id' => $dataCustomer['customers_company_id'] ?? null,
-            'first_name' => $dataCustomer['first_name'],
-            'last_name' => $dataCustomer['last_name'] ?? null,
-            'customerCategory' => $dataCustomer['customerCategory'],
-            'job' => $dataCustomer['job'] ?? null,
-            'description' => $dataCustomer['description'] ?? null,
-            'status' => $dataCustomer['status'],
-            'birthdate' => $dataCustomer['birthdate'] ?? null,
-            'email' => $dataCustomer['email'] ?? null,
-            'phone' => $dataCustomer['phone'],
-            'owner' => $dataCustomer['owner'],
-            'address' => $dataCustomer['address'] ?? null,
-            'province' => $dataCustomer['province'] ?? null,
-            'city' => $dataCustomer['city'] ?? null,
-            'subdistrict' => $dataCustomer['subdistrict'] ?? null,
-            'village' => $dataCustomer['village'] ?? null,
-            'zip_code' => $dataCustomer['zip_code'] ?? null,
-        ]);
+        $customers = new Customer();
+        $customers->customers_company_id = $dataCustomer['customers_company_id'] ?? null;
+        $customers->first_name = $dataCustomer['first_name'];
+        $customers->last_name = $dataCustomer['last_name'] ?? null;
+        $customers->customerCategory = $dataCustomer['customerCategory'];
+        $customers->job = $dataCustomer['job'] ?? null;
+        $customers->description = $dataCustomer['description'] ?? null;
+        $customers->status = $dataCustomer['status'];
+        $customers->birthdate = $dataCustomer['birthdate'] ?? null;
+        $customers->email = $dataCustomer['email'] ?? null;
+        $customers->phone = $dataCustomer['phone'];
+        $customers->owner = $dataCustomer['owner'];
+        $customers->address = $dataCustomer['address'] ?? null;
+        $customers->province = $dataCustomer['province'] ?? null;
+        $customers->city = $dataCustomer['city'] ?? null;
+        $customers->subdistrict = $dataCustomer['subdistrict'] ?? null;
+        $customers->village = $dataCustomer['village'] ?? null;
+        $customers->zip_code = $dataCustomer['zip_code'] ?? null;
+        
+        $customers->save();
+        return $customers;
     }
 
     public static function updateCustomer(array $dataCustomer, string $customerId): self

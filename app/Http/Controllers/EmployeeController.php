@@ -118,8 +118,8 @@ class EmployeeController extends Controller
             'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($employeeId)->whereNull('deleted_at'),
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
-            'role' => 'sometimes|required|in:super admin,admin,karyawan',
-            'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
+            'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
+            'gender' => 'sometimes|nullable|in:Laki-laki,Perempuan,Lainnya',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
@@ -138,8 +138,8 @@ class EmployeeController extends Controller
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus pilih salah satu: super admin, admin, atau karyawan.',
-            'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
+            'role.in' => 'Akses harus pilih salah satu: Super Admin, Admin, atau Karyawan.',
+            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lainnya.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

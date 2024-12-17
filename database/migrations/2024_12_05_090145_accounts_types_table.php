@@ -12,6 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts_types', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->uuid('id')->primary();
             $table->uuid('user_company_id');
             $table->enum('account_type', ['trial', 'regular', 'professional', 'business', 'unactive'])->default('trial');
@@ -19,12 +23,12 @@ return new class extends Migration
             $table->dateTime('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-
+            
             // Foreign key
             $table->foreign('user_company_id')->references('id')->on('users_companies')->onDelete('cascade');
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */

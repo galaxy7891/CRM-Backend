@@ -7,7 +7,7 @@ use App\Http\Resources\ApiResponseResource;
 use App\Mail\TemplateInviteUser;
 use App\Models\User;
 use App\Models\UserInvitation;
-
+use App\Services\DataLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -24,10 +24,29 @@ class UserInvitationController extends Controller
      * @return \Illuminate\Http\JsonResponse 
      */
     public function sendInvitation(Request $request)
-    {   
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->user_company_id;
+        $limitCheck = DataLimitService::checkUsersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        } 
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
-            'role' => 'required|in:admin,karyawan',
+            'role' => 'required|in:Admin,Karyawan',
             'job_position' => 'required|max:50',
         ], [
             'email.required' => 'Email tidak boleh kosong',
@@ -35,11 +54,11 @@ class UserInvitationController extends Controller
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses user harus pilih salah satu: admin, atau karyawan.',
+            'role.in' => 'Akses user harus pilih salah satu: Admin, atau Karyawan.',
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
         ]);
-
+        
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,
@@ -55,16 +74,16 @@ class UserInvitationController extends Controller
 
         $recentInvitation = UserInvitation::getRecentInvitation($data['email']);
 
-        // if ($recentInvitation) {
-        //     $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
+        if ($recentInvitation) {
+            $remainingTime = UserInvitation::getRemainingTime($recentInvitation);
 
-        //     return new ApiResponseResource(
-        //         false,
-        //         'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
-        //             "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
-        //         null
-        //     );
-        // }
+            return new ApiResponseResource(
+                false,
+                'Anda hanya dapat mengundang pengguna ini sekali dalam seminggu. Dapat mengirim undangan ulang dalam ' .
+                    "{$remainingTime['days']} hari, {$remainingTime['hours']} jam, {$remainingTime['minutes']} menit, dan {$remainingTime['seconds']} detik.",
+                null
+            );
+        }
 
         try {
             $email = $data['email'];

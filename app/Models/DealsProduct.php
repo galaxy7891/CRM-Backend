@@ -39,12 +39,14 @@ class DealsProduct extends Model
 
     public static function createDealsProducts(array $dataDealsProduct, string $dealsId): self
     {
-        return self::create([
-            'deals_id' => $dealsId ?? null,
-            'product_id' => $dataDealsProduct['product_id'] ?? null,
-            'quantity' => $dataDealsProduct['quantity'] ?? null,
-            'unit' => $dataDealsProduct['unit'] ?? null, 
-        ]);
+        $dealsProducts = new DealsProduct();
+        $dealsProducts->deals_id = $dealsId ?? null;
+        $dealsProducts->product_id = $dataDealsProduct['product_id'] ?? null;
+        $dealsProducts->quantity = $dataDealsProduct['quantity'] ?? null;
+        $dealsProducts->unit = $dataDealsProduct['unit'] ?? null; 
+        
+        $dealsProducts->save();
+        return $dealsProducts;
     }
 
     public static function updateDealsProducts(array $dataDealsProduct, string $dealsId): self

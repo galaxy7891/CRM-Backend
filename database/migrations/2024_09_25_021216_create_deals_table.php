@@ -10,6 +10,10 @@ class CreateDealsTable extends Migration
     public function up()
     {   
         Schema::create('deals', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->uuid('id')->primary();
             $table->enum('category', ['customers', 'customers_companies']);
             $table->uuid('customer_id')->nullable();

@@ -10,7 +10,6 @@ use App\Models\CustomersCompany;
 use App\Models\PasswordResetToken;
 use App\Models\User;
 use Illuminate\Support\Str;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -51,7 +50,7 @@ class UserController extends Controller
             );
         }
     }
-
+    
     /**
      * Update the specified resource in storage.
      */ 
@@ -66,16 +65,16 @@ class UserController extends Controller
                 null
             );
         }
-
+        
         $validator = Validator::make($request->all(), [
             'user_company_id' => 'sometimes|nullable|uuid',
             'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($id)->whereNull('deleted_at'),
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
             'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($id)->whereNull('deleted_at'),
-            'role' => 'sometimes|required|in:super admin,admin,karyawan',
+            'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
             'job_position' => 'sometimes|required|max:50',
-            'gender' => 'sometimes|nullable|in:laki-laki,perempuan,lainnya',
+            'gender' => 'sometimes|nullable|in:Laki-laki,Perempuan,Lainnya',
         ], [
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
@@ -93,8 +92,8 @@ class UserController extends Controller
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',
-            'role.in' => 'Akses harus pilih salah satu: super admin, admin, atau karyawan.',
-            'gender.in' => 'Gender harus pilih salah satu: laki-laki, perempuan, lainnya.',
+            'role.in' => 'Akses harus pilih salah satu: Super Admin, Admin, atau Karyawan.',
+            'gender.in' => 'Gender harus pilih salah satu: Laki-laki, Perempuan, Lainnya.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -206,7 +205,7 @@ class UserController extends Controller
                 'Unauthorized',
                 null
             );
-        }
+        }   
 
         $validator = Validator::make($request->only('photo'), [
             'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -225,7 +224,6 @@ class UserController extends Controller
         }
 
         try {
-
             $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id);
 
             return new ApiResponseResource(
@@ -266,6 +264,7 @@ class UserController extends Controller
                 "Data pengguna {$first_name} " . strtolower($last_name) . "berhasil dihapus",
                 null
             );
+        
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -286,7 +285,7 @@ class UserController extends Controller
     {
         $email = '';
         $frontendPath = '';
-
+        
         if (auth()->check()) {
             $user = auth()->user();
             $email = $user->email;
@@ -440,8 +439,8 @@ class UserController extends Controller
         
         $leadsCount = Customer::countCustomerSummary($user->email, 'leads', $user->role, $user->user_company_id);
         $contactsCount = Customer::countCustomerSummary($user->email, 'contact', $user->role, $user->user_company_id);
-
-        $customersCompanyCount = CustomersCompany::countCustomersCompany($user->email, $user->role, $user->user_company_id);
+        
+        $customersCompanyCount = CustomersCompany::countCustomersCompanySummary($user->email, $user->role, $user->user_company_id);
 
         $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
         

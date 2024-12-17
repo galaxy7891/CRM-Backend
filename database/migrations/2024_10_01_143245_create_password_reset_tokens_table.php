@@ -12,6 +12,11 @@ Class CreatePasswordResetTokensTable extends Migration
     public function up(): void
     {
         Schema::create('password_reset_tokens', function (Blueprint $table) {
+            
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->string('email', 100)->primary();
             $table->string('token', 100);
             $table->timestamps();

@@ -6,6 +6,7 @@ use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Customer;
 use App\Models\CustomersCompany;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 
 use Illuminate\Http\Request;
@@ -77,10 +78,29 @@ class CustomersCompanyController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+        
+        $userCompanyId = $user->user_company_id;
+        $limitCheck = DataLimitService::checkCustomersLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|'. Rule::unique('customers_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'nullable|string|max:50',
-            'status' => 'required|in:tinggi,sedang,rendah',
+            'status' => 'required|in:Tinggi,Sedang,Rendah',
             'email' => 'nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->whereNull('deleted_at'),
             'phone' => 'nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->whereNull('deleted_at'),
             'website' => 'nullable|string|max:255',
@@ -99,7 +119,7 @@ class CustomersCompanyController extends Controller
             'industry.string' => 'Jenis industri harus berupa teks.',
             'industry.max' => 'Jenis industri maksimal 50 karakter.',
             'status.required' => 'Status tidak boleh kosong.',
-            'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
+            'status.in' => 'Status harus pilih salah satu dari: Tinggi, Sedang, Rendah.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
@@ -231,7 +251,7 @@ class CustomersCompanyController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:100|'. Rule::unique('customers_companies', 'name')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'industry' => 'sometimes|nullable|string|max:50',
-            'status' => 'sometimes|required|in:tinggi,sedang,rendah',
+            'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers_companies', 'email')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'phone' => 'sometimes|nullable|numeric|max_digits:15|'. Rule::unique('customers_companies', 'phone')->ignore($customersCompanyId)->whereNull('deleted_at'),
             'website' => 'sometimes|nullable|string|max:255',
@@ -251,7 +271,7 @@ class CustomersCompanyController extends Controller
             'industry.string' => 'Jenis industri harus berupa teks.',
             'industry.max' => 'Jenis industri maksimal 50 karakter.',
             'status.required' => 'Status tidak boleh kosong.',
-            'status.in' => 'Status harus pilih salah satu dari: tinggi, sedang, rendah.',
+            'status.in' => 'Status harus pilih salah satu dari: Tinggi, Sedang, Rendah.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
@@ -314,10 +334,10 @@ class CustomersCompanyController extends Controller
      */
     public function destroy(Request $request)
     {
-        $id = $request->input('id', []);
-        if (empty($id)) {
+        $ids = $request->input('id', []);
+        if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data perusahaan pelanggan yang ingin dihapus terlebih dahulu",
                 null
             );
@@ -328,7 +348,7 @@ class CustomersCompanyController extends Controller
         $companiesToNullifyContacts = [];
         $companiesWithDealsNames = [];
 
-        foreach ($id as $companyId) {
+        foreach ($ids as $companyId) {
             $company = CustomersCompany::find($companyId);
             if (!$company) {
                 continue;
@@ -346,6 +366,14 @@ class CustomersCompanyController extends Controller
             }
         }
 
+        if (!empty($companiesWithDeals)) {
+            return new ApiResponseResource(
+                false,
+                "Data perusahaan pelanggan tidak dapat dihapus karena terdapat " . count($companiesWithDeals) . " perusahaan pelanggan terhubung dengan data deals.",
+                $companiesWithDealsNames
+            );
+        }
+
         try {
             if (!empty($companiesToNullifyContacts)) {
                 Customer::nullifyCompanyAssociation($companiesToNullifyContacts);
@@ -353,15 +381,11 @@ class CustomersCompanyController extends Controller
 
             $deletedCount = CustomersCompany::whereIn('id', $companiesWithoutDeals)->delete();
 
-            $message = $deletedCount . " data perusahaan pelanggan berhasil dihapus. ";
-            if (count($companiesWithDeals) > 0) {
-                $message .= count($companiesWithDeals) . " data perusahaan pelanggan tidak dapat dihapus karena terhubung dengan data deals.";
-            }
-
+            $message = $deletedCount . " data perusahaan pelanggan berhasil dihapus.";
             return new ApiResponseResource(
                 true,
                 $message,
-                $companiesWithDealsNames
+                null
             );
 
         } catch (\Exception $e) {

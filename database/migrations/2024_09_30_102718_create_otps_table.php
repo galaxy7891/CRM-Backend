@@ -14,6 +14,10 @@ class CreateOtpsTable extends Migration
     public function up()
     {
         Schema::create('otps', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Pastikan tabel menggunakan InnoDB
+            $table->charset = 'utf8'; // Charset untuk mendukung emoji
+            $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
+            
             $table->string('email')->primary(); 
             $table->string('code', 6);
             $table->dateTime('expired_at');

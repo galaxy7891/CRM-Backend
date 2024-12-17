@@ -7,7 +7,7 @@
     <style>
         /* Import Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
+        
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #ECF2F3;
@@ -71,7 +71,7 @@
             margin: 0 4px;
             display: inline-block;
         }
-
+        
         hr {
             margin: 0 16px;
             border: none;

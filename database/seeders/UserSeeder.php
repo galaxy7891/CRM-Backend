@@ -62,7 +62,7 @@ class UserSeeder extends Seeder
             'image_url' => null,
             'image_public_id' => null,
         ]);
-
+        
         User::create([
             'id' => '123e4567-abcr-1985-a456-426312174125',
             'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',

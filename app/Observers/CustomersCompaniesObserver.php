@@ -27,12 +27,12 @@ class CustomersCompaniesObserver
         
         $changes = ModelChangeLoggerHelper::getModelChanges($customersCompany, 'customers_companies', 'CREATE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'customers_companies',
-            'action' => 'CREATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'customers_companies';
+        $activityLog->action = 'CREATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 
     /**
@@ -42,12 +42,12 @@ class CustomersCompaniesObserver
     {   
         $changes = ModelChangeLoggerHelper::getModelChanges($customersCompany, 'customers_companies', 'UPDATE');
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'customers_companies',
-            'action' => 'UPDATE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'customers_companies';
+        $activityLog->action = 'UPDATE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 
     /**
@@ -73,11 +73,11 @@ class CustomersCompaniesObserver
             ]);
         }
 
-        ActivityLog::create([
-            'user_id' => auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100',
-            'model_name' => 'customers_companies',
-            'action' => 'DELETE',
-            'changes' => $changes ? json_encode($changes) : null,
-        ]);
+        $activityLog = new ActivityLog();
+        $activityLog->user_id = auth()->id() ? auth()->id() : '123e4567-e89b-12d3-a456-426614174100';
+        $activityLog->model_name = 'customers_companies';
+        $activityLog->action = 'DELETE';
+        $activityLog->changes = $changes ? json_encode($changes) : null;
+        $activityLog->save();
     }
 }

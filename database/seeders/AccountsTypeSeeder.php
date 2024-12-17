@@ -19,7 +19,7 @@ class AccountsTypeSeeder extends Seeder
             'start_date' => now(),
             'end_date' => now()->addDays(7),
         ]);
-        
+         
         AccountsType::create([
             'id' => '123e4567-e12f-1234d-a456-54312754',
             'user_company_id' => '123e4567-e89b-13a3-a456-426614175030',

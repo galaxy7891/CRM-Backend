@@ -31,7 +31,7 @@ class AccountsTypeController extends Controller
         try {
             $query = AccountsType::with('userCompany');
 
-            $query = $this->applyFiltersAccountsType($request, $query);
+            // $query = $this->applyFiltersAccountsType($request, $query);
             $accountsTypes = $this->applyFilters($request, $query);
             if (!$accountsTypes) {
                 return new ApiResponseResource(
@@ -91,21 +91,21 @@ class AccountsTypeController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'account_type' => 'sometimes|required|in:percobaan,reguler,profesional,bisnis,tidak aktif',
+            'account_type' => 'sometimes|required|in:Percobaan,Reguler,Profesional,Bisnis,Tidak Aktif',
             'user_company_id' => 'sometimes|required',
-            'quantity' => 'required_if:account_type,percobaan,reguler,profesional,bisnis|prohibited_if:account_type,tidak aktif|nullable|numeric|min:1',
-            'category' => 'required_if:account_type,percobaan,reguler,profesional,bisnis|prohibited_if:account_type,tidak aktif|nullable|in:hari,bulan,tahun',
+            'quantity' => 'required_if:account_type,Percobaan,Reguler,Profesional,Bisnis|prohibited_if:account_type,Tidak Aktif|nullable|numeric|min:1',
+            'category' => 'required_if:account_type,Percobaan,Reguler,Profesional,Bisnis|prohibited_if:account_type,Tidak Aktif|nullable|in:Hari,Bulan,Tahun',
         ], [
             'account_type.required' => 'Tipe pelanggan tidak boleh kosong',
-            'account_type.in' => 'Tipe pelanggan harus pilih salah satu: percobaan, reguler, profesional, bisnis, atau tidak aktif',
+            'account_type.in' => 'Tipe pelanggan harus pilih salah satu: Percobaan, Reguler, Profesional, Bisnis, atau Tidak Aktif',
             'user_company_id.required' => 'Nama perusahaan tidak boleh kosong',
-            'quantity.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif',
-            'quantity.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif',
+            'quantity.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain Tidak Aktif',
+            'quantity.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun Tidak Aktif',
             'quantity.numeric' => 'Batas langganan harus berupa angka',
-            'quantity.min' => 'Batas langganan minimal berisi 1',
-            'category.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif',
-            'category.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif',
-            'category.in' => 'Batas langganan harus pilih salah satu: hari, bulan, tahun',
+            'quantity.min' => 'Batas langganan minimal berisi 1', 
+            'category.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain Tidak Aktif', 
+            'category.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun Tidak Aktif', 
+            'category.in' => 'Batas langganan harus pilih salah satu: Hari, Bulan, Tahun', 
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

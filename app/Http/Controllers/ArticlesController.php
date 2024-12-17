@@ -19,15 +19,6 @@ class ArticlesController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        if (!$user) {
-            return new ApiResponseResource(
-                false,
-                'Unauthorized',
-                null
-            );
-        }
-
         try {
             $query = Article::query();
 
@@ -68,7 +59,7 @@ class ArticlesController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
             'description' => 'required|string',
-            'status' => 'required|in:draf,terbit',
+            'status' => 'required|in:Draf,Terbit',
             'photo_article' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'title.required' => 'Judul artikel tidak boleh kosong',
@@ -77,7 +68,7 @@ class ArticlesController extends Controller
             'description.required' => 'Isi deskripsi artikel tidak boleh kosong', 
             'description.string' => 'Isi deskripsi artikel harus berupa teks',
             'status.required' => 'Status artikel tidak boleh kosong',
-            'status.in' => 'Status artikel harus pilih salah satu: draf atau terbit',
+            'status.in' => 'Status artikel harus pilih salah satu: Draf atau Terbit',
             'photo_article.required' => 'Foto artikel tidak boleh kosong.',
             'photo_article.image' => 'Foto artikel harus berupa gambar.',
             'photo_article.mimes' => 'Foto artikel tidak sesuai format.',
@@ -163,7 +154,7 @@ class ArticlesController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:100',
             'description' => 'sometimes|required|string',
-            'status' => 'sometimes|required|in:draf,terbit',
+            'status' => 'sometimes|required|in:Draf,Terbit',
             'photo_article' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'title.required' => 'Judul artikel tidak boleh kosong',
@@ -172,7 +163,7 @@ class ArticlesController extends Controller
             'description.required' => 'Isi deskripsi artikel tidak boleh kosong', 
             'description.string' => 'Isi deskripsi artikel harus berupa teks',
             'status.required' => 'Status artikel tidak boleh kosong',
-            'status.in' => 'Status artikel harus pilih salah satu: draf atau terbit',
+            'status.in' => 'Status artikel harus pilih salah satu: Draf atau Terbit',
             'photo_article.required' => 'Foto artikel tidak boleh kosong.',
             'photo_article.image' => 'Foto artikel harus berupa gambar.',
             'photo_article.mimes' => 'Foto artikel tidak sesuai format.',

@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Helpers\ActionMapperHelper;
 use App\Http\Resources\ApiResponseResource;
 use App\Models\Product;
+use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -27,7 +27,7 @@ class ProductController extends Controller
                 null
             );
         }
-
+        
         try {
             $query = Product::where('user_company_id', $user->user_company_id);
 
@@ -40,7 +40,7 @@ class ProductController extends Controller
                 );
             }
 
-            $products->getCollection()->transform(function ($product) {
+            $products->transform(function ($product) {
                 $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
                 return $product;
             });
@@ -73,12 +73,22 @@ class ProductController extends Controller
             );
         }
         
+        $userCompanyId = $user->user_company_id;
+        $limitCheck = DataLimitService::checkProductsLimit($userCompanyId);
+        if ($limitCheck['isExceeded']) {
+            return new ApiResponseResource(
+                false, 
+                $limitCheck['message'], 
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100|unique_product_name',
-            'category' => 'required|in:barang,jasa|max:100',
+            'category' => 'required|in:Barang,Jasa|max:100',
             'code' => 'required|string|max:100|unique_product_code',
-            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
-            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
+            'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|in:box,pcs,unit',
             'price' => 'required|numeric|min:0|max_digits:20',
             'description' => 'nullable|string',
         ], [
@@ -87,19 +97,19 @@ class ProductController extends Controller
             'name.max' => 'Nama produk maksimal 100 karakter.',
             'name.unique' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
-            'category.in' => 'Kategori produk harus pilih salah satu: barang atau jasa.',
+            'category.in' => 'Kategori produk harus pilih salah satu: Barang atau Jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode produk tidak boleh kosong.',
             'code.string' => 'Kode produk harus berupa string.',
             'code.max' => 'Kode produk maksimal 100 karakter.',
             'code.unique' => 'Kode produk sudah terdaftar.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya Barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya Jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya Barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya Jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga minimal berisi 1.',
@@ -118,7 +128,7 @@ class ProductController extends Controller
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
         }
-        $productData['user_company_id'] = $user->company->id;
+        $productData['user_company_id'] = $user->user_company_id;
 
         try {
             $product = Product::createProduct($productData);
@@ -180,13 +190,19 @@ class ProductController extends Controller
                 null
             );
         }
-
+        
+        $productData = $request->all();
+        if (isset($productData['category']) && $productData['category'] === 'Jasa') {
+            $productData['quantity'] = null;
+            $productData['unit'] = null;
+        }
+        
         $validator = Validator::make($productData, [
             'name' => 'sometimes|required|string|max:100|unique_product_name',
-            'category' => 'sometimes|required|in:barang,jasa|max:100',
+            'category' => 'sometimes|required|in:Barang,Jasa|max:100',
             'code' => 'sometimes|required|string|max:100|unique_product_code',
-            'quantity' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|numeric|min:0',
-            'unit' => 'required_if:category,barang|prohibited_if:category,jasa|nullable|in:box,pcs,unit',
+            'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
+            'unit' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|in:box,pcs,unit',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
             'description' => 'sometimes|nullable|string',
         ], [
@@ -195,19 +211,19 @@ class ProductController extends Controller
             'name.max' => 'Nama produk maksimal 100 karakter.',
             'name.unique' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
-            'category.string' => 'Kategori produk harus berupa teks.',
+            'category.in' => 'Kategori produk harus pilih salah satu: Barang atau Jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode produk tidak boleh kosong.',
             'code.string' => 'Kode produk harus berupa teks.',
             'code.max' => 'Kode produk terlalu panjang.',
             'code.unique' => 'Kode produk sudah terdaftar.',
-            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya Barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',
-            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya jasa.',
-            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya barang.',
+            'quantity.prohibited_if' => 'Jumlah produk harus kosong jika kategorinya Jasa.',
+            'unit.required_if' => 'Satuan produk tidak boleh kosong jika kategorinya Barang.',
             'unit.in' => 'Satuan produk harus pilih salah satu: box, pcs, unit.',
-            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya jasa.',
+            'unit.prohibited_if' => 'Satuan produk harus kosong jika kategorinya Jasa.',
             'price.required' => 'Harga tidak boleh kosong.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga minimal berisi 1.',
@@ -226,7 +242,7 @@ class ProductController extends Controller
         if (isset($productData['category'])) {
             $productData['category'] = ActionMapperHelper::mapCategoryProductToDatabase($productData['category']);
         }
-
+        
         try {
             $updatedProduct = Product::updateProduct($productData, $productId);
             return new ApiResponseResource(
@@ -274,7 +290,7 @@ class ProductController extends Controller
         }
 
         try {
-            $photoData = $product->updatePhotoProduct($request->file('photo'), $productId);
+            $photoData = $product->updatePhotoProduct($request->file('photo_product'), $productId); 
 
             return new ApiResponseResource(
                 true,
@@ -298,7 +314,7 @@ class ProductController extends Controller
         $ids = $request->input('id', []);
         if (empty($ids)) {
             return new ApiResponseResource(
-                true,
+                false,
                 "Pilih data yang ingin dihapus terlebih dahulu",
                 null
             );
@@ -313,26 +329,30 @@ class ProductController extends Controller
                 continue;
             }
 
-            if ($product && $product->deals()->exists()) {
+            if ($product->deals()->exists()) {
                 $productsWithDeals[] = $product->id;
                 $productsWithDealsNames[] = ucfirst($product->name);
             } else {
                 $productsWithoutDeals[] = $product->id;
             }
         }
-        
-        try {
-            $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
 
-            $message = $deletedCount . " data produk berhasil dihapus. ";
-            if (count($productsWithDeals) > 0) {
-                $message .= count($productsWithDeals) . " data produk tidak dapat dihapus karena terhubung dengan data deals.";
-            }
-
+        if (count($productsWithDeals) > 0) {
             return new ApiResponseResource(
                 false,
-                $message,
+                "Data produk tidak dapat dihapus karena terdapat ". count($productsWithDeals) . " produk terhubung dengan data deals.",
                 $productsWithDealsNames
+            );
+        }
+
+        try {
+            // Delete products without deals
+            $deletedCount = Product::whereIn('id', $productsWithoutDeals)->delete();
+
+            return new ApiResponseResource(
+                true,
+                $deletedCount . " data produk berhasil dihapus.",
+                null
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
@@ -342,4 +362,5 @@ class ProductController extends Controller
             );
         }
     }
+
 }

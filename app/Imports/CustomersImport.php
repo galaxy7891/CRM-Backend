@@ -111,6 +111,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 $this->summaryData['total_data']++;
                 $this->summaryData['invalid_data']++;
                 continue;
+
             } else {
                 $rowMap[$rowKey] = $index;
             }
@@ -160,7 +161,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 'nama_belakang' => 'nullable|string|max:50',
                 'pekerjaan' => 'nullable|string|max:100',
                 'deskripsi' => 'nullable|string',
-                'status' => 'required|in:tinggi,sedang,rendah',
+                'status' => 'required|in:Tinggi,Sedang,Rendah',
                 'tanggal_lahir' => 'nullable|date',
                 'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
                 'nomor_telepon' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
@@ -180,7 +181,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
                 'pekerjaan.max' => 'Pekerjaan maksimal 100 karakter.',
                 'deskripsi.string' => 'Pekerjaan maksimal 100 karakter.',
                 'status.required' => 'Status tidak boleh kosong.',
-                'status.in' => 'Status harus berupa salah satu: tinggi, sedang, atau rendah.',
+                'status.in' => 'Status harus berupa salah satu: Tinggi, Sedang, atau Rendah.',
                 'tanggal_lahir.date' => 'Tanggal lahir harus berupa tanggal yang valid.',
                 'email.email' => 'Format email tidak valid.',
                 'email.unique' => 'Email sudah terdaftar.',
@@ -241,7 +242,7 @@ class CustomersImport implements ToCollection, WithHeadingRow
             }
 
             $this->validData[] = [
-                'customer_company_id' => $customerCompanyId,
+                'customers_company_id' => $customerCompanyId,
                 'first_name' => $row['nama_depan'],
                 'last_name' => $row['nama_belakang'],
                 'customerCategory' => $this->customerCategory,

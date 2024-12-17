@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActionMapperHelper;
 use App\Models\User;
 use App\Models\UsersCompany;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponseResource;
-use Google_Client;
-
+use App\Models\AccountsType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -39,7 +39,6 @@ class AuthController extends Controller
         }
 
         try {
-
             $credentials = $request->only(['email', 'password']);
             if (!$token = auth()->attempt($credentials)) {
                 return new ApiResponseResource(
@@ -49,7 +48,20 @@ class AuthController extends Controller
                 );
             }
 
+            $user = auth()->user();
+            if ($user->company) {
+                $endDate = $user->company->accountType->end_date;
+                if ($endDate && now()->greaterThan($endDate)) {
+                    return new ApiResponseResource(
+                        false,
+                        'Masa aktif perusahaan Anda telah habis. Silakan hubungi customer support untuk memperbarui akun.',
+                        null,
+                    );
+                }
+            }
+
             return $this->respondWithToken($token);
+
         } catch (\Exception $e) {
 
             return new ApiResponseResource(
@@ -66,7 +78,7 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request)
-    {
+    {   
         $validator = Validator::make($request->all(), [
             'google_id' => 'nullable|string|' . Rule::unique('users', 'google_id')->whereNull('deleted_at'),
             'email' => 'required|email|' . Rule::unique('users', 'email')->whereNull('deleted_at'),
@@ -112,8 +124,9 @@ class AuthController extends Controller
         }
 
         try {
-            $userCompany = UsersCompany::createCompany($request->only(['name', 'industry']));
+            $userCompany = UsersCompany::createUserCompany($request->only(['name', 'industry']));
             User::createUser($request->all(), $userCompany->id);
+            AccountsType::createAccountsType($userCompany->id);
 
             $credentials = [
                 'email' => $request->email,
@@ -156,6 +169,50 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+
+            $user = User::where('google_id', $googleUser->id)
+            ->first();
+
+            if ($user) {
+                if ($user->company && $user->company->accountType->end_date && now()->greaterThan($user->company->end_date)) {
+                    return new ApiResponseResource(
+                        false,
+                        'Masa aktif perusahaan Anda telah habis. Silakan hubungi customer support untuk memperbarui akun.',
+                        null
+                    );
+                }
+
+                $token = auth()->login($user);
+
+                return $this->respondWithToken($token);
+            } else {
+                $nameParts = \App\Helpers\StringHelper::splitName($googleUser->name);
+                
+                return new ApiResponseResource(
+                    true,
+                    'Data user google',
+                    [
+                        'email' => $googleUser->email,
+                        'first_name' => $nameParts['first_name'],
+                        'last_name' => $nameParts['last_name'],
+                        'role' => 'super_admin',
+                        'photo' => $googleUser->avatar,
+                        'google_id' => $googleUser->id,
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            return new ApiResponseResource(
+                false,
+                $e->getMessage(),
+                null,
+            );
+        }
+    }
 
     /**
      * Logout (Invalidate the token).
@@ -210,7 +267,7 @@ class AuthController extends Controller
             );
         }
         
-        $userCompany = $user->company;
+        $userCompanyData = $this->getAccountTypeAndDuration($user);
 
         return new ApiResponseResource(
             true,
@@ -220,17 +277,68 @@ class AuthController extends Controller
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60,
                 'user' => [
-                    'id' => $user->id,
-                    'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                    'job_position' => $user->job_position,
-                    'role' => $user->role,
-                    'gender' => $user->gender,
-                    'photo' => $user->image_url,
-                    'company_id' => $userCompany ? $userCompany->id : null
+                   'id' => $user->id,
+                   'name' => ucfirst($user->first_name) . ' ' . ucfirst($user->last_name),
+                   'email' => $user->email,
+                   'phone' => $user->phone,
+                   'job_position' => $user->job_position,
+                   'role' => $user->role,
+                   'gender' => $user->gender,
+                   'photo' => $user->image_url,
+                   'company_id' => $userCompanyData['company_id'],
+                   'account_type' => $userCompanyData['account_type'],
+                   'duration' => $userCompanyData['duration'],
                 ]
             ],
         );
     }
+
+    /**
+     * Get the account type and duration for the user's company.
+     *
+     * @param  \App\Models\User $user
+     * @return array
+     */
+    protected function getAccountTypeAndDuration($user)
+    {
+        $userCompany = $user->company;
+        $accountTypeData = [
+            'company_id' => null,
+            'account_type' => null,
+            'duration' => null,
+        ];
+
+        if ($userCompany) {
+            $accountsType = AccountsType::where('user_company_id', $userCompany->id)->first();
+            
+            if ($accountsType) {
+                $userCompany->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
+                $endDate = \Carbon\Carbon::parse($accountsType->end_date)->startOfDay();
+                $now = \Carbon\Carbon::now()->startOfDay();
+                
+                $daysDiff = $now->diffInDays($endDate);
+
+                if ($daysDiff <= 31) {
+                    $duration = $daysDiff . ' hari';
+                } elseif ($daysDiff > 31 && $daysDiff <= 365) {
+                    $months = floor($daysDiff / 30);
+                    $duration = $months . ' bulan';
+                } else {
+                    $years = floor($daysDiff / 365);
+                    $duration = $years . ' tahun';
+                }
+
+                $userCompany->duration = $duration;
+
+                $accountTypeData = [
+                    'company_id' => $userCompany->id,
+                    'account_type' => $userCompany->account_type,
+                    'duration' => $userCompany->duration,
+                ];
+            }
+        }
+
+        return $accountTypeData;
+    }
+
 }
