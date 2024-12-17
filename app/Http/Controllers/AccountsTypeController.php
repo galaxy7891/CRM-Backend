@@ -23,11 +23,11 @@ class AccountsTypeController extends Controller
         if (!$user) {
             return new ApiResponseResource(
                 false,
-                'Unauthorized',              
-                null                         
-            );                               
-        }                                    
-        
+                'Unauthorized',
+                null
+            );
+        }
+
         try {
             $query = AccountsType::with('userCompany');
 
@@ -40,7 +40,7 @@ class AccountsTypeController extends Controller
                     null
                 );
             }
-            
+
             $accountsTypes->getCollection()->transform(function ($accountsType) {
                 $accountsType->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
                 return $accountsType;
@@ -51,7 +51,6 @@ class AccountsTypeController extends Controller
                 'Daftar pelanggan',
                 $accountsTypes
             );
-            
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false,
@@ -60,7 +59,7 @@ class AccountsTypeController extends Controller
             );
         }
     }
-        
+
     /**
      * Store a newly created resource in storage.
      */
@@ -85,12 +84,12 @@ class AccountsTypeController extends Controller
         $accountsType = AccountsType::find($accountsTypeId);
         if (!$accountsType) {
             return new ApiResponseResource(
-                false, 
+                false,
                 'Data pelanggan tidak ditemukan.',
                 null
             );
         }
-        
+
         $validator = Validator::make($request->all(), [
             'account_type' => 'sometimes|required|in:percobaan,reguler,profesional,bisnis,tidak aktif',
             'user_company_id' => 'sometimes|required',
@@ -103,10 +102,10 @@ class AccountsTypeController extends Controller
             'quantity.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif',
             'quantity.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif',
             'quantity.numeric' => 'Batas langganan harus berupa angka',
-            'quantity.min' => 'Batas langganan minimal berisi 1', 
-            'category.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif', 
-            'category.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif', 
-            'category.in' => 'Batas langganan harus pilih salah satu: hari, bulan, tahun', 
+            'quantity.min' => 'Batas langganan minimal berisi 1',
+            'category.required_if' => 'Batas langganan tidak boleh kosong jika tipe akun selain tidak aktif',
+            'category.prohibited_if' => 'Batas langganan tidak boleh diisi jika tipe akun tidak aktif',
+            'category.in' => 'Batas langganan harus pilih salah satu: hari, bulan, tahun',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -115,18 +114,18 @@ class AccountsTypeController extends Controller
                 null
             );
         }
-        
+
         $accountsTypeData = $request->all();
         if (isset($accountsTypeData['account_type'])) {
             $accountsTypeData['account_type'] = ActionMapperHelper::mapAccountsTypesToDatabase($accountsTypeData['account_type']);
         }
-        
+
         if (isset($accountsTypeData['category']) && isset($accountsTypeData['quantity'])) {
             $accountsTypeData['start_date'] = now();
             if ($accountsType->account_type === $accountsTypeData['account_type']) {
                 $accountsTypeData['start_date'] = $accountsType->start_date;
             }
-            
+
             $quantity = (int)$accountsTypeData['quantity'];
             switch ($accountsTypeData['category']) {
                 case 'hari':
@@ -141,7 +140,7 @@ class AccountsTypeController extends Controller
                 default:
                     $endDate = null;
             }
-            
+
             $accountsTypeData['end_date'] = $endDate;
         } else {
             $accountsTypeData['start_date'] =  null;
@@ -155,10 +154,9 @@ class AccountsTypeController extends Controller
                 "Data pelanggan berhasil diubah",
                 $accountsType
             );
-
         } catch (\Exception $e) {
             return new ApiResponseResource(
-                false, 
+                false,
                 $e->getMessage(),
                 null
             );

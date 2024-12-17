@@ -17,7 +17,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614171001',
                 'name' => 'Pensil',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'PEN-001',
                 'quantity' => 10,
@@ -28,7 +28,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614172002',
                 'name' => 'Pulpen',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'BOL-001',
                 'quantity' => 10,
@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614173003',
                 'name' => 'Bantal',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'BAN-001',
                 'quantity' => 10,
@@ -50,7 +50,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614174004',
                 'name' => 'Meja',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'MEJ-001',
                 'quantity' => 15,
@@ -61,7 +61,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614175005',
                 'name' => 'Kursi',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'KUR-001',
                 'quantity' => 20,
@@ -72,7 +72,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614176006',
                 'name' => 'Lampu',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'LAM-001',
                 'quantity' => 30,
@@ -83,7 +83,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614177007',
                 'name' => 'Kipas Angin',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'KAP-001',
                 'quantity' => 25,
@@ -94,7 +94,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614178008',
                 'name' => 'Kulkas',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'KUL-001',
                 'quantity' => 8,
@@ -105,7 +105,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614179009',
                 'name' => 'TV',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'TV-001',
                 'quantity' => 12,
@@ -116,7 +116,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614180010',
                 'name' => 'Speaker',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'SPE-001',
                 'quantity' => 18,
@@ -127,7 +127,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614181011',
                 'name' => 'Sound System',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'SOU-001',
                 'quantity' => 6,
@@ -138,7 +138,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614182012',
                 'name' => 'Lemari',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'LEM-001',
                 'quantity' => 5,
@@ -149,7 +149,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614183013',
                 'name' => 'Meja Makan',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'MEM-001',
                 'quantity' => 7,
@@ -160,7 +160,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614184014',
                 'name' => 'Sofa',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'SOF-001',
                 'quantity' => 14,
@@ -171,7 +171,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614185015',
                 'name' => 'Kasur',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'KAS-001',
                 'quantity' => 11,
@@ -182,7 +182,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-42661418016',
                 'name' => 'Komputer',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'KOM-001',
                 'quantity' => 10,
@@ -193,7 +193,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-426614187017',
                 'name' => 'Laptop',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'LAP-001',
                 'quantity' => 8,
@@ -204,7 +204,7 @@ class ProductSeeder extends Seeder
             [
                 'id' => '123e4567-e89b-12d3-a456-4266141818',
                 'name' => 'Smartphone',
-                'user_company_id' => '123e4567-e89b-12d3-a456-426614174000',
+                'user_company_id' => '128e4267-1d4b-12d3-a456-426614112440',
                 'category' => 'stuff',
                 'code' => 'SMA-001',
                 'quantity' => 20,
