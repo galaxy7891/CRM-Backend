@@ -117,16 +117,6 @@ class DealController extends Controller
             );
         }
         
-        $userCompanyId = $user->user_company_id;
-        $limitCheck = DataLimitService::checkDealsLimit($userCompanyId);
-        if ($limitCheck['isExceeded']) {
-            return new ApiResponseResource(
-                false, 
-                $limitCheck['message'], 
-                null
-            );
-        }
-
         $rules = [
             'name' => 'required|string|max:100',
             'category' => 'required|in:Pelanggan,Perusahaan',

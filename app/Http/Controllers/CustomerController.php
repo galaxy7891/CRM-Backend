@@ -158,8 +158,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
-            'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
+            'phone' => 'required|numeric|max_digits:15|unique_customers_phone',
+            'email' => 'nullable|email|max:100|unique_customers_email',
             'status' => 'required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'nullable|date',
             'job' => 'nullable|string|max:100',
@@ -180,9 +180,9 @@ class CustomerController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_customers_phone' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
+            'email.unique_customers_email' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status leads wajib dipilih.',
             'status.in' => 'Status leads harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
@@ -264,10 +264,10 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->whereNull('deleted_at'),
+            'phone' => 'required|numeric|max_digits:15|unique_customers_phone',
             'status' => 'required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'nullable|date',
-            'email' => 'nullable|email|max:100|'. Rule::unique('customers', 'email')->whereNull('deleted_at'),
+            'email' => 'nullable|email|max:100|unique_customers_email',
             'job' => 'nullable|string|max:100',
             'customers_company_id' => 'required|exists:customers_companies,id',
             'owner' => 'required|email|max:100|exists:users,email',
@@ -287,9 +287,9 @@ class CustomerController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_customers_phone' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
+            'email.unique_customers_email' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status kontak wajib dipilih.',
             'status.in' => 'Status leads harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
@@ -498,8 +498,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers','phone')->ignore($leadsId)->whereNull('deleted_at'),
-            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -520,9 +520,9 @@ class CustomerController extends Controller
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_customers_phone' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
+            'email.unique_customers_email' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
             'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
@@ -611,8 +611,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($contactId)->whereNull('deleted_at'),
-            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($contactId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -633,9 +633,9 @@ class CustomerController extends Controller
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_customers_phone' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
+            'email.unique_customers_email' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
             'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
@@ -724,8 +724,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('customers', 'phone')->ignore($leadsId)->whereNull('deleted_at'),
-            'email' => 'sometimes|nullable|email|max:100|'. Rule::unique('customers', 'email')->ignore($leadsId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -746,9 +746,9 @@ class CustomerController extends Controller
             'last_name.max' => 'Nama belakang maksimal 50 karakter',
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_customers_phone' => 'Nomor telepon sudah terdaftar.',
             'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
+            'email.unique_customers_email' => 'Email sudah terdaftar.',
             'email.max' => 'Email maksimal 100 karakter.',
             'status.required' => 'Status pelanggan wajib dipilih.',
             'status.in' => 'Status harus berupa pilih salah satu: Tinggi, Sedang, atau Rendah.',
@@ -897,7 +897,7 @@ class CustomerController extends Controller
         if (count($contactsWithDeals) > 0) {
             return new ApiResponseResource(
                 false,
-                "Data kontak tidak dapat dihapus karena ada " . count($contactsWithDeals) . " kontak terhubung dengan data deals.",
+                "Data kontak tidak dapat dihapus karena terdapat " . count($contactsWithDeals) . " kontak terhubung dengan data deals.",
                 $contactsWithDealsNames
             );
         }
@@ -912,12 +912,11 @@ class CustomerController extends Controller
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
-            false,
-            $e->getMessage(),
-            null
-        );
+                false,
+                $e->getMessage(),
+                null
+            ); 
+        }
     }
-}
-
 
 }

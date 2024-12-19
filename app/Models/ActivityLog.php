@@ -67,7 +67,7 @@ class ActivityLog extends Model
                 $query->where('user_id', $id);
             } else{
                 $query->where('model_name', $modelName)
-                    ->whereJsonContains('changes->id->new', $id);
+                    ->whereRaw('JSON_UNQUOTE(JSON_EXTRACT(changes, "$.id.new")) = ?', [$id]);
             }
         }
 

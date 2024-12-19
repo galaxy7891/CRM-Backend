@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ApiResponseResource;
+use App\Models\AccountsType;
 
 class UserController extends Controller
 {
@@ -34,13 +35,18 @@ class UserController extends Controller
             );
         }
 
+        $userCompanyData = $this->getAccountTypeAndDuration($user);
+        $user->load('company');
+        $user->account_type = $userCompanyData['account_type'];
+        $user->duration = $userCompanyData['duration'];
+
         try {
             $user->role = ActionMapperHelper::mapRole($user->role);
             $user->gender = ActionMapperHelper::mapGender($user->gender);
             return new ApiResponseResource(
                 true,
                 "Data user {$user->first_name} " . strtolower($user->last_name),
-                $user->load('company'),
+                $user,
             );
         } catch (\Exception $e) {
             return new ApiResponseResource(
@@ -49,6 +55,54 @@ class UserController extends Controller
                 null
             );
         }
+    }
+    
+    /**
+     * Get the account type and duration for the user's company.
+     *
+     * @param  \App\Models\User $user
+     * @return array
+     */
+    protected function getAccountTypeAndDuration($user)
+    {
+        $userCompany = $user->company;
+        $accountTypeData = [
+            'company_id' => null,
+            'account_type' => null,
+            'duration' => null,
+        ];
+
+        if ($userCompany) {
+            $accountsType = AccountsType::where('user_company_id', $userCompany->id)->first();
+            
+            if ($accountsType) {
+                $userCompany->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
+                $endDate = \Carbon\Carbon::parse($accountsType->end_date)->startOfDay();
+                $now = \Carbon\Carbon::now()->startOfDay();
+                
+                $daysDiff = $now->diffInDays($endDate);
+
+                if ($daysDiff <= 31) {
+                    $duration = $daysDiff . ' hari';
+                } elseif ($daysDiff > 31 && $daysDiff <= 365) {
+                    $months = floor($daysDiff / 30);
+                    $duration = $months . ' bulan';
+                } else {
+                    $years = floor($daysDiff / 365);
+                    $duration = $years . ' tahun';
+                }
+
+                $userCompany->duration = $duration;
+
+                $accountTypeData = [
+                    'company_id' => $userCompany->id,
+                    'account_type' => $userCompany->account_type,
+                    'duration' => $userCompany->duration,
+                ];
+            }
+        }
+
+        return $accountTypeData;
     }
     
     /**
@@ -68,10 +122,10 @@ class UserController extends Controller
         
         $validator = Validator::make($request->all(), [
             'user_company_id' => 'sometimes|nullable|uuid',
-            'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($id)->whereNull('deleted_at'),
+            'email' => 'sometimes|required|email|unique_user_email',
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($id)->whereNull('deleted_at'),
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone',
             'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
             'job_position' => 'sometimes|required|max:50',
             'gender' => 'sometimes|nullable|in:Laki-laki,Perempuan,Lainnya',
@@ -79,7 +133,7 @@ class UserController extends Controller
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_user_email' => 'Email sudah terdaftar',
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
@@ -88,7 +142,7 @@ class UserController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_user_phone' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'role.required' => 'Akses user harus diisi',

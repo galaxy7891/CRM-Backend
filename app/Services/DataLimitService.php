@@ -27,19 +27,6 @@ class DataLimitService
         ];
     }
 
-    public static function checkDealsLimit($userCompanyId)
-    {
-        $account = self::getAccountType($userCompanyId);
-        $limits = Config::get("account_limits.{$account}");
-
-        $dealsCount = (int) Deal::countDeals($userCompanyId);
-
-        return [
-            'isExceeded' => $dealsCount >= $limits['deals'],
-            'message' => "Jumlah Deals sudah mencapai limit (> {$limits['deals']}) untuk tipe akun Anda. Hubungi customer support untuk masalah lebih lanjut.",
-        ];
-    }
-
     public static function checkProductsLimit($userCompanyId)
     {
         $account = self::getAccountType($userCompanyId);
@@ -66,7 +53,7 @@ class DataLimitService
             'message' => "Jumlah Pengguna sudah mencapai limit (> {$limits['users']}) untuk tipe akun Anda. Hubungi customer support untuk masalah lebih lanjut.",
         ];
     }
-
+    
     private static function getAccountType($userCompanyId)
     {
         $account = AccountsType::where('user_company_id', $userCompanyId)->first();

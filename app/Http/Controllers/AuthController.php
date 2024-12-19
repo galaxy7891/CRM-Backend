@@ -80,21 +80,21 @@ class AuthController extends Controller
     public function register(Request $request)
     {   
         $validator = Validator::make($request->all(), [
-            'google_id' => 'nullable|string|'. Rule::unique('users', 'google_id')->whereNull('deleted_at'),
-            'email' => 'required|email|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
+            'google_id' => 'nullable|string|unique_google_id',
+            'email' => 'required|email|unique_user_email',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'password' => 'required|min:8',
             'password_confirmation' => 'required|min:8|same:password',
-            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->whereNull('deleted_at'),
+            'phone' => 'required|numeric|max_digits:15|unique_user_phone',
             'job_position' => 'required|max:50',
-            'name' => 'required|max:100|'.  Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
+            'name' => 'required|max:100|unique_userscompanies_name',
             'industry' => 'required|max:50',
         ], [
-            'google_id.unique' => 'Akun Google sudah terdaftar',
-            'email.required' => 'Email tidak boleh kosong',
+            'google_id.unique_google_id' => 'Akun Google sudah terdaftar',
+            'email.unique_user_email' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_user_email' => 'Email sudah terdaftar',
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
@@ -107,11 +107,11 @@ class AuthController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_user_phone' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'name.required' => 'Nama perusahaan tidak boleh kosong',
-            'name.unique' => 'Nama perusahaan sudah terdaftar',
+            'name.unique_userscompanies_name' => 'Nama perusahaan sudah terdaftar',
             'industry.required' => 'Jenis industri tidak boleh kosong',
             'industry.max' => 'Jenis industri maksimal 50 karakter',
         ]);
@@ -267,9 +267,8 @@ class AuthController extends Controller
                 null
             );
         }
-        
-        $userCompanyData = $this->getAccountTypeAndDuration($user);
 
+        $userCompanyId = $user->company->id;
         return new ApiResponseResource(
             true,
             'Token berhasil dibuat',
@@ -286,60 +285,10 @@ class AuthController extends Controller
                    'role' => $user->role,
                    'gender' => $user->gender,
                    'photo' => $user->image_url,
-                   'company_id' => $userCompanyData['company_id'],
-                   'account_type' => $userCompanyData['account_type'],
-                   'duration' => $userCompanyData['duration'],
+                   'company_id' => $userCompanyId,
                 ]
             ],
         );
-    }
-
-    /**
-     * Get the account type and duration for the user's company.
-     *
-     * @param  \App\Models\User $user
-     * @return array
-     */
-    protected function getAccountTypeAndDuration($user)
-    {
-        $userCompany = $user->company;
-        $accountTypeData = [
-            'company_id' => null,
-            'account_type' => null,
-            'duration' => null,
-        ];
-
-        if ($userCompany) {
-            $accountsType = AccountsType::where('user_company_id', $userCompany->id)->first();
-            
-            if ($accountsType) {
-                $userCompany->account_type = ActionMapperHelper::mapAccountsTypes($accountsType->account_type);
-                $endDate = \Carbon\Carbon::parse($accountsType->end_date)->startOfDay();
-                $now = \Carbon\Carbon::now()->startOfDay();
-                
-                $daysDiff = $now->diffInDays($endDate);
-
-                if ($daysDiff <= 31) {
-                    $duration = $daysDiff . ' hari';
-                } elseif ($daysDiff > 31 && $daysDiff <= 365) {
-                    $months = floor($daysDiff / 30);
-                    $duration = $months . ' bulan';
-                } else {
-                    $years = floor($daysDiff / 365);
-                    $duration = $years . ' tahun';
-                }
-
-                $userCompany->duration = $duration;
-
-                $accountTypeData = [
-                    'company_id' => $userCompany->id,
-                    'account_type' => $userCompany->account_type,
-                    'duration' => $userCompany->duration,
-                ];
-            }
-        }
-
-        return $accountTypeData;
     }
 
 }

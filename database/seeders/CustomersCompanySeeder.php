@@ -30,7 +30,7 @@ class CustomersCompanySeeder extends Seeder
             'village' => 'Kota Bambu',
             'zip_code' => '12910'
         ]);
-
+        
         CustomersCompany::create([
             'id' => '123e4567-e89b-12d3-a456-426614174005',
             'name' => 'CV Maju Jaya',

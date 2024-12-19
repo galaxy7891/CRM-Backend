@@ -18,7 +18,7 @@ class ActivityLogController extends Controller
         try {
             $id = $request->input('id');
             $result = $activityLogService->getFormattedLogs($modelName, $id);
-    
+            
             return new ApiResponseResource(
                 true,
                 'Daftar aktivitas',

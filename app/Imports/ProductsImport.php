@@ -135,8 +135,8 @@ class ProductsImport implements ToCollection, WithHeadingRow
             }
 
             $validator = Validator::make($rowArray, [
-                'nama_produk' => 'required|string|max:100|'. Rule::unique('products', 'name')->whereNull('deleted_at'),
-                'kode_produk' => 'required|string|max:100|'.  Rule::unique('products', 'code')->whereNull('deleted_at'),
+                'nama_produk' => 'required|string|max:100|unique_product_name',
+                'kode_produk' => 'required|string|max:100|unique_product_code',
                 'kategori_produk' => 'nullable|in:Barang,Jasa',
                 'jumlah_produk' => 'required_if:kategori_produk,Barang|prohibited_if:kategori_produk,Jasa|nullable|numeric|min:0',
                 'satuan_produk' => 'required_if:kategori_produk,Barang|prohibited_if:kategori_produk,Jasa|nullable|in:box,pcs,unit',
@@ -146,11 +146,11 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 'nama_produk.required' => 'Nama produk tidak boleh kosong.',
                 'nama_produk.string' => 'Nama produk harus berupa teks.',
                 'nama_produk.max' => 'Nama produk maksimal 100 karakter.',
-                'nama_produk.unique' => 'Nama produk sudah terdaftar.',
+                'nama_produk.unique_product_name' => 'Nama produk sudah terdaftar.',
                 'kode_produk.required' => 'Kode produk tidak boleh kosong.',
                 'kode_produk.string' => 'Kode produk harus berupa string.',
                 'kode_produk.max' => 'Kode produk maksimal 100 karakter.',
-                'kode_produk.unique' => 'Kode produk sudah terdaftar.',
+                'kode_produk.unique_product_code' => 'Kode produk sudah terdaftar.',
                 'kategori_produk.required' => 'Kategori produk tidak boleh kosong.',
                 'kategori_produk.in' => 'Kategori produk harus berupa salah satu: Barang atau Jasa.',
                 'jumlah_produk.required_if' => 'Jumlah produk tidak boleh kosong.',
