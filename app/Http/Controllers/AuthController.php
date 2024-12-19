@@ -88,11 +88,11 @@ class AuthController extends Controller
             'password_confirmation' => 'required|min:8|same:password',
             'phone' => 'required|numeric|max_digits:15|unique_user_phone',
             'job_position' => 'required|max:50',
-            'name' => 'required|max:100|unique_userscompanies_name',
+            'name' => 'required|max:100|'. Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'required|max:50',
         ], [
             'google_id.unique_google_id' => 'Akun Google sudah terdaftar',
-            'email.unique_user_email' => 'Email tidak boleh kosong',
+            'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
             'email.unique_user_email' => 'Email sudah terdaftar',
             'first_name.required' => 'Nama depan tidak boleh kosong',
@@ -111,7 +111,7 @@ class AuthController extends Controller
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'name.required' => 'Nama perusahaan tidak boleh kosong',
-            'name.unique_userscompanies_name' => 'Nama perusahaan sudah terdaftar',
+            'name.unique' => 'Nama perusahaan sudah terdaftar',
             'industry.required' => 'Jenis industri tidak boleh kosong',
             'industry.max' => 'Jenis industri maksimal 50 karakter',
         ]);

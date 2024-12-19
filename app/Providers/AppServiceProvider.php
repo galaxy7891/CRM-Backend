@@ -65,40 +65,6 @@ class AppServiceProvider extends ServiceProvider
                 ->exists();
         });
         
-        // User Companies
-        Validator::extend('unique_userscompanies_name', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UsersCompany::where('id', $userCompanyId)
-                ->where('name', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
-        Validator::extend('unique_userscompanies_email', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UsersCompany::where('id', $userCompanyId)
-                ->where('email', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
-        Validator::extend('unique_userscompanies_phone', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UsersCompany::where('id', $userCompanyId)
-                ->where('phone', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
-        Validator::extend('unique_userscompanies_website', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UsersCompany::where('id', $userCompanyId)
-                ->where('website', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
-
         // Customers
         Validator::extend('unique_customers_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
