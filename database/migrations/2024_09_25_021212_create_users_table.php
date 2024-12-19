@@ -16,7 +16,7 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_company_id')->nullable();
             $table->string('google_id', 255)->nullable();
-            $table->string('email', 100);
+            $table->string('email', 100)->unique();
             $table->string('first_name', 50);
             $table->string('last_name', 50)->nullable();
             $table->string('password', 255)->nullable();
