@@ -16,11 +16,11 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_company_id')->nullable();
             $table->string('google_id', 255)->nullable();
-            $table->string('email', 100)->unique();
+            $table->string('email', 100);
             $table->string('first_name', 50);
             $table->string('last_name', 50)->nullable();
             $table->string('password', 255)->nullable();
-            $table->string('phone', 15)->unique();
+            $table->string('phone', 15);
             $table->string('job_position', 50)->nullable();
             $table->enum('role', ['super_admin_lc', 'super_admin', 'admin', 'employee'])->default('super_admin');
             $table->enum('gender', ['male', 'female', 'other'])->nullable();

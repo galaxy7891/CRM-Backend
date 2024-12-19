@@ -23,7 +23,7 @@ class CreateCustomersTable extends Migration
             $table->enum('status', ['hot', 'warm', 'cold']);
             $table->date('birthdate')->nullable();
             $table->string('email', 100)->nullable();
-            $table->string('phone', 15)->unique();
+            $table->string('phone', 15);
             $table->string('owner', 100);
             $table->string('address', 100)->nullable();
             $table->string('province', 100)->nullable();

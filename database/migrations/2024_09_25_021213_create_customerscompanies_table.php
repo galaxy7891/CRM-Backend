@@ -14,7 +14,7 @@ class CreateCustomersCompaniesTable extends Migration
             $table->collation = 'utf8_unicode_ci'; // Collation untuk Unicode penuh
             
             $table->uuid('id')->primary();
-            $table->string('name', 100)->unique();
+            $table->string('name', 100);
             $table->string('industry', 50)->nullable();
             $table->string('email', 100)->nullable();
             $table->enum('status', ['hot', 'warm', 'cold']);

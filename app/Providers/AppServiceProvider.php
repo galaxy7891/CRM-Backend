@@ -122,26 +122,6 @@ class AppServiceProvider extends ServiceProvider
                 ->whereNull('deleted_at')
                 ->exists();
         });
-        
-        // User Invitation
-        Validator::extend('unique_userinvitation_email', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UserInvitation::whereHas('inviter', function ($inviterQuery) use ($userCompanyId) {
-                $inviterQuery->where('user_company_id', $userCompanyId);
-            })->where('email', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
-        Validator::extend('unique_userinvitation_phone', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-            
-            return !UserInvitation::whereHas('inviter', function ($inviterQuery) use ($userCompanyId) {
-                $inviterQuery->where('user_company_id', $userCompanyId);
-            })->where('phone', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
 
         // Product
         Validator::extend('unique_product_name', function ($attribute, $value, $parameters, $validator) {

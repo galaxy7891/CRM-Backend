@@ -91,7 +91,7 @@ class UserInvitationController extends Controller
             $expired_at = now()->addWeek()->toDateTimeString();
             $invited_by = Auth::user()->email;
             $nama = explode('@', $email)[0];
-
+            
             $dataUser = [
                 'email' => $email,
                 'token' => $token,
