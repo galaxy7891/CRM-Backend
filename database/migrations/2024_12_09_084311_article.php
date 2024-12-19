@@ -22,8 +22,8 @@ return new class extends Migration
             $table->enum('status', ['draft', 'post'])->default('draft');
             $table->text('description');
             $table->dateTime('post_date')->nullable();
-            $table->string('image_url', 255)->nullable();
-            $table->string('image_public_id', 255)->nullable();
+            $table->string('image_url', 255);
+            $table->string('image_public_id', 255);
             $table->timestamps();
             $table->softDeletes();
         });

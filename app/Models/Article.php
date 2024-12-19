@@ -118,12 +118,12 @@ class Article extends Model
             'post_date' => $postDate,
         ];
 
-        if (isset($dataArticle['photo'])) {
+        if (isset($dataArticle['photo_article'])) {
             if ($article->image_public_id) {
                 $article->deletePhoto(); 
             }
 
-            $uploadResult = $article->uploadPhoto($dataArticle['photo']);
+            $uploadResult = $article->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
             $articleData['image_public_id'] = $uploadResult['image_public_id'];
         }

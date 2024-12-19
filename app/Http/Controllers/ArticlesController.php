@@ -60,7 +60,7 @@ class ArticlesController extends Controller
             'title' => 'required|string|max:100',
             'description' => 'required|string',
             'status' => 'required|in:Draf,Terbit',
-            'photo_article' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'photo_article' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'title.required' => 'Judul artikel tidak boleh kosong',
             'title.string' => 'Judul artikel harus berupa teks',
@@ -155,7 +155,7 @@ class ArticlesController extends Controller
             'title' => 'sometimes|required|string|max:100',
             'description' => 'sometimes|required|string',
             'status' => 'sometimes|required|in:Draf,Terbit',
-            'photo_article' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'photo_article' => 'sometimes|required|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'title.required' => 'Judul artikel tidak boleh kosong',
             'title.string' => 'Judul artikel harus berupa teks',
