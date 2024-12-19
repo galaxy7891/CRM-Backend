@@ -108,10 +108,10 @@ class ArticlesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $articleId)
+    public function show(string $slug)
     {
         try {
-            $article = Article::find($articleId);
+            $article = Article::where('slug', $slug)->first();
             if (!$article) {
                 return new ApiResponseResource(
                     false, 
