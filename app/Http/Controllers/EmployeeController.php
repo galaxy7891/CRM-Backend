@@ -114,8 +114,8 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->ignore($employeeId)->whereNull('deleted_at'),
-            'email' => 'sometimes|required|email|'. Rule::unique('users', 'email')->ignore($employeeId)->whereNull('deleted_at'),
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone',
+            'email' => 'sometimes|required|email|unique_user_email',
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
             'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
@@ -123,7 +123,7 @@ class EmployeeController extends Controller
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_user_email' => 'Email sudah terdaftar',
             'first_name.required' => 'Nama depan tidak boleh kosong',
             'first_name.string' => 'Nama depan harus berupa teks',
             'first_name.max' => 'Nama depan maksimal 50 karakter',
@@ -133,7 +133,7 @@ class EmployeeController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_user_phone' => 'Nomor telepon sudah terdaftar.',
             'job_position.required' => 'Jabatan tidak boleh kosong',
             'job_position.max' => 'Jabatan maksimal 50 karakter',
             'user_company_id.uuid' => 'ID Company harus berupa UUID yang valid.',

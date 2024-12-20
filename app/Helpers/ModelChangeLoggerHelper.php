@@ -21,7 +21,7 @@ class ModelChangeLoggerHelper
                     'new' => null,
                 ];
             }
-            
+        
         } else {
             if ($action === 'UPDATE'){
                 if (isset($originalAttributes['id'])) {

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ApiResponseResource;
-use App\Models\Otp;
+use App\Models\OTP as Otp;
 use App\Services\SendOTPService;
 
 use Illuminate\Support\Facades\Validator;
@@ -32,7 +32,7 @@ class OtpController extends Controller
             'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
         ]);
-
+        
         if ($validator->fails()) {
             return new ApiResponseResource(
                 false,

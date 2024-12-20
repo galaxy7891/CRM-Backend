@@ -57,7 +57,7 @@ Route::group(['middleware' => 'api'], function () {
             Route::get('/dashboard/admin', [DashboardController::class, 'getSummaryAdmin']);
 
             Route::get('/article', [ArticlesController::class, 'index']);
-            Route::get('/article/{articleId}', [ArticlesController::class, 'show']);
+            Route::get('/article/{slug}', [ArticlesController::class, 'show']);
             Route::post('/article', [ArticlesController::class, 'store']);
             Route::post('/article/{articleId}', [ArticlesController::class, 'update']);
             Route::delete('/article', [ArticlesController::class, 'destroy']);

@@ -35,45 +35,109 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Validator::extend('unique_customers_company_name', function ($attribute, $value, $parameters, $validator) {
+        /**
+         * Validator Unique
+         */
+        
+        // User
+        Validator::extend('unique_google_id', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\CustomersCompany::where('user_company_id', $userCompanyId)
-                ->where('name', $value)
+
+            return !User::where('user_company_id', $userCompanyId)
+                ->where('google_id', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
-    
-        Validator::extend('unique_product_code', function ($attribute, $value, $parameters, $validator) {
+        Validator::extend('unique_user_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\Product::where('user_company_id', $userCompanyId)
-                ->where('code', $value)
+            
+            return !User::where('user_company_id', $userCompanyId)
+                ->where('email', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+        Validator::extend('unique_user_phone', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            
+            return !User::where('user_company_id', $userCompanyId)
+                ->where('phone', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+        
+        // Customers
+        Validator::extend('unique_customers_email', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            
+            return !Customer::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('email', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+        Validator::extend('unique_customers_phone', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            
+            return !Customer::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('phone', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
 
-        Validator::extend('unique_product_name', function ($attribute, $value, $parameters, $validator) {
+        // Customers Companies
+        Validator::extend('unique_customerscompanies_name', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\Product::where('user_company_id', $userCompanyId)
-                ->where('name', $value)
+            
+            return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('name', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
-    
-        Validator::extend('unique_product_code', function ($attribute, $value, $parameters, $validator) {
+        Validator::extend('unique_customerscompanies_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\Product::where('user_company_id', $userCompanyId)
-                ->where('code', $value)
+            
+            return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('email', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+        Validator::extend('unique_customerscompanies_phone', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            
+            return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('phone', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+        Validator::extend('unique_customerscompanies_website', function ($attribute, $value, $parameters, $validator) {
+            $userCompanyId = auth()->user()->company->id;
+            
+            return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
+                $ownerQuery->where('user_company_id', $userCompanyId);
+            })->where('website', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
 
+        // Product
         Validator::extend('unique_product_name', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\Product::where('user_company_id', $userCompanyId)
+            
+            return !Product::where('user_company_id', $userCompanyId)
                 ->where('name', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
-    
         Validator::extend('unique_product_code', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            return !\App\Models\Product::where('user_company_id', $userCompanyId)
+            
+            return !Product::where('user_company_id', $userCompanyId)
                 ->where('code', $value)
+                ->whereNull('deleted_at')
                 ->exists();
         });
 

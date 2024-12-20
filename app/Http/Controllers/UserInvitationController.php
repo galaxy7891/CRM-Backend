@@ -43,15 +43,15 @@ class UserInvitationController extends Controller
                 null
             );
         } 
-
+        
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
+            'email' => 'required|email|max:100|unique_user_email',
             'role' => 'required|in:Admin,Karyawan',
             'job_position' => 'required|max:50',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_user_email' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses user harus pilih salah satu: Admin, atau Karyawan.',
@@ -91,7 +91,7 @@ class UserInvitationController extends Controller
             $expired_at = now()->addWeek()->toDateTimeString();
             $invited_by = Auth::user()->email;
             $nama = explode('@', $email)[0];
-
+            
             $dataUser = [
                 'email' => $email,
                 'token' => $token,
@@ -134,17 +134,17 @@ class UserInvitationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
+            'email' => 'required|email|max:100|unique_user_email',
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|min:8|same:password',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->whereNull('deleted_at'),
+            'phone' => 'required|numeric|max_digits:15|unique_user_phone',
         ], [
             'token.required' => 'Token tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_user_email' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'password.required' => 'Password tidak boleh kosong',
             'password.mnin' => 'Password tidak boleh kosong',
@@ -159,7 +159,7 @@ class UserInvitationController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_user_phone' => 'Nomor telepon sudah terdaftar.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

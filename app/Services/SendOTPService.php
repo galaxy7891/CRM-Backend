@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TemplateOTPEmail;
-use App\Models\Otp;
+use App\Models\OTP as Otp;
 
 class SendOTPService
 {

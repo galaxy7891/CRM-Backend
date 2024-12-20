@@ -32,6 +32,13 @@ class Article extends Model
     ];
 
     /**
+     * The attributes that should be cast to date instances.
+     * 
+     * @var array
+     */
+    protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+
+    /**
      * Return the sluggable configuration array for this model.
      *
      * @return array
@@ -58,22 +65,15 @@ class Article extends Model
             $cloudinary->uploadApi()->destroy($this->image_public_id);
         }
 
-        $result = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
+        $uploadResult = $cloudinary->uploadApi()->upload($photo->getRealPath(), [
             'folder' => 'articles',
         ]);
 
         return [
-            'image_url' => $result['secure_url'],
-            'image_public_id' => $result['public_id'],
+            'image_url' => $uploadResult['secure_url'],
+            'image_public_id' => $uploadResult['public_id'],
         ];
     }
-
-    /**
-     * The attributes that should be cast to date instances.
-     * 
-     * @var array
-     */
-    protected $dates = ['created_at', 'updated_at', 'deleted_at'];
     
     public static function createArticle(array $dataArticle): self
     {
@@ -86,8 +86,8 @@ class Article extends Model
             'post_date' => $postDate,
         ];
 
-        if (isset($dataArticle['photo'])) {
-            $uploadResult = (new self())->uploadPhoto($dataArticle['photo']);
+        if (isset($dataArticle['photo_article'])) {
+            $uploadResult = (new self())->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
             $articleData['image_public_id'] = $uploadResult['image_public_id'];
         }
@@ -118,12 +118,12 @@ class Article extends Model
             'post_date' => $postDate,
         ];
 
-        if (isset($dataArticle['photo'])) {
+        if (isset($dataArticle['photo_article'])) {
             if ($article->image_public_id) {
                 $article->deletePhoto(); 
             }
 
-            $uploadResult = $article->uploadPhoto($dataArticle['photo']);
+            $uploadResult = $article->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
             $articleData['image_public_id'] = $uploadResult['image_public_id'];
         }

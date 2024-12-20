@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('first_name', 50);
             $table->string('last_name', 50)->nullable();
             $table->string('password', 255)->nullable();
-            $table->string('phone', 15)->unique();
+            $table->string('phone', 15);
             $table->string('job_position', 50)->nullable();
             $table->enum('role', ['super_admin_lc', 'super_admin', 'admin', 'employee'])->default('super_admin');
             $table->enum('gender', ['male', 'female', 'other'])->nullable();

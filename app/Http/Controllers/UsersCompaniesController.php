@@ -72,11 +72,11 @@ class UsersCompaniesController extends Controller
         }   
         
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->ignore($userCompanyId)->whereNull('deleted_at'),
+            'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
             'industry' => 'sometimes|required|string|max:50',
-            'email' => 'sometimes|nullable|email|'.  Rule::unique('users_companies', 'email')->ignore($userCompanyId)->whereNull('deleted_at'),
-            'phone' => 'sometimes|nullable|numeric|max_digits:15|'.  Rule::unique('users_companies', 'phone')->ignore($userCompanyId)->whereNull('deleted_at'),
-            'website' => 'sometimes|nullable|string|max:255|'.  Rule::unique('users_companies', 'website')->ignore($userCompanyId)->whereNull('deleted_at'),
+            'email' => 'sometimes|nullable|email|'. Rule::unique('users_companies', 'email')->whereNull('deleted_at'),
+            'phone' => 'sometimes|nullable|numeric|max_digits:15|'. Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
+            'website' => 'sometimes|nullable|string|max:255|'. Rule::unique('users_companies', 'website')->whereNull('deleted_at'),
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',
             'name.string' => 'Nama perusahaan harus berupa teks.',

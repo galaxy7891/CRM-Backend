@@ -24,7 +24,7 @@ Class CreateUserInvitationsTable extends Migration
             $table->string('job_position', 50)->nullable();
             $table->enum('role', ['super_admin', 'admin', 'employee'])->default('employee');
             $table->timestamps();
-
+            
             // Foreign Key Constraints
             $table->foreign('invited_by')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
