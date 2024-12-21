@@ -47,7 +47,8 @@ class Article extends Model
     {
         return [
             'slug' => [
-                'source' => 'title'
+                'source' => 'title',
+                'onUpdate' => true,
             ]
         ];
     }
@@ -85,7 +86,7 @@ class Article extends Model
             'description' => $dataArticle['description'],
             'post_date' => $postDate,
         ];
-
+        
         if (isset($dataArticle['photo_article'])) {
             $uploadResult = (new self())->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
@@ -98,6 +99,7 @@ class Article extends Model
     public static function updateArticle(array $dataArticle, string $articleId): self
     {
         $article = self::findOrFail($articleId);
+        $cloudinary = new Cloudinary();
 
         if ($dataArticle['status'] === 'draft') {
             $postDate = null;
@@ -120,14 +122,14 @@ class Article extends Model
 
         if (isset($dataArticle['photo_article'])) {
             if ($article->image_public_id) {
-                $article->deletePhoto(); 
+                $cloudinary->uploadApi()->destroy($article->image_public_id);
             }
 
             $uploadResult = $article->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
             $articleData['image_public_id'] = $uploadResult['image_public_id'];
         }
-
+        
         $article->update($articleData);
 
         return $article;

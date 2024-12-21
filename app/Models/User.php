@@ -226,8 +226,8 @@ class User extends Authenticatable implements JWTSubject
     public function updateProfilePhoto($photo, string $userId)
     {
         $user = self::findOrFail($userId);
-
         $cloudinary = new Cloudinary();
+        
         if ($user->image_public_id) {
             $cloudinary->uploadApi()->destroy($user->image_public_id);
         }
