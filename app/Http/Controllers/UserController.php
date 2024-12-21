@@ -276,7 +276,7 @@ class UserController extends Controller
                 null
             );
         }
-
+        
         try {
             $photoData = $user->updateProfilePhoto($request->file('photo'), $user->id);
 

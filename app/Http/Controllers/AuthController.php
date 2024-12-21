@@ -267,7 +267,12 @@ class AuthController extends Controller
             );
         }
 
-        $userCompanyId = $user->company->id;
+        if ($user->role !== 'super_admin_lc') {
+            $userCompanyId = $user->company->id;
+        } else{
+            $userCompanyId = null;
+        }
+        
         return new ApiResponseResource(
             true,
             'Token berhasil dibuat',

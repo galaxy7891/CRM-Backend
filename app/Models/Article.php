@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Cviebrock\EloquentSluggable\Sluggable;
@@ -98,6 +98,7 @@ class Article extends Model
     public static function updateArticle(array $dataArticle, string $articleId): self
     {
         $article = self::findOrFail($articleId);
+        $cloudinary = new Cloudinary();
 
         if ($dataArticle['status'] === 'draft') {
             $postDate = null;
@@ -120,9 +121,9 @@ class Article extends Model
 
         if (isset($dataArticle['photo_article'])) {
             if ($article->image_public_id) {
-                $article->deletePhoto(); 
+                $cloudinary->uploadApi()->destroy($article->image_public_id);
             }
-
+            
             $uploadResult = $article->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
             $articleData['image_public_id'] = $uploadResult['image_public_id'];
