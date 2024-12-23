@@ -48,6 +48,24 @@ class Deal extends Model
     protected $dates = ['created_at', 'updated_at', 'deleted_at', 'open_date', 'close_date', 'expected_close_date'];
 
     /**
+     * Scope a query to search by various attributes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function search($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%");
+            });
+        }
+        
+        return $query;
+    }
+
+    /**
      * The products that belong to the deal.
      */
     public function products()

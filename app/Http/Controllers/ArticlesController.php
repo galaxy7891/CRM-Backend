@@ -20,10 +20,20 @@ class ArticlesController extends Controller
     public function index(Request $request)
     {
         try {
+            $search = $request->input('search');
             $query = Article::query();
-
+            
+            $query = Article::search($query, $search);
             $query = $this->applyFiltersArticles($request, $query);
             $articles = $this->applyFilters($request, $query);
+            if ($articles->isEmpty()) {
+                return new ApiResponseResource(
+                    false,
+                    'Data artikel tidak ditemukan',
+                    null
+                );
+            }
+            
             $articles->getCollection()->transform(function ($article) {
                 $article->status = ActionMapperHelper::mapStatusArticle($article->status);
                 return $article;

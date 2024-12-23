@@ -28,7 +28,7 @@ class RoleMiddleware
                     'data' => null
                 ], 403);
             }
-
+            
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,

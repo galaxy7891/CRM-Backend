@@ -122,10 +122,10 @@ class UserController extends Controller
         
         $validator = Validator::make($request->all(), [
             'user_company_id' => 'sometimes|nullable|uuid',
-            'email' => 'sometimes|required|email|unique_user_email',
+            'email' => 'sometimes|required|email|unique_user_email'. $id,
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone:' . $id,
             'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',
             'job_position' => 'sometimes|required|max:50',
             'gender' => 'sometimes|nullable|in:Laki-laki,Perempuan,Lainnya',

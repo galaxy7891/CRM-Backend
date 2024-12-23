@@ -34,16 +34,18 @@ class CustomerController extends Controller
         }
 
         try {
+            $search = $request->input('search');
             $query = Customer::where('customerCategory', 'leads');
-
+            
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             });
-              
+            
             if ($user->role == 'employee') {
                 $query->where('owner', $user->email);
             }
-
+            
+            // $query = Customer::search($query, $search);
             $leads = $this->applyFilters($request, $query);
             if ($leads->isEmpty()) {
                 return new ApiResponseResource(
@@ -91,6 +93,7 @@ class CustomerController extends Controller
         }
 
         try {
+            $search = $request->input('search');
             $query = Customer::with(['customersCompany:id,name'])
                     ->where('customerCategory', 'contact');
 
@@ -102,6 +105,7 @@ class CustomerController extends Controller
                 $query->where('owner', $user->email);
             }
 
+            $query = Customer::search($query, $search);
             $contacts = $this->applyFilters($request, $query);
             if ($contacts->isEmpty()) {
                 return new ApiResponseResource(
@@ -498,8 +502,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
-            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone:'. $leadsId,
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email:'. $leadsId,
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -611,8 +615,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
-            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone:' . $contactId,
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email:' . $contactId,
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',
@@ -724,8 +728,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone',
-            'email' => 'sometimes|nullable|email|max:100|unique_customers_email',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_customers_phone:'. $leadsId,
+            'email' => 'sometimes|nullable|email|max:100|unique_customers_email:'. $leadsId,
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
             'birthdate' => 'sometimes|nullable|date',
             'job' => 'sometimes|nullable|string|max:100',

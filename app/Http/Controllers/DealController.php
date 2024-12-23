@@ -34,6 +34,7 @@ class DealController extends Controller
         }
 
         try {
+            $search = $request->input('search');
             $query = Deal::whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             })->with([
@@ -49,7 +50,16 @@ class DealController extends Controller
             ]);
 
             $query = $this->applyFiltersDeals($request, $query);
-            $deals = $this->applyFilters($request, $query);
+            $query2 = Deal::search($query, $search);
+            $deals = $this->applyFilters($request, $query2);
+            if ($deals->isEmpty()) {
+                return new ApiResponseResource(
+                    false,
+                    'Data deals tidak ditemukan',
+                    null
+                );
+            }
+            
             $deals->getCollection()->transform(function ($deal) {
                 $deal->status = ActionMapperHelper::mapStatus($deal->status);
                 $deal->stage = ActionMapperHelper::mapStageDeal($deal->stage);

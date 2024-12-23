@@ -34,8 +34,8 @@ class CustomersCompanyController extends Controller
         }
 
         try {
+            $search = $request->input('search');
             $query = CustomersCompany::query();
-
             $query->whereHas('user', function ($ownerQuery) use ($user) {
                 $ownerQuery->where('user_company_id', $user->user_company_id);
             });
@@ -43,9 +43,10 @@ class CustomersCompanyController extends Controller
             if ($user->role === 'employee') {
                 $query->where('owner', $user->email);
             }
-            
+
+            $query = CustomersCompany::search($query, $search);
             $CustomersCompanies = $this->applyFilters($request, $query);
-            if (!$CustomersCompanies) {
+            if ($CustomersCompanies->isEmpty()) {
                 return new ApiResponseResource(
                     false,
                     'Data perusahaan pelanggan tidak ditemukan',
@@ -103,7 +104,7 @@ class CustomersCompanyController extends Controller
             'status' => 'required|in:Tinggi,Sedang,Rendah',
             'email' => 'nullable|email|max:100|unique_customerscompanies_email',
             'phone' => 'nullable|numeric|max_digits:15|unique_customerscompanies_phone',
-            'website' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255||unique_customerscompanies_website',
             'owner' => 'required|email|max:100|exists:users,email',
             'province' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
@@ -126,6 +127,7 @@ class CustomersCompanyController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique_customerscompanies_phone' => 'Nomor telepon sudah terdaftar.',
+            'website.unique_customerscompanies_website' => 'Website sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',
@@ -249,12 +251,12 @@ class CustomersCompanyController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100|unique_customerscompanies_name',
+            'name' => 'sometimes|required|string|max:100|unique_customerscompanies_name:' . $customersCompanyId,
             'industry' => 'sometimes|nullable|string|max:50',
             'status' => 'sometimes|required|in:Tinggi,Sedang,Rendah',
-            'email' => 'sometimes|nullable|email|max:100|unique_customerscompanies_email',
-            'phone' => 'sometimes|nullable|numeric|max_digits:15|unique_customerscompanies_phone',
-            'website' => 'sometimes|nullable|string|max:255',
+            'email' => 'sometimes|nullable|email|max:100|unique_customerscompanies_email:' . $customersCompanyId,
+            'phone' => 'sometimes|nullable|numeric|max_digits:15|unique_customerscompanies_phone:' . $customersCompanyId,
+            'website' => 'sometimes|nullable|string|max:255|unique_customerscompanies_website:' .  $customersCompanyId,
             'owner' => 'sometimes|required|email|max:100|exists:users,email',
             'province' => 'sometimes|nullable|string|max:100',
             'city' => 'sometimes|nullable|string|max:100',
@@ -278,6 +280,7 @@ class CustomersCompanyController extends Controller
             'phone.numeric' => 'Nomor telepon harus berupa angka.',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka.',
             'phone.unique_customerscompanies_phone' => 'Nomor telepon sudah terdaftar.',
+            'website.unique_customerscompanies_website' => 'Website sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter.',
             'owner.required' => 'Penanggung jawab kontak tidak boleh kosong.',

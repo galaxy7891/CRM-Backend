@@ -40,104 +40,177 @@ class AppServiceProvider extends ServiceProvider
          */
         
         // User
-        Validator::extend('unique_google_id', function ($attribute, $value, $parameters, $validator) {
-            $userCompanyId = auth()->user()->company->id;
-
-            return !User::where('user_company_id', $userCompanyId)
-                ->where('google_id', $value)
-                ->whereNull('deleted_at')
-                ->exists();
-        });
         Validator::extend('unique_user_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            
-            return !User::where('user_company_id', $userCompanyId)
-                ->where('email', $value)
+            $excludeId = $parameters[0] ?? null;
+
+            return !User::where('email', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         Validator::extend('unique_user_phone', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            
+            $excludeId = $parameters[0] ?? null;
+
             return !User::where('user_company_id', $userCompanyId)
                 ->where('phone', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         
+        // User Companies
+        Validator::extend('unique_usercompanies_name', function ($attribute, $value, $parameters, $validator) {
+            $excludeId = $parameters[0] ?? null;
+
+            return !UsersCompany::where('name', $value)
+                ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
+                ->exists();
+        });
+        Validator::extend('unique_usercompanies_email', function ($attribute, $value, $parameters, $validator) {
+            $excludeId = $parameters[0] ?? null;
+
+            return !UsersCompany::where('email', $value)
+                ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
+                ->exists();
+        });
+        Validator::extend('unique_usercompanies_phone', function ($attribute, $value, $parameters, $validator) {
+            $excludeId = $parameters[0] ?? null;
+
+            return !UsersCompany::where('phone', $value)
+                ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
+                ->exists();
+        });
+        Validator::extend('unique_usercompanies_website', function ($attribute, $value, $parameters, $validator) {
+            $excludeId = $parameters[0] ?? null;
+
+            return !UsersCompany::where('website', $value)
+                ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
+                ->exists();
+        });
+
         // Customers
         Validator::extend('unique_customers_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
-            
+            $excludeId = $parameters[0] ?? null;
+
             return !Customer::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('email', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         Validator::extend('unique_customers_phone', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !Customer::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('phone', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
 
         // Customers Companies
         Validator::extend('unique_customerscompanies_name', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('name', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         Validator::extend('unique_customerscompanies_email', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('email', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
-        });
+        }); 
         Validator::extend('unique_customerscompanies_phone', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('phone', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         Validator::extend('unique_customerscompanies_website', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !CustomersCompany::whereHas('user', function ($ownerQuery) use ($userCompanyId) {
                 $ownerQuery->where('user_company_id', $userCompanyId);
             })->where('website', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
 
         // Product
         Validator::extend('unique_product_name', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !Product::where('user_company_id', $userCompanyId)
                 ->where('name', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
         Validator::extend('unique_product_code', function ($attribute, $value, $parameters, $validator) {
             $userCompanyId = auth()->user()->company->id;
+            $excludeId = $parameters[0] ?? null;
             
             return !Product::where('user_company_id', $userCompanyId)
                 ->where('code', $value)
                 ->whereNull('deleted_at')
+                ->when($excludeId, function ($query) use ($excludeId) {
+                    $query->where('id', '!=', $excludeId);
+                })
                 ->exists();
         });
 

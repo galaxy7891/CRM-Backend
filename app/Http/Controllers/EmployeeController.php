@@ -29,11 +29,13 @@ class EmployeeController extends Controller
         }
         
         try {
+            $search = $request->input('search');
             $query = User::where('user_company_id', $user->user_company_id)
                 ->where('id', '!=', $user->id);
             
-            $employees = $this->applyFilters($request, $query);
-            if (!$employees) {
+            $query2 = User::search($query, $search);
+            $employees = $this->applyFilters($request, $query2);
+            if ($employees->isEmpty()) {
                 return new ApiResponseResource(
                     false,
                     'Data karyawan tidak ditemukan',
@@ -101,6 +103,7 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, $employeeId)
     {
+
         $user = User::find($employeeId);
 
         if (!$user) {
@@ -114,8 +117,8 @@ class EmployeeController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'sometimes|required|string|max:50',
             'last_name' => 'sometimes|nullable|string|max:50',
-            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone',
-            'email' => 'sometimes|required|email|unique_user_email',
+            'phone' => 'sometimes|required|numeric|max_digits:15|unique_user_phone:' . $user->id,
+            'email' => 'sometimes|required|email|unique_user_email:'. $user->id,
             'job_position' => 'sometimes|required|max:50',
             'user_company_id' => 'sometimes|nullable|uuid',
             'role' => 'sometimes|required|in:Super Admin,Admin,Karyawan',

@@ -72,26 +72,26 @@ class UsersCompaniesController extends Controller
         }   
         
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100|'. Rule::unique('users_companies', 'name')->whereNull('deleted_at'),
+            'name' => 'sometimes|required|string|max:100|unique_usercompanies_name:'. $userCompanyId,
             'industry' => 'sometimes|required|string|max:50',
-            'email' => 'sometimes|nullable|email|'. Rule::unique('users_companies', 'email')->whereNull('deleted_at'),
-            'phone' => 'sometimes|nullable|numeric|max_digits:15|'. Rule::unique('users_companies', 'phone')->whereNull('deleted_at'),
-            'website' => 'sometimes|nullable|string|max:255|'. Rule::unique('users_companies', 'website')->whereNull('deleted_at'),
+            'email' => 'sometimes|nullable|email|unique_usercompanies_email:'. $userCompanyId,
+            'phone' => 'sometimes|nullable|numeric|max_digits:15|unique_usercompanies_phone:'. $userCompanyId,
+            'website' => 'sometimes|nullable|string|max:255|unique_usercompanies_website:'. $userCompanyId,
         ], [
             'name.required' => 'Nama perusahaan tidak boleh kosong.',
             'name.string' => 'Nama perusahaan harus berupa teks.',
             'name.max' => 'Nama perusahaan maksimal 100 karakter.',
-            'name.unique' => 'Nama perusahaan sudah terdaftar.',
+            'name.unique_usercompanies_name' => 'Nama perusahaan sudah terdaftar.',
             'industry.string' => 'Jenis industri harus berupa teks.',
             'industry.max' => 'Jenis industri maksimal 50 karakter.',
             'email.email' => 'Email harus valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'email.unique_usercompanies_email' => 'Email sudah terdaftar',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique_usercompanies_phone' => 'Nomor telepon sudah terdaftar.',
             'website.string' => 'Website harus berupa teks.',
             'website.max' => 'Website maksimal 255 karakter',
-            'website.unique' => 'Website sudah terdaftar',
+            'website.unique_usercompanies_website' => 'Website sudah terdaftar',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(

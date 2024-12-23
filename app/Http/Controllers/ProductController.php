@@ -9,6 +9,7 @@ use App\Services\DataLimitService;
 use App\Traits\Filter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -29,17 +30,19 @@ class ProductController extends Controller
         }
         
         try {
+            $search = $request->input('search');
             $query = Product::where('user_company_id', $user->user_company_id);
 
-            $products = $this->applyFilters($request, $query);
-            if (!$products) {
+            $search = Product::search($query, $search);
+            $products = $this->applyFilters($request, $search);
+            if ($products->isEmpty()) {
                 return new ApiResponseResource(
                     false,
                     'Data produk tidak ditemukan',
                     null
                 );
             }
-
+            
             $products->transform(function ($product) {
                 $product->category = ActionMapperHelper::mapCategoryProduct($product->category);
                 return $product;
@@ -85,7 +88,7 @@ class ProductController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique_product_name',
+            'name' => 'required|string|max:100|unique_product_name' ,
             'category' => 'required|in:Barang,Jasa|max:100',
             'code' => 'required|string|max:100|unique_product_code',
             'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
@@ -185,6 +188,15 @@ class ProductController extends Controller
      */
     public function update(Request $request, $productId)                
     {   
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $product = Product::find($productId);
         if (!$product) {
             return new ApiResponseResource(
@@ -201,9 +213,9 @@ class ProductController extends Controller
         }
         
         $validator = Validator::make($productData, [
-            'name' => 'sometimes|required|string|max:100|unique_product_name',
+            'name' => 'sometimes|required|string|max:100|unique_product_name:' . $productId,
             'category' => 'sometimes|required|in:Barang,Jasa|max:100',
-            'code' => 'sometimes|required|string|max:100|unique_product_code',
+            'code' => 'sometimes|required|string|max:100|unique_product_code:' . $productId,
             'quantity' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|numeric|min:0',
             'unit' => 'required_if:category,Barang|prohibited_if:category,Jasa|nullable|in:box,pcs,unit',
             'price' => 'sometimes|required|numeric|min:0|max_digits:20',
@@ -212,14 +224,14 @@ class ProductController extends Controller
             'name.required' => 'Nama produk tidak boleh kosong.',
             'name.string' => 'Nama produk harus berupa teks.',
             'name.max' => 'Nama produk maksimal 100 karakter.',
-            'name.unique' => 'Nama produk sudah terdaftar.',
+            'name.unique_product_name' => 'Nama produk sudah terdaftar.',
             'category.required' => 'Kategori produk tidak boleh kosong.',
             'category.in' => 'Kategori produk harus pilih salah satu: Barang atau Jasa.',
             'category.max' => 'Kategori produk maksimal 100 karakter.',
             'code.required' => 'Kode produk tidak boleh kosong.',
             'code.string' => 'Kode produk harus berupa teks.',
             'code.max' => 'Kode produk terlalu panjang.',
-            'code.unique' => 'Kode produk sudah terdaftar.',
+            'code.unique_product_code' => 'Kode produk sudah terdaftar.',
             'quantity.required_if' => 'Jumlah produk tidak boleh kosong jika kategorinya Barang.',
             'quantity.numeric' => 'Jumlah produk harus berupa angka.',
             'quantity.min' => 'Jumlah produk minimal berisi 1.',

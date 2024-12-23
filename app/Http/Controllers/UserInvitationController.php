@@ -45,13 +45,13 @@ class UserInvitationController extends Controller
         } 
         
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|max:100|unique_user_email',
+            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
             'role' => 'required|in:Admin,Karyawan',
             'job_position' => 'required|max:50',
         ], [
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique_user_email' => 'Email sudah terdaftar',
+            'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'role.required' => 'Akses user harus diisi',
             'role.in' => 'Akses user harus pilih salah satu: Admin, atau Karyawan.',
@@ -132,9 +132,18 @@ class UserInvitationController extends Controller
      */
     public function createUser(Request $request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return new ApiResponseResource(
+                false,
+                'Unauthorized',
+                null
+            );
+        }
+
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'email' => 'required|email|max:100|unique_user_email',
+            'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|min:8|same:password',
             'first_name' => 'required|string|max:50',
@@ -144,7 +153,7 @@ class UserInvitationController extends Controller
             'token.required' => 'Token tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'email.email' => 'Email harus valid',
-            'email.unique_user_email' => 'Email sudah terdaftar',
+            'email.unique' => 'Email sudah terdaftar',
             'email.max' => 'Email maksimal 100 karakter',
             'password.required' => 'Password tidak boleh kosong',
             'password.mnin' => 'Password tidak boleh kosong',

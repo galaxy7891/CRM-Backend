@@ -100,7 +100,7 @@ trait Filter
             return new LengthAwarePaginator(
                 $data, 
                 $data->count(),
-                $data->count(),
+                max($data->count(), 1),
                 1,
                 [
                     'path' => $request->url(), 

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Traits\HasUuid;
 use Cloudinary\Cloudinary;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +40,24 @@ class Product extends Model
      * @var array
      */
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+
+    /**
+     * Scope a query to search by various attributes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function search($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%");
+            });
+        }
+        
+        return $query;
+    }
 
     /**
      * The deals that belong to the product.

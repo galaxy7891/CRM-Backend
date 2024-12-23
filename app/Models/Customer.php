@@ -59,6 +59,25 @@ class Customer extends Model
         return $this->belongsTo(User::class, 'owner', 'email');
     }
 
+    /**
+     * Scope a query to search by various attributes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function search($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%$search%")
+                ->orWhere('last_name', 'LIKE', "%$search%");
+            });
+        }
+
+        return $query;
+    }
+
     public function customersCompany()
     {
         return $this->belongsTo(customersCompany::class, 'customers_company_id', 'id');

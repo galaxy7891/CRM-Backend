@@ -54,6 +54,24 @@ class Article extends Model
     }
 
     /**
+     * Scope a query to search by various attributes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function search($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%$search%");
+            });
+        }
+        
+        return $query;
+    }
+
+    /**
      * Upload photo article of the articles.
      *
      * @param \Illuminate\Http\UploadedFile $photo
@@ -86,7 +104,7 @@ class Article extends Model
             'description' => $dataArticle['description'],
             'post_date' => $postDate,
         ];
-        
+
         if (isset($dataArticle['photo_article'])) {
             $uploadResult = (new self())->uploadPhoto($dataArticle['photo_article']);
             $articleData['image_url'] = $uploadResult['image_url'];
@@ -100,7 +118,7 @@ class Article extends Model
     {
         $article = self::findOrFail($articleId);
         $cloudinary = new Cloudinary();
-
+        
         if ($dataArticle['status'] === 'draft') {
             $postDate = null;
         } elseif ($article->status === 'draft' && $dataArticle['status'] === 'post') {

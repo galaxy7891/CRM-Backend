@@ -56,6 +56,25 @@ class User extends Authenticatable implements JWTSubject
     ];
     
     /**
+     * Scope a query to search by various attributes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function search($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%$search%")
+                ->orWhere('last_name', 'LIKE', "%$search%");
+            });
+        }
+        
+        return $query;
+    }
+
+    /**
      * Get the company that owns the user.
      * 
      * This defines a many-to-one relationship where the user belongs to a company.

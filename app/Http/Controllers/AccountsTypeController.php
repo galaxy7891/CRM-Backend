@@ -129,13 +129,13 @@ class AccountsTypeController extends Controller
             
             $quantity = (int)$accountsTypeData['quantity'];
             switch ($accountsTypeData['category']) {
-                case 'hari':
+                case 'Hari':
                     $endDate = now()->addDays($quantity);
                     break;
-                case 'bulan':
+                case 'Bulan':
                     $endDate = now()->addMonths($quantity);
                     break;
-                case 'tahun':
+                case 'Tahun':
                     $endDate = now()->addYears($quantity);
                     break;
                 default:
