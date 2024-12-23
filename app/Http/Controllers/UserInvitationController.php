@@ -102,7 +102,7 @@ class UserInvitationController extends Controller
                 'job_position' => $data['job_position'],
             ];
 
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $frontendUrl = env('FRONTEND_URL', 'https://loyalcust.vercel.app/');
             $url = $frontendUrl . '/accept-invitation?email=' . urlencode($email) . '&token=' . $token;
 
             Mail::to($email)->send(new TemplateInviteUser($email, $url, $nama, $invited_by));

@@ -387,7 +387,7 @@ class UserController extends Controller
                 'token' => $token
             ];
 
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $frontendUrl = env('FRONTEND_URL', 'https://loyalcust.vercel.app/');
             $url = $frontendUrl . $frontendPath . urlencode($email) . '&token=' . $token; 
             Mail::to($email)->send(new TemplateForgetPassword($email, $url, $nama)); 
 
