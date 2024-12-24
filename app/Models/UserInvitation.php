@@ -48,7 +48,7 @@ class UserInvitation extends Model
     {
         return $this->belongsTo(User::class, 'invited_by', 'email');
     }
-
+    
     /**
      * Update the status of the invitation.
      *

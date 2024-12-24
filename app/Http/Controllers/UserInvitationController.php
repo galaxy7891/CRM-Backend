@@ -132,15 +132,6 @@ class UserInvitationController extends Controller
      */
     public function createUser(Request $request)
     {
-        $user = auth()->user();
-        if (!$user) {
-            return new ApiResponseResource(
-                false,
-                'Unauthorized',
-                null
-            );
-        }
-
         $validator = Validator::make($request->all(), [
             'token' => 'required',
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
