@@ -389,12 +389,27 @@ class DealController extends Controller
         }
 
         try {
+            $dealsQualification = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'qualificated');
+            $dealsProposal = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'proposal');
+            $dealsNegotiation = Deal::countDealsByStage($user->email,  $user->role, $user->user_company_id, 'negotiate');
+            $dealsWon = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'won');
+            $dealsLost = Deal::countDealsByStage($user->email, $user->role, $user->user_company_id, 'lose');
+
             $deals = Deal::sumValueEstimatedByStage($user->email, $user->role, $user->user_company_id);
             
             return new ApiResponseResource(
                 true,
                 'Value deals',
-                $deals
+                [
+                    'count' => [
+                        'qualification' => $dealsQualification,
+                        'proposal' => $dealsProposal,
+                        'negotiation' => $dealsNegotiation,
+                        'won' => $dealsWon,
+                        'lose' => $dealsLost,
+                    ],
+                    'value' => $deals
+                ]
             );
 
         } catch(\Exception $e){
