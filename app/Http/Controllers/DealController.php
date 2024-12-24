@@ -163,13 +163,13 @@ class DealController extends Controller
             ];
         }
         
-        if ($request->payment_category === 'sekali') {
+        if ($request->payment_category === 'Sekali') {
             $rules += ['payment_duration' => 'prohibited'];
         } else {
             $rules += ['payment_duration' => 'required|numeric|min:1'];
         }
         
-        if ($request->stage === 'tercapai') {
+        if ($request->stage === 'Tercapai') {
             $rules += [
                 'value_estimated' => 'prohibited',
                 'value_actual' => 'required|numeric|max_digits:20',
@@ -451,13 +451,13 @@ class DealController extends Controller
             ];
         }
         
-        if ($request->payment_category === 'sekali') {
+        if ($request->payment_category === 'Sekali') {
             $rules += ['payment_duration' => 'prohibited'];
         } else {
             $rules += ['payment_duration' => 'required|numeric|min:1'];
         }
         
-        if ($request->stage === 'tercapai') {
+        if ($request->stage === 'Tercapai') {
             $rules += [
                 'value_actual' => 'required|numeric|max_digits:20',
                 'close_date' => 'required|date',
@@ -616,7 +616,7 @@ class DealController extends Controller
         $validatedData = $validator->validated();
 
         try {
-            if ($validatedData['stage'] === 'tercapai') {
+            if ($validatedData['stage'] === 'Tercapai') {
             $deal->update([
                     'stage' => ActionMapperHelper::mapStageDealToDatabase($validatedData['stage']),
                     'close_date' => now()->format('Y-m-d'),
