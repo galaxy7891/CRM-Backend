@@ -114,7 +114,7 @@ class CustomerController extends Controller
                     null
                 );
             }
-
+            
             $contacts->getCollection()->transform(function ($contact) {
                 $contact->customerCategory = ActionMapperHelper::mapCustomerCategory($contact->customerCategory);
                 $contact->status = ActionMapperHelper::mapStatus($contact->status);

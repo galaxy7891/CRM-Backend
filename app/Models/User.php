@@ -65,12 +65,15 @@ class User extends Authenticatable implements JWTSubject
     public static function search($query, $search)
     {
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'LIKE', "%$search%")
-                ->orWhere('last_name', 'LIKE', "%$search%");
+            $keywords = explode(' ', $search);
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $q->orWhere('first_name', 'LIKE', "%$keyword%")
+                      ->orWhere('last_name', 'LIKE', "%$keyword%");
+                }
             });
         }
-        
+
         return $query;
     }
 
