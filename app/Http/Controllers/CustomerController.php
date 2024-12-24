@@ -45,7 +45,7 @@ class CustomerController extends Controller
                 $query->where('owner', $user->email);
             }
             
-            // $query = Customer::search($query, $search);
+            $query = Customer::search($query, $search);
             $leads = $this->applyFilters($request, $query);
             if ($leads->isEmpty()) {
                 return new ApiResponseResource(
