@@ -33,7 +33,7 @@ class Product extends Model
         'updated_at',
         'deleted_at',
     ];
-
+    
     /**
      * The attributes that should be cast to date instances.
      * 
@@ -55,7 +55,7 @@ class Product extends Model
                 $q->where('name', 'LIKE', "%$search%");
             });
         }
-        
+
         return $query;
     }
 
