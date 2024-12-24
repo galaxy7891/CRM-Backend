@@ -545,7 +545,7 @@ class DealController extends Controller
         ];
 
         try {
-            if ($validatedData['stage'] === 'tercapai') {
+            if ($validatedData['stage'] === 'Tercapai') {
                 $product = Product::find($validatedData['product_id']);
                 if ($product && $product['category'] === 'stuff') {
                     $newQuantity = $product->quantity - ($validatedData['quantity'] ?? 0);
