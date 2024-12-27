@@ -132,6 +132,8 @@ class UserInvitationController extends Controller
      */
     public function createUser(Request $request)
     {
+        $invitation = UserInvitation::findInvitation($request->only('email', 'token'));
+
         $validator = Validator::make($request->all(), [
             'token' => 'required',
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
@@ -139,7 +141,7 @@ class UserInvitationController extends Controller
             'password_confirmation' => 'required|min:8|same:password',
             'first_name' => 'required|string|max:50',
             'last_name' => 'nullable|string|max:50',
-            'phone' => 'required|numeric|max_digits:15|unique_user_phone',
+            'phone' => 'required|numeric|max_digits:15|'. Rule::unique('users', 'phone')->where('user_company_id', $invitation->inviter->user_company_id)->whereNull('deleted_at'),
         ], [
             'token.required' => 'Token tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
@@ -159,7 +161,7 @@ class UserInvitationController extends Controller
             'phone.required' => 'Nomor telepon tidak boleh kosong',
             'phone.numeric' => 'Nomor telepon harus berupa angka',
             'phone.max_digits' => 'Nomor telepon maksimal 15 angka',
-            'phone.unique_user_phone' => 'Nomor telepon sudah terdaftar.',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
         ]);
         if ($validator->fails()) {
             return new ApiResponseResource(
@@ -169,7 +171,7 @@ class UserInvitationController extends Controller
             );
         }
 
-        if (!$invitation = UserInvitation::findInvitation($request->only('email', 'token'))) {
+        if (!$invitation) {
             return new ApiResponseResource(
                 false,
                 'Token invitation tidak valid atau telah kadaluarsa.',
