@@ -632,7 +632,21 @@ class DealController extends Controller
 
         try {
             if ($validatedData['stage'] === 'Tercapai') {
-            $deal->update([
+
+                $product = Product::find($validatedData['product_id']);
+                if ($product && $product['category'] === 'stuff') {
+                    $newQuantity = $product->quantity - ($validatedData['quantity'] ?? 0);
+                    if ($newQuantity < 0) {
+                        return new ApiResponseResource(
+                            false,
+                            'Jumlah produk di stok tidak mencukupi untuk memenuhi deals ini',
+                            null
+                        );
+                    }
+                    $product->update(['quantity' => $newQuantity]);
+                }
+                
+                $deal->update([
                     'stage' => ActionMapperHelper::mapStageDealToDatabase($validatedData['stage']),
                     'close_date' => now()->format('Y-m-d'),
                     'value_actual' => $deal->value_estimated,
@@ -653,7 +667,7 @@ class DealController extends Controller
         } catch (\Exception $e) {
             return new ApiResponseResource(
                 false, 
-                'Terjadi kesalahan saat memperbarui tahapan: ' . $e->getMessage(),
+                $e->getMessage(),
                 null
             );
         }

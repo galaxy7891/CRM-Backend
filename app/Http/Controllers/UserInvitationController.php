@@ -42,7 +42,7 @@ class UserInvitationController extends Controller
                 $limitCheck['message'], 
                 null
             );
-        } 
+        }
         
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:100|'. Rule::unique('users', 'email')->whereNull('deleted_at'),
