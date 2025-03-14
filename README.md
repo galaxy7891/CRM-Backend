@@ -2,7 +2,7 @@
 
 
 
-## CRM-BE LoyalCust
+## CRM LoyalCust
 
 LoyalCust is a Customer Relationship Management (CRM) application designed to help businesses manage customer data, optimize sales processes, and increase customer loyalty. This project is part of the Magang Bersertifikat Batch 7 Kemdikbud.
 
@@ -22,7 +22,7 @@ LoyalCust is a Customer Relationship Management (CRM) application designed to he
     <li>Dark Mode</li>
 </ul>
 
-## 🛠️Tech Stack
+## 🛠️Tech Stack Backend
 <ol>
     <li>Laravel</li>
     <li>Cloudinary</li>
